@@ -1,0 +1,32 @@
+﻿using System;
+using Microsoft.Owin;
+using Microsoft.Owin.Security.OAuth;
+using Owin;
+using GroundsIce.WebService.Providers;
+using GroundsIce.Model.Repositories;
+
+namespace GroundsIce.WebService
+{
+    public partial class Startup
+    {
+        public static OAuthAuthorizationServerOptions OAuthOptions { get; private set; }
+
+        public static string PublicClientId { get; private set; }
+
+        public void ConfigureAuth(IAppBuilder app, IUsersRepository repo)
+        {
+            PublicClientId = "self";
+            OAuthOptions = new OAuthAuthorizationServerOptions
+            {
+                TokenEndpointPath = new PathString("/Token"),
+                Provider = new ApplicationOAuthProvider(PublicClientId, repo),
+                AuthorizeEndpointPath = new PathString("/api/Account/ExternalLogin"),
+                AccessTokenExpireTimeSpan = TimeSpan.FromDays(14),
+                // In production mode set AllowInsecureHttp = false
+                AllowInsecureHttp = true
+            };
+
+            app.UseOAuthBearerTokens(OAuthOptions);
+        }
+    }
+}
