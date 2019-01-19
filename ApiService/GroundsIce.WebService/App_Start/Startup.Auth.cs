@@ -13,7 +13,7 @@ namespace GroundsIce.WebService
 
         public static string PublicClientId { get; private set; }
 
-        public void ConfigureAuth(IAppBuilder app, IUsersRepository repo)
+        public void ConfigureAuth(IAppBuilder app, IAccountRepository repo)
         {
             PublicClientId = "self";
             OAuthOptions = new OAuthAuthorizationServerOptions

@@ -6,6 +6,8 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using GroundsIce.Model;
+using System;
 
 namespace GroundsIce.WebService.Attributes
 {
@@ -18,30 +20,20 @@ namespace GroundsIce.WebService.Attributes
                 return;
             }
             base.OnAuthorization(actionContext);
-            string token = string.Empty;
-            AuthenticationTicket ticket;
-
-            token = (actionContext.Request.Headers.Any(x => x.Key == "Authorization")) ? actionContext.Request.Headers.Where(x => x.Key == "Authorization").FirstOrDefault().Value.SingleOrDefault().Replace("Bearer ", "") : "";
-
-            if (token == string.Empty)
+            string token = (actionContext.Request.Headers.Any(x => x.Key == "Authorization")) ? actionContext.Request.Headers.Where(x => x.Key == "Authorization").FirstOrDefault().Value.SingleOrDefault().Replace("Bearer ", "") : "";
+            if (token == "")
             {
                 actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Unauthorized, "Missing 'Authorization' header. Access denied.");
                 return;
             }
-
-            //your OAuth startup class may be called something else...
-            ticket = Startup.OAuthOptions.AccessTokenFormat.Unprotect(token);
-
+            AuthenticationTicket ticket = Startup.OAuthOptions.AccessTokenFormat.Unprotect(token);
             if (ticket == null)
             {
                 actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid token decrypted.");
                 return;
             }
-
-            // you could perform some logic on the ticket here...
-
-            // you will be able to retrieve the ticket in all controllers by querying properties and looking for "Ticket"... 
-            actionContext.Request.Properties.Add(new KeyValuePair<string, object>("UserId", ticket.Properties.Dictionary["UserId"]));
+            var currentUser = new User(UInt64.Parse(ticket.Properties.Dictionary["USER_ID"]));
+            actionContext.Request.Properties.Add(new KeyValuePair<string, object>("USER", currentUser));
         }
 
         private static bool SkipAuthorization(HttpActionContext actionContext)
