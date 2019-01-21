@@ -61,9 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Accounting\Account.Tests.cs" />
-    <Compile Include="Accounting\Credentials.Tests.cs" />
-    <Compile Include="Accounting\Registrator.Tests.cs" />
+    <Compile Include="Accounting\AccountService.Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

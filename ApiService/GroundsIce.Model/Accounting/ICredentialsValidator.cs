@@ -2,14 +2,16 @@
 
 namespace GroundsIce.Model.Accounting
 {
-    public class CredentialsValidatorException : Exception
-    {
-        public CredentialsValidatorException(string message) : base(message)
-        {
-        }
-    }
+    /// <summary>
+    /// Валидатор учётных данныъ пользователя
+    /// </summary>
     public interface ICredentialsValidator
     {
-        void Validate(Credentials credentials);
+        /// <summary>
+        /// Проверить учётные данные пользователя
+        /// </summary>
+        /// <param name="credentials">Учётные данные, представляемые как строка (логин или пароль)</param>
+        /// <returns>True, если учётные данные прошли проверку, иначе false</returns>
+        bool Validate(string credentials);
     }
 }

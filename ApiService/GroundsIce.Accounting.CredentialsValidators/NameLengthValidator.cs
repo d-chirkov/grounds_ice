@@ -18,20 +18,13 @@ namespace GroundsIce.Accounting.CredentialsValidators
             maxLength_ = max;
         }
 
-        public void Validate(Credentials credentials)
+        public bool Validate(string username)
         {
-            if (credentials == null || credentials.Name == null)
+            if (username == null)
             {
                 throw new ArgumentNullException("credentials | credentials.Name");
             }
-            if (credentials.Name.Length < minLength_)
-            {
-                throw new CredentialsValidatorException($"Username length must be greater or equals {minLength_}");
-            }
-            if (credentials.Name.Length > maxLength_)
-            {
-                throw new CredentialsValidatorException($"Username length must be less or equals {maxLength_}");
-            }
+            return username.Length >= minLength_ && username.Length <= maxLength_;
         }
     }
 }

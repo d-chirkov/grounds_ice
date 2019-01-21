@@ -4,7 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.OAuth;
-using GroundsIce.Model.Accounting;
+using GroundsIce.Model;
 using GroundsIce.Model.Repositories;
 
 namespace GroundsIce.WebService.Providers
@@ -22,20 +22,19 @@ namespace GroundsIce.WebService.Providers
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
-            var credentials = new Credentials(context.UserName, context.Password);
-            Account account = await repo_.GetAccountAsync(credentials);
-            if (account == null)
+            User user = await repo_.GetUserAsync(context.UserName, context.Password);
+            if (user == null)
             {
                 context.SetError("invalid_grant", "The user name or password is incorrect.");
                 return;
             }
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Name, credentials.Name),
-                new Claim(ClaimTypes.NameIdentifier, account.User.Id.ToString())
+                new Claim(ClaimTypes.Name, context.UserName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
             var oAuthIdentity = new ClaimsIdentity(claims, "Bearer");
-            AuthenticationProperties properties = CreateProperties(account.User.Id);
+            AuthenticationProperties properties = CreateProperties(user.Id);
             AuthenticationTicket ticket = new AuthenticationTicket(oAuthIdentity, properties);
             context.Validated(ticket);
         }
@@ -76,7 +75,7 @@ namespace GroundsIce.WebService.Providers
             return Task.FromResult<object>(null);
         }
 
-        public static AuthenticationProperties CreateProperties(UInt64 userId)
+        public static AuthenticationProperties CreateProperties(long userId)
         {
             IDictionary<string, string> data = new Dictionary<string, string>
             {

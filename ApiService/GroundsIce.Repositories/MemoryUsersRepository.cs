@@ -10,57 +10,101 @@ using GroundsIce.Model.Repositories;
 
 namespace GroundsIce.Repositories
 {
-    public class MemoryUsersRepository : IAccountRepository
+    public class MemoryAccountRepository : IAccountRepository
     {
-        static SemaphoreSlim access_ = new SemaphoreSlim(1,1);
-        static private Dictionary<UInt64, Account> accounts_ = new Dictionary<UInt64, Account>();
-        static private UInt64 nextUserId_ = 0;
+        class AccountInfo
+        {
+            public string Username { get; set; }
+            public string Password { get; set; }
+        }
+        static SemaphoreSlim access_ = new SemaphoreSlim(1, 1);
+        static private Dictionary<long, AccountInfo> accounts_ = new Dictionary<long, AccountInfo>();
+        static private long nextUserId_ = 0;
 
-        public MemoryUsersRepository()
+        public MemoryAccountRepository()
         {
             Debug.WriteLine("Repository initiation");
         }
-        public async Task<Account> AddNewAccountAsync(Credentials credentials)
+        
+        public Task<User> GetUserAsync(string username, string password)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<User> AddNewUserAsync(string username, string password)
         {
             await access_.WaitAsync();
             var newUser = new User(nextUserId_);
-            var newAccount = new Account(newUser, credentials);
-            if (IsUserWithNameExists(credentials.Name))
+            var newAccountInfo = new AccountInfo { Username = username, Password = password };
+            if (IsUsernameIsAlreadyUsing(username))
             {
                 access_.Release();
-                throw new CredentialsValidatorException($"User with name {credentials.Name} already exists");
+                return null;
             }
-            accounts_[nextUserId_++] = newAccount;
+            accounts_[nextUserId_++] = newAccountInfo;
             access_.Release();
-            return newAccount;
+            return newUser;
         }
 
-        public async Task<Account> GetAccountAsync(User user)
+        private bool IsUsernameIsAlreadyUsing(string username)
+        {
+            int usersCount = (from account in accounts_
+                              where account.Value.Username == username
+                              select account).Count();
+            return usersCount > 0;
+        }
+
+        public async Task<string> GetUsernameAsync(User user)
         {
             await access_.WaitAsync();
-            var account = (from keyAccount in accounts_ where keyAccount.Key == user.Id select keyAccount.Value).FirstOrDefault();
+            string username = (from account in accounts_
+                               where account.Key.Equals(user)
+                               select account.Value.Username).FirstOrDefault();
             access_.Release();
-            return account;
+            return username;
         }
 
-        public async Task<Account> GetAccountAsync(Credentials credentials)
+        public async Task<bool> ChangePasswordAsync(User user, string password)
         {
             await access_.WaitAsync();
-            var account = (from keyUser in accounts_
-                        where keyUser.Value.Credentials.Equals(credentials)
-                        select keyUser.Value)
-                        .FirstOrDefault();
+            int accountCount = (from account in accounts_
+                                where account.Key.Equals(user)
+                                select account).Count();
+            if (accountCount != 1)
+            {
+                access_.Release();
+                return false;
+            }
+            accounts_[user.Id].Password = password;
             access_.Release();
-            return account;
+            return true;
         }
 
-        private bool IsUserWithNameExists(string name)
+        public async Task<User> ChangeUsernameAsync(User user, string username)
         {
-            var user = (from keyUser in accounts_
-                        where keyUser.Value.Credentials.Name == name
-                        select keyUser.Value)
-                        .FirstOrDefault();
-            return user != null;
+            await access_.WaitAsync();
+            int accountCount = (from account in accounts_
+                                where account.Key.Equals(user)
+                                select account).Count();
+            if (accountCount != 1)
+            {
+                access_.Release();
+                return null;
+            }
+            int withMatchedUsername = (from account in accounts_
+                                where account.Value.Username == username
+                                select account).Count();
+            if (withMatchedUsername > 0)
+            {
+                long userId = (from account in accounts_
+                               where account.Value.Username == username
+                               select account.Key).FirstOrDefault();
+                access_.Release();
+                return new User(userId);
+            }
+            accounts_[user.Id].Username = username;
+            access_.Release();
+            return user;
         }
     }
 }

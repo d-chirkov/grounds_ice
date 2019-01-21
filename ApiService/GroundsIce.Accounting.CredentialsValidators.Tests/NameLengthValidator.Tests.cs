@@ -30,33 +30,32 @@ namespace GroundsIce.Accounting.CredentialsValidators.Tests
         [Test]
         public void WhenSuccessedValidatingNameLength()
         {
-            var credentials = new Credentials("user", "");
-            var validator = new NameLengthValidator(credentials.Name.Length, credentials.Name.Length);
-            Assert.DoesNotThrow(() => validator.Validate(credentials));
+            string username = "user";
+            var validator = new NameLengthValidator(username.Length, username.Length);
+            Assert.DoesNotThrow(() => Assert.True(validator.Validate(username)));
         }
 
         [Test]
         public void WhenFailedValidatingTooShortNameLength()
         {
-            var credentials = new Credentials("user", "");
-            var validator = new NameLengthValidator(credentials.Name.Length + 1, credentials.Name.Length + 2);
-            Assert.Throws<CredentialsValidatorException>(() => validator.Validate(credentials));
+            string username = "user";
+            var validator = new NameLengthValidator(username.Length + 1, username.Length + 2);
+            Assert.False(validator.Validate(username));
         }
 
         [Test]
         public void WhenFailedValidatingTooLongNameLength()
         {
-            var credentials = new Credentials("user", "");
-            var validator = new NameLengthValidator(credentials.Name.Length - 2, credentials.Name.Length - 1);
-            Assert.Throws<CredentialsValidatorException>(() => validator.Validate(credentials));
+            string username = "user";
+            var validator = new NameLengthValidator(username.Length - 2, username.Length - 1);
+            Assert.False(validator.Validate(username));
         }
 
         [Test]
         public void WhenFailedValidatingEmptyNameLength()
         {
-            var credentials = new Credentials("", "");
             var validator = new NameLengthValidator(1, 2);
-            Assert.Throws<CredentialsValidatorException>(() => validator.Validate(credentials));
+            Assert.False(validator.Validate(""));
         }
     }
 }

@@ -32,7 +32,7 @@ namespace GroundsIce.WebService.Attributes
                 actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid token decrypted.");
                 return;
             }
-            var currentUser = new User(UInt64.Parse(ticket.Properties.Dictionary["USER_ID"]));
+            var currentUser = new User(long.Parse(ticket.Properties.Dictionary["USER_ID"]));
             actionContext.Request.Properties.Add(new KeyValuePair<string, object>("USER", currentUser));
         }
 

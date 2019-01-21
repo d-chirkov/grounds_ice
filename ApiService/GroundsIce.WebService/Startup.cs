@@ -9,7 +9,6 @@ using System.Net.Http.Formatting;
 using GroundsIce.Model.Accounting;
 using GroundsIce.Model.Repositories;
 using GroundsIce.Accounting.CredentialsValidators;
-using System.Collections.Generic;
 
 [assembly: OwinStartup(typeof(GroundsIce.WebService.Startup))]
 
@@ -19,12 +18,15 @@ namespace GroundsIce.WebService
     {
         public void Configuration(IAppBuilder app)
         {
-            var repo = new MemoryUsersRepository();
+            var repo = new MemoryAccountRepository();
             var builder = new ContainerBuilder();
 
-            builder.Register(c => new MemoryUsersRepository()).As<IAccountRepository>().InstancePerRequest();
-            builder.Register(c => new NameLengthValidator(6, 20)).As<ICredentialsValidator>().SingleInstance();
-            builder.Register(c => new Registrator(c.Resolve<IAccountRepository>(), c.Resolve<IEnumerable<ICredentialsValidator>>())).InstancePerRequest();
+            builder.Register(c => new MemoryAccountRepository()).As<IAccountRepository>().InstancePerRequest();
+            builder.Register(c => {
+                var service = new AccountService(c.Resolve<IAccountRepository>());
+                service.AddUsernameValidator(new NameLengthValidator(6, 20));
+                return service;
+                }).InstancePerRequest();
 
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
 
