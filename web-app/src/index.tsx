@@ -6,10 +6,11 @@ import thunk from 'redux-thunk';
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-
 import actionToPlainObject from "./middlewares/actionToPlainObject";
-
-import updateRootState from "./contexts/root/reducers";
+import updateRootState from "./contexts/reducers";
+import 'primereact/resources/themes/nova-light/theme.css';
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 
 export let store = createStore(updateRootState, applyMiddleware(thunk, actionToPlainObject));
 

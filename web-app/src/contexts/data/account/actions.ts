@@ -1,11 +1,11 @@
 import { Action } from "redux";
-import { RootAction } from "../root/actions";
+import { RootAction } from "../../actions";
 
 export enum AccountActionType {
-	"ACCOUNT_SET_TOKEN",
-	"ACCOUNT_SET_USER_ID",
-	"ACCOUNT_SET_USERNAME",
-	"ACCOUNT_SET"
+	ACCOUNT_SET = "ACCOUNT_SET",
+	ACCOUNT_SET_TOKEN = "ACCOUNT_SET_TOKEN",
+	ACCOUNT_SET_USER_ID = "ACCOUNT_SET_USER_ID",
+	ACCOUNT_SET_USERNAME = "ACCOUNT_SET_USERNAME"
 }
 
 export class SetTokenAction implements Action<AccountActionType.ACCOUNT_SET_TOKEN> {
@@ -40,8 +40,8 @@ export let LogInAction = (username: string, password: string) =>
 		//TODO: send token request to api, recieve response, dispatch actions to update state
 	}
 	
-export type AccountContextAction = SetTokenAction | SetUserIdAction | SetUserNameAction | SetAccountAction;
+export type AccountAction = SetTokenAction | SetUserIdAction | SetUserNameAction | SetAccountAction;
 
-export function isAccountContextAction(action: RootAction): action is AccountContextAction {
+export function isAccountAction(action: RootAction): action is AccountAction {
 	return Object.values(AccountActionType).includes(action.type);
 }

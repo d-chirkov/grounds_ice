@@ -4,6 +4,4 @@ interface IAccount {
 	userName: string
 }
 
-type OIAccount = IAccount | null;
-
-export default OIAccount;
+export default IAccount;

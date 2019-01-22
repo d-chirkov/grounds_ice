@@ -1,7 +1,7 @@
-import OIAccount from "./model"
-import { AccountActionType, AccountContextAction } from "./actions";
+import IAccount from "./model"
+import { AccountActionType, AccountAction } from "./actions";
 
-let updateAccount = (state: OIAccount | undefined, action: AccountContextAction): OIAccount => {
+let updateAccount = (state: IAccount | null | undefined, action: AccountAction): IAccount | null => {
 	if (action.type == AccountActionType.ACCOUNT_SET) {
 		return {
 			token: action.token,
