@@ -114,12 +114,6 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 		this.setState({password, passwordError: null});
 	}
 	
-	componentWillUpdate() {
-		if (this.props.isLoggedIn) {
-			this.props.closeDialog();
-		}
-	}
-	
 	componentDidUpdate() {
 		if (this.props.serverError != null) {
 			this.props.clearServerError();

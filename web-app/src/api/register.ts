@@ -1,7 +1,7 @@
 import fetch from "isomorphic-fetch";
 import { accountGetInfoUrl, accountRegisterUrl, tokenUrl } from "./urls";
 
-let askForAccountInfo = (token: string): Promise<Response> => {
+let fetchAccountInfo = (token: string): Promise<Response> => {
 	let request: RequestInit = {
 		method: "Post",
 		headers: {
@@ -12,7 +12,7 @@ let askForAccountInfo = (token: string): Promise<Response> => {
 	return fetch(accountGetInfoUrl, request);
 }
 
-let askForToken = (username: string, password: string): Promise<Response> => {
+let fetchToken = (username: string, password: string): Promise<Response> => {
 	interface TokenRequest {
 		grant_type: string,
 		username: string,
@@ -40,13 +40,6 @@ let askForToken = (username: string, password: string): Promise<Response> => {
 	};
 	return fetch(tokenUrl, request);
 }
-	
-let errorCodesMap = {
-	[1000]: "Success",
-	[2000]: "Unspecified",
-	[3000]: "CredentialsNotValid",
-	[4000]: "UserAlreadyExists",
-}
 
 export enum ErrorCode {
 	Success = 1000,
@@ -61,11 +54,56 @@ export interface IAccountInfo {
 	username: string
 }
 
+interface FetchingException {
+	isUnauthorized?: boolean,
+	isUnexpected?: boolean,
+	errorCode?: ErrorCode
+}
+
+let checkHttpStatus = (response: Response): any => {
+	let status = response.status;
+	if (status == 200) {
+		return response;
+	}
+	if (status == 401) {
+		throw <FetchingException>{isUnauthorized: true};
+	}
+	throw <FetchingException>{isUnexpected: true};
+}
+
+let checkErrorCode = <T>(response: T): T => {
+	if (!response.hasOwnProperty("ErrorCode")) {
+		throw <FetchingException>{isUnexpected: true};
+	}
+	let errorCode = (<any>response).ErrorCode;
+	if(!Object.values(ErrorCode).includes(errorCode)) {
+		throw <FetchingException>{isUnexpected: true};
+	}
+	if (errorCode != ErrorCode.Success) {
+		throw <FetchingException>{errorCode};
+	}
+	return response;
+}
+
+let selectJsonFrom = (response: Response): any => {
+	return checkHttpStatus(response).json().then((res:any) => checkErrorCode(res))
+}
+
+let selectTokenFrom = (response: Response): any => {
+	return checkHttpStatus(response).json()
+		.then((res:any) => {
+			if (!res.hasOwnProperty("access_token")) {
+				throw <FetchingException>{isUnauthorized: true};
+			}
+			return res.access_token;
+		})
+}
+
 export let registerAccount = (
 	username: string, 
 	password: string, 
 	onSuccess: (accountInfo: IAccountInfo) => void, 
-	onFail: (errorCode: ErrorCode) => void) => 
+	onFail: (errorDescription: string) => void) => 
 	{
 	let registerRequest: RequestInit = {
 		method: "Post",
@@ -77,25 +115,36 @@ export let registerAccount = (
 	}
 	let token: string = "";
 	fetch(accountRegisterUrl, registerRequest)
-		.then((res) => res.json())
-		.then((res) => askForToken(username, password))
-		.then((res) => res.json())
-		.then((res) => {token = res.access_token; return askForAccountInfo(token) })
-		.then((res) => res.json())
-		.then((res) => {console.log(res); onSuccess({
+		.then(res => selectJsonFrom(res))
+		.then(res => fetchToken(username, password))
+		.then(res => selectTokenFrom(res))
+		.then(res => {token = res; return fetchAccountInfo(token) })
+		.then(res => selectJsonFrom(res))
+		.then(res => {console.log(res); onSuccess({
 			token: token,
 			userId: res.Id,
 			username: res.Name})})
 		.catch((reason) => {
-			let errorCode: ErrorCode = ErrorCode.Unspecified;
-			console.log(reason);
-			if (reason.json().ErrorCode != undefined) {
-				console.log("WTF!!!");
-				errorCode = ErrorCode.Unspecified;
+			if ("isUnauthorized" in reason && reason.isUnauthorized) {
+				onFail("Не удалось авторизоваться на сервере, попробуйте позже");
 			}
-			console.log(errorCode);
-			onFail(errorCode);
-		}).catch(() => onFail(ErrorCode.Unspecified));
+			else if ("isUnexpected" in reason && reason.isUnexpected) {
+				onFail("Что-то пошло не так, попробуйте повторить попытку позже");
+			}
+			else if ("errorCode" in reason) {
+				let errorCode:ErrorCode = reason.errorCode;
+				let err: string = "";
+				switch(errorCode) {
+					case ErrorCode.CredentialsNotValid: err = "Логин или пароль не прошли валидацию, попробуйте другие учётные данные"; break;
+					case ErrorCode.UserAlreadyExists: err = "Пользователь с таким логином уже существует, попробуйте другой"; break;
+					default: err = "Что-то пошло не так, попробуйте повторить попытку позже";
+				}
+				onFail(err);
+			}
+			else {
+				onFail("Что-то пошло не так, попробуйте повторить попытку позже");
+			}
+		});
 }
 
 

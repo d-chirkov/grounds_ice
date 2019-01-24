@@ -53,7 +53,7 @@ namespace GroundsIce.WebService.Controllers
             {
                 errorCode = ErrorCode.CredentialsNotValid;
             }
-            return Content(HttpStatusCode.Unauthorized, new { ErrorCode = errorCode });
+            return Ok<object>(new { ErrorCode = errorCode });
         }
 
         [HttpPost]
@@ -63,9 +63,9 @@ namespace GroundsIce.WebService.Controllers
             User user = GetUserFromContext();
             string username = await accountService_.GetUsernameAsync(user);
             return 
-                username != null ? 
-                Ok(new { ErrorCode = ErrorCode.Success, Id = user.Id, Name = username }) : 
-                (IHttpActionResult)Content(HttpStatusCode.Unauthorized, new { ErrorCode = ErrorCode.Unspecified });
+                username != null ?
+                Ok<object>(new { ErrorCode = ErrorCode.Success, Id = user.Id, Name = username }) :
+                Ok<object>(new { ErrorCode = ErrorCode.Unspecified });
         }
 
         private User GetUserFromContext() => (User)Request.Properties["USER"];
@@ -76,8 +76,8 @@ namespace GroundsIce.WebService.Controllers
             AccountService.Error error = await accountService_.ChangePasswordAsync(GetUserFromContext(), newPassword);
             return
                 error == AccountService.Error.NoError ? Ok(new { ErrorCode = ErrorCode.Success }) :
-                error == AccountService.Error.PasswordNotValid ? (IHttpActionResult)Content(HttpStatusCode.Unauthorized, new { ErrorCode = ErrorCode.CredentialsNotValid }) :
-                (IHttpActionResult)(IHttpActionResult)Content(HttpStatusCode.Unauthorized, new { ErrorCode = ErrorCode.Unspecified });
+                error == AccountService.Error.PasswordNotValid ? Ok(new { ErrorCode = ErrorCode.CredentialsNotValid }) :
+                Ok(new { ErrorCode = ErrorCode.Unspecified });
         }
 
         [HttpPost]
@@ -85,10 +85,10 @@ namespace GroundsIce.WebService.Controllers
         {
             AccountService.Error error = await accountService_.ChangeUsernameAsync(GetUserFromContext(), newLogin);
             return
-                error == AccountService.Error.NoError ? Ok(new { ErrorCode = ErrorCode.Success }) :
-                error == AccountService.Error.RepositoryConflict ? (IHttpActionResult)Content(HttpStatusCode.Unauthorized, new { ErrorCode = ErrorCode.UserAlreadyExists }) :
-                error == AccountService.Error.UsernameNotValid ? (IHttpActionResult)Content(HttpStatusCode.Unauthorized, new { ErrorCode = ErrorCode.CredentialsNotValid }) :
-                (IHttpActionResult)(IHttpActionResult)Content(HttpStatusCode.Unauthorized, new { ErrorCode = ErrorCode.Unspecified });
+                error == AccountService.Error.NoError ? Ok<object>(new { ErrorCode = ErrorCode.Success }) :
+                error == AccountService.Error.RepositoryConflict ? Ok<object>(new { ErrorCode = ErrorCode.UserAlreadyExists }) :
+                error == AccountService.Error.UsernameNotValid ? Ok<object>(new { ErrorCode = ErrorCode.CredentialsNotValid }) :
+                Ok<object>(new { ErrorCode = ErrorCode.Unspecified });
         }
 
         protected override void Dispose(bool disposing) => base.Dispose(disposing);

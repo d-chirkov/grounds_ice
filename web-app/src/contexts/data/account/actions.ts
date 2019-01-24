@@ -28,31 +28,23 @@ export class SetAccountAction implements Action<AccountActionType.ACCOUNT_SET> {
 	constructor(public token: string, public userId: string, public userName: string) {}
 }
 
-import { LogInFormShowAction, LogInFormSetServerErrorAction } from "../../ui/logInForm/actions";
+import { LogInFormSetServerErrorAction } from "../../ui/logInForm/actions";
 import Messager from "../../../Messager";
-import { registerAccount, IAccountInfo, ErrorCode } from "../../../api/register";
+import { processSignUpRequest, IAccountInfo } from "../../../api/register";
 
 export let SignUpAction = (username: string, password: string) => 
 	(dispatch: Function): void => {
 		let onSuccess = (accountInfo: IAccountInfo) => {
 			dispatch(new SetAccountAction(accountInfo.token, accountInfo.userId, accountInfo.username));
 		}
-		let onFail = (errorCode: ErrorCode) => {
-			let errorDescription: string = "";
-			switch(errorCode) {
-				case ErrorCode.Success:
-				case ErrorCode.Unspecified: errorDescription = "Неизвестная ошибка"; break;
-				case ErrorCode.UserAlreadyExists: errorDescription = "Неверные логин или пароль"; break;
-				case ErrorCode.UserAlreadyExists: errorDescription = "Пользователь с таким логином уже существует"; break;
-				default: errorDescription = "Неизвестная ошибка"; break;
-			}
-			dispatch(new LogInFormSetServerErrorAction(errorDescription));
-			Messager.showWarning("Ошибка", errorDescription);
+		let onFail = (err: string) => {
+			dispatch(new LogInFormSetServerErrorAction(err));
+			Messager.showWarning("Ошибка", err);
 		}
-		registerAccount(username, password, onSuccess, onFail);
+		processSignUpRequest(username, password, onSuccess, onFail);
 	}
 	
-export let SignInAction = (username: string, password: string) => 
+export let SignInAction = () => 
 	(dispatch: Function): void => {
 		setTimeout(() => {
 			dispatch(new LogInFormSetServerErrorAction("Неверный логин или пароль"));
