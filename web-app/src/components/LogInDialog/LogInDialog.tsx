@@ -1,10 +1,11 @@
+import "./LogInDialog.css"
+
 import React from "react";
 import { connect } from "react-redux";
 import { Dialog } from "primereact/dialog";
 import SignInForm from "./SignInForm";
 import UserAgreementForm from "./UserAgreementForm"
 import SignUpForm from "./SignUpForm"
-import Messager from "../../Messager";
 
 interface ILogInDialogStateProps {
 	isLoggedIn: boolean,
@@ -31,8 +32,10 @@ interface ILogInDialogState {
 	variant: LogInVariant,
 	username: string,
 	password: string,
+	passwordRepeat: string,
 	usernameError: string | null,
 	passwordError: string | null,
+	userAgreementChecked: boolean,
 	loading: boolean
 }
 
@@ -45,8 +48,10 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 			variant: LogInVariant.SignIn,
 			username: "",
 			password: "",
+			passwordRepeat: "",
 			usernameError: null,
 			passwordError: null,
+			userAgreementChecked: false
 		};
 		this.getHeader = this.getHeader.bind(this);
 		this.getWelcome = this.getWelcome.bind(this);
@@ -54,6 +59,7 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 		this.signUp = this.signUp.bind(this);
 		this.updateUsernameInput = this.updateUsernameInput.bind(this);
 		this.updatePasswordInput = this.updatePasswordInput.bind(this);
+		this.updatePasswordRepeatInput = this.updatePasswordRepeatInput.bind(this);
 	}
 	
 	getHeader(): string {
@@ -90,7 +96,7 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 	}
 	
 	signUp() {
-		let {username, password} = this.state;
+		let {username, password, passwordRepeat} = this.state;
 		let isError: boolean = false;
 		if (username.length === 0) {
 			this.setState({usernameError: "Введите логин"});
@@ -98,6 +104,10 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 		}
 		if (password.length === 0) {
 			this.setState({passwordError: "Введите пароль"});
+			isError = true;
+		}
+		if (password !== passwordRepeat) {
+			this.setState({passwordError: "Пароли не совпадают"});
 			isError = true;
 		}
 		if (!isError) {
@@ -112,6 +122,10 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
  	
 	updatePasswordInput(password: string) {
 		this.setState({password, passwordError: null});
+	}
+	
+	updatePasswordRepeatInput(passwordRepeat: string) {
+		this.setState({passwordRepeat, passwordError: null});
 	}
 	
 	componentDidUpdate() {
@@ -137,12 +151,13 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 				blockScroll={ true }
 				onHide={ () => { this.props.closeDialog() } }
 				>
-				{
-					this.props.isLoggedIn ? 
-						<div className="w3-container w3-center">
-							<h1 className="w3-opacity"><b>{this.getWelcome()}</b></h1>
-						</div>:
-					variant == LogInVariant.SignIn ? 
+					<Button 
+						id="LogInDialog_CloseButton"
+						icon="pi pi-times" 
+						className="p-button-rounded p-button-secondary" 
+						style={{position:"absolute", top:0, right:0}} 
+						onClick={() => { this.props.closeDialog() }} />
+					{variant == LogInVariant.SignIn ? 
 						<SignInForm 
 							loading={this.state.loading} 
 							usernameError={this.state.usernameError}
@@ -153,7 +168,10 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 							updatePasswordInput={ this.updatePasswordInput }
 							/> :
 					variant == LogInVariant.UserAgreement ? 
-						<UserAgreementForm switchToSignUp={ () => this.setState({ variant: LogInVariant.SignUp }) }/> :
+						<UserAgreementForm 
+							userAgreementChecked={ this.state.userAgreementChecked }
+							onUserAgreementChecked={ 
+							() => { this.setState({userAgreementChecked: true}); setTimeout(() => this.setState({ variant: LogInVariant.SignUp }), 1000) } }/> :
 					variant == LogInVariant.SignUp ? 
 						<SignUpForm 
 							loading={this.state.loading} 
@@ -162,9 +180,9 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 							onSignUpClick={() => this.signUp()}
 							updateUsernameInput={ this.updateUsernameInput }
 							updatePasswordInput={ this.updatePasswordInput }
+							updatePasswordRepeatInput={ this.updatePasswordRepeatInput }
 							/> : ""
-				}
-				
+					}
 			</Dialog>
 		</div>
 		);
@@ -173,6 +191,7 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 
 import { LogInFormShowAction, LogInFormSetServerErrorAction } from "../../contexts/ui/logInForm/actions";
 import { SignUpAction, SignInAction } from "../../contexts/data/account/actions";
+import { Button } from "primereact/button";
 
 let mapStateToProps = (state: any): ILogInDialogStateProps => ({
 	isLoggedIn: state.data.account != null,

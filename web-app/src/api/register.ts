@@ -90,6 +90,9 @@ let selectJsonFrom = (response: Response): any => {
 }
 
 let selectTokenFrom = (response: Response): any => {
+	if (response.status == 400) {
+		throw <FetchingException>{isUnauthorized: true};
+	}
 	return checkHttpStatus(response).json()
 		.then((res:any) => {
 			if (!res.hasOwnProperty("access_token")) {
@@ -99,13 +102,13 @@ let selectTokenFrom = (response: Response): any => {
 		})
 }
 
-export let registerAccount = (
+export let processSignUpRequest = (
 	username: string, 
 	password: string, 
 	onSuccess: (accountInfo: IAccountInfo) => void, 
 	onFail: (errorDescription: string) => void) => 
 	{
-	let registerRequest: RequestInit = {
+	let signUpRequest: RequestInit = {
 		method: "Post",
 		headers: {
 			"Accept": "application/json",
@@ -114,16 +117,16 @@ export let registerAccount = (
 		body: JSON.stringify({username: username, password: password})
 	}
 	let token: string = "";
-	fetch(accountRegisterUrl, registerRequest)
+	fetch(accountRegisterUrl, signUpRequest)
 		.then(res => selectJsonFrom(res))
 		.then(res => fetchToken(username, password))
 		.then(res => selectTokenFrom(res))
 		.then(res => {token = res; return fetchAccountInfo(token) })
 		.then(res => selectJsonFrom(res))
-		.then(res => {console.log(res); onSuccess({
+		.then(res => onSuccess({
 			token: token,
 			userId: res.Id,
-			username: res.Name})})
+			username: res.Name}))
 		.catch((reason) => {
 			if ("isUnauthorized" in reason && reason.isUnauthorized) {
 				onFail("Не удалось авторизоваться на сервере, попробуйте позже");
@@ -147,6 +150,30 @@ export let registerAccount = (
 		});
 }
 
+export let processSignInRequest = (
+	username: string, 
+	password: string, 
+	onSuccess: (accountInfo: IAccountInfo) => void, 
+	onFail: (errorDescription: string) => void) => 
+	{
+	let token: string = "";
+	fetchToken(username, password)
+		.then(res => selectTokenFrom(res))
+		.then(res => {token = res; return fetchAccountInfo(token) })
+		.then(res => selectJsonFrom(res))
+		.then(res => {console.log(res); onSuccess({
+			token: token,
+			userId: res.Id,
+			username: res.Name})})
+		.catch((reason) => {
+			if ("isUnauthorized" in reason && reason.isUnauthorized) {
+				onFail("Неверный логин или пароль");
+			}
+			else {
+				onFail("Что-то пошло не так, попробуйте повторить попытку позже");
+			}
+		});
+}
 
 
 

@@ -40,7 +40,7 @@ let HeaderMenu = (props: IHeaderMenuProps) => {
 				}
 			</div>
 		</Toolbar>
-		<Growl ref={(el) => Messager.setGrowl(el)} />
+		<Growl ref={(el) => Messager.setGrowl(el)} style={{marginTop:"50px"}} />
 		{isLogInDialogVisible && <LogInDialog />}
 	</div>)
 }

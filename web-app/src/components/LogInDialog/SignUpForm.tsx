@@ -11,6 +11,7 @@ interface ISignUpFormProps {
 	onSignUpClick: () => void,
 	updateUsernameInput: (username: string) => void,
 	updatePasswordInput: (password: string) => void,
+	updatePasswordRepeatInput: (password: string) => void,
 }
 
 let SignUpForm = (props: ISignUpFormProps) => {
@@ -36,14 +37,29 @@ let SignUpForm = (props: ISignUpFormProps) => {
 					className={props.passwordError != null ? "p-error" : undefined}
 					tooltip={props.passwordError != null ? props.passwordError : undefined}
 					size={30} 
+					feedback={false}
 					onChange={(e) => { props.updatePasswordInput(e.currentTarget.value); }} 
 					placeholder="Пароль"/>
+			</span>
+		</div>
+		
+		<div className="w3-panel">
+			<span>
+				<Password 
+					id="SignInForm.Password" 
+					type="text" 
+					className={props.passwordError != null ? "p-error" : undefined}
+					size={30} 
+					feedback={false}
+					onChange={(e) => { props.updatePasswordRepeatInput(e.currentTarget.value); }} 
+					placeholder="Повторите пароль"
+					value={props.passwordError != null ? "" : undefined}/>
 			</span>
 		</div>
 		<div className="w3-panel">
 			{props.loading ? 
 				<Button label="Регистрация..." icon="pi pi-spin pi-spinner" iconPos="left" disabled={true} /> :
-				<Button label="Зарегестрироваться" icon="pi pi-sign-in" iconPos="left" onClick={props.onSignUpClick} />
+				<Button label="Зарегистрироваться" icon="pi pi-sign-in" iconPos="left" onClick={props.onSignUpClick} />
 			}
 		</div>
 	</div>)

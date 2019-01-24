@@ -37,6 +37,7 @@ let SignInForm = (props: ISignInFormProps) => {
 					className={props.passwordError != null ? "p-error" : undefined}
 					tooltip={props.passwordError != null ? props.passwordError : undefined}
 					size={30} 
+					feedback={false}
 					onChange={(e) => { props.updatePasswordInput(e.currentTarget.value); }} 
 					placeholder="Пароль"/>
 			</span>

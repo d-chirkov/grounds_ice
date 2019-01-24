@@ -13,6 +13,7 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import './w3.css';
 
+
 export let store = createStore(updateRootState, applyMiddleware(thunk, actionToPlainObject));
 
 ReactDOM.render(

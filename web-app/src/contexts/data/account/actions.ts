@@ -28,12 +28,19 @@ export class SetAccountAction implements Action<AccountActionType.ACCOUNT_SET> {
 	constructor(public token: string, public userId: string, public userName: string) {}
 }
 
-import { LogInFormSetServerErrorAction } from "../../ui/logInForm/actions";
+import { LogInFormShowAction, LogInFormSetServerErrorAction } from "../../ui/logInForm/actions";
 import Messager from "../../../Messager";
-import { processSignUpRequest, IAccountInfo } from "../../../api/register";
+import { processSignUpRequest, processSignInRequest, IAccountInfo } from "../../../api/register";
 
-export let SignUpAction = (username: string, password: string) => 
-	(dispatch: Function): void => {
+function processSignInUpRequest (
+	username: string, 
+	password: string, 
+	handler: (username:string, 
+			  password: string, 
+			  onSuccess: (accountInfo: IAccountInfo) => void, 
+			  onFail: (err: string) => void) => void) 
+	{
+	return (dispatch: Function): void => {
 		let onSuccess = (accountInfo: IAccountInfo) => {
 			dispatch(new SetAccountAction(accountInfo.token, accountInfo.userId, accountInfo.username));
 		}
@@ -41,19 +48,15 @@ export let SignUpAction = (username: string, password: string) =>
 			dispatch(new LogInFormSetServerErrorAction(err));
 			Messager.showWarning("Ошибка", err);
 		}
-		processSignUpRequest(username, password, onSuccess, onFail);
-	}
+		handler(username, password, onSuccess, onFail);
+	}		  
+}
 	
-export let SignInAction = () => 
-	(dispatch: Function): void => {
-		setTimeout(() => {
-			dispatch(new LogInFormSetServerErrorAction("Неверный логин или пароль"));
-			Messager.showWarning("Ошибка", "Неверный логин или пароль");
-		}, 1500);
-		return;
-		//TODO: send token request to api, recieve response, dispatch actions to update state
-	}
+
+export let SignUpAction = (username: string, password: string) => processSignInUpRequest(username, password, processSignUpRequest);
 	
+export let SignInAction = (username: string, password: string) => processSignInUpRequest(username, password, processSignInRequest);
+
 export type AccountAction = SetTokenAction | SetUserIdAction | SetUserNameAction | SetAccountAction;
 
 export function isAccountAction(action: RootAction): action is AccountAction {
