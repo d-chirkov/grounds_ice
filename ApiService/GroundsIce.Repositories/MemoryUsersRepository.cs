@@ -26,9 +26,14 @@ namespace GroundsIce.Repositories
             Debug.WriteLine("Repository initiation");
         }
         
-        public Task<User> GetUserAsync(string username, string password)
+        public async Task<User> GetUserAsync(string username, string password)
         {
-            throw new NotImplementedException();
+            await access_.WaitAsync();
+            User user = (from account in accounts_
+                           where account.Value.Username == username && account.Value.Password == password
+                           select new User(account.Key)).FirstOrDefault();
+            access_.Release();
+            return user;
         }
 
         public async Task<User> AddNewUserAsync(string username, string password)
@@ -58,7 +63,7 @@ namespace GroundsIce.Repositories
         {
             await access_.WaitAsync();
             string username = (from account in accounts_
-                               where account.Key.Equals(user)
+                               where account.Key == user.Id
                                select account.Value.Username).FirstOrDefault();
             access_.Release();
             return username;
@@ -68,7 +73,7 @@ namespace GroundsIce.Repositories
         {
             await access_.WaitAsync();
             int accountCount = (from account in accounts_
-                                where account.Key.Equals(user)
+                                where account.Key == user.Id
                                 select account).Count();
             if (accountCount != 1)
             {
@@ -84,7 +89,7 @@ namespace GroundsIce.Repositories
         {
             await access_.WaitAsync();
             int accountCount = (from account in accounts_
-                                where account.Key.Equals(user)
+                                where account.Key == user.Id
                                 select account).Count();
             if (accountCount != 1)
             {

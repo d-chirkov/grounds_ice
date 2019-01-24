@@ -1,3 +1,3 @@
-import { RegistrationFromAction as RegistrationFormAction } from "./registrationForm/actions";
+import { LogInFormAction } from "./logInForm/actions";
 
-export type UIAction = RegistrationFormAction;
+export type UIAction = LogInFormAction;

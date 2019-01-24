@@ -11,7 +11,7 @@ let updateDataState = (state: IDataState = initialDataState, action: RootAction)
 			account: updateAccount(state.account, action)
 		};
 	}
-	return { ...state };
+	return state;
 }
 
 export default updateDataState;

@@ -1,4 +1,5 @@
 ﻿using System.Web.Http;
+using System.Web.Http.Cors;
 using Microsoft.Owin.Security.OAuth;
 
 namespace GroundsIce.WebService
@@ -11,8 +12,8 @@ namespace GroundsIce.WebService
             config.SuppressDefaultHostAuthentication();
             config.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
 
+            config.EnableCors(new EnableCorsAttribute("*", "*", "*"));
             // Web API routes
-            // TODO: WTF
             config.MapHttpAttributeRoutes();
 
             config.Routes.MapHttpRoute(

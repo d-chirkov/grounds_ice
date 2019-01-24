@@ -1,9 +1,9 @@
-import { IRegistrationForm, initialRegistrationForm} from "./registrationForm/model";
+import { ILogInForm, initialLogInForm } from "./logInForm/model";
 
 export interface IUIState {
-	registrationForm: IRegistrationForm
+	logInForm: ILogInForm
 }
 
 export let initialUIState: IUIState = {
-	registrationForm: initialRegistrationForm
+	logInForm: initialLogInForm
 }

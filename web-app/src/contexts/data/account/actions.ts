@@ -28,14 +28,36 @@ export class SetAccountAction implements Action<AccountActionType.ACCOUNT_SET> {
 	constructor(public token: string, public userId: string, public userName: string) {}
 }
 
-export let RegisterAccountAction = (username: string, password: string) => 
+import { LogInFormShowAction, LogInFormSetServerErrorAction } from "../../ui/logInForm/actions";
+import Messager from "../../../Messager";
+import { registerAccount, IAccountInfo, ErrorCode } from "../../../api/register";
+
+export let SignUpAction = (username: string, password: string) => 
 	(dispatch: Function): void => {
-		return;
-		//TODO: send register request to api, recieve response, dispatch actions to update state
+		let onSuccess = (accountInfo: IAccountInfo) => {
+			dispatch(new SetAccountAction(accountInfo.token, accountInfo.userId, accountInfo.username));
+		}
+		let onFail = (errorCode: ErrorCode) => {
+			let errorDescription: string = "";
+			switch(errorCode) {
+				case ErrorCode.Success:
+				case ErrorCode.Unspecified: errorDescription = "Неизвестная ошибка"; break;
+				case ErrorCode.UserAlreadyExists: errorDescription = "Неверные логин или пароль"; break;
+				case ErrorCode.UserAlreadyExists: errorDescription = "Пользователь с таким логином уже существует"; break;
+				default: errorDescription = "Неизвестная ошибка"; break;
+			}
+			dispatch(new LogInFormSetServerErrorAction(errorDescription));
+			Messager.showWarning("Ошибка", errorDescription);
+		}
+		registerAccount(username, password, onSuccess, onFail);
 	}
 	
-export let LogInAction = (username: string, password: string) => 
+export let SignInAction = (username: string, password: string) => 
 	(dispatch: Function): void => {
+		setTimeout(() => {
+			dispatch(new LogInFormSetServerErrorAction("Неверный логин или пароль"));
+			Messager.showWarning("Ошибка", "Неверный логин или пароль");
+		}, 1500);
 		return;
 		//TODO: send token request to api, recieve response, dispatch actions to update state
 	}

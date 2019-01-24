@@ -1,7 +1,7 @@
 interface IAccount {
 	token: string,
 	userId: string,
-	userName: string
+	username: string
 }
 
 export default IAccount;

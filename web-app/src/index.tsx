@@ -11,6 +11,7 @@ import updateRootState from "./contexts/reducers";
 import 'primereact/resources/themes/nova-light/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
+import './w3.css';
 
 export let store = createStore(updateRootState, applyMiddleware(thunk, actionToPlainObject));
 

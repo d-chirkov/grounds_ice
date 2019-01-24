@@ -6,7 +6,7 @@ let updateAccount = (state: IAccount | null | undefined, action: AccountAction):
 		return {
 			token: action.token,
 			userId: action.userId,
-			userName: action.userName
+			username: action.userName
 		};
 	}
 	if (state === null || state === undefined) {

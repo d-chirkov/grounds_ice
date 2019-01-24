@@ -9,8 +9,8 @@ using System.Net;
 
 namespace GroundsIce.WebService.Controllers
 {
+    //[RoutePrefix("api/account")]
     [AuthorizeApi]
-    [RoutePrefix("account")]
     public class AccountController : ApiController
     {
         private AccountService accountService_;
@@ -19,24 +19,33 @@ namespace GroundsIce.WebService.Controllers
 
         private enum ErrorCode
         {
-            Success = 0,
-            Unspecified = 1,
-            CredentialsNotValid = 2,
-            UserAlreadyExists = 3
+            Success = 1000,
+            Unspecified = 2000,
+            CredentialsNotValid = 3000,
+            UserAlreadyExists = 4000,
         }
 
+        public struct UserData
+        {
+            public string username { get; set; }
+            public string password { get; set; }
+        }
+
+        //[Route("~api/account/register")]
         [AllowAnonymous]
         [HttpPost]
-        [Route("register")]
-        public async Task<IHttpActionResult> Register(string username, string password)
+        public async Task<IHttpActionResult> Register(UserData userData)
         {
+            string username = userData.username;
+            string password = userData.password;
+            Debug.WriteLine("DEBUG_OUTPUT: Register");
             ErrorCode errorCode = ErrorCode.Unspecified;
             try
             {
                 User created = await accountService_.RegisterUserAsync(username, password);
                 if (created != null)
                 {
-                    Ok(new { ErrorCode = ErrorCode.Success, Id = created.Id });
+                    return Ok(new { ErrorCode = ErrorCode.Success, Id = created.Id });
                 }
                 errorCode = ErrorCode.UserAlreadyExists;
             }
@@ -44,43 +53,42 @@ namespace GroundsIce.WebService.Controllers
             {
                 errorCode = ErrorCode.CredentialsNotValid;
             }
-            return Ok(new { ErrorCode = errorCode });
+            return Content(HttpStatusCode.Unauthorized, new { ErrorCode = errorCode });
         }
 
         [HttpPost]
-        [Route("get_info")]
         public async Task<IHttpActionResult> GetInfo()
         {
+            Debug.WriteLine("DEBUG_OUTPUT: GetInfo");
             User user = GetUserFromContext();
             string username = await accountService_.GetUsernameAsync(user);
             return 
-                username != null ? Ok(new { ErrorCode = ErrorCode.Success, Id = user.Id, Name = username }) : 
-                (IHttpActionResult)Unauthorized();
+                username != null ? 
+                Ok(new { ErrorCode = ErrorCode.Success, Id = user.Id, Name = username }) : 
+                (IHttpActionResult)Content(HttpStatusCode.Unauthorized, new { ErrorCode = ErrorCode.Unspecified });
         }
 
         private User GetUserFromContext() => (User)Request.Properties["USER"];
 
         [HttpPost]
-        [Route("change_password")]
         public async Task<IHttpActionResult> ChangePassword(string newPassword)
         {
             AccountService.Error error = await accountService_.ChangePasswordAsync(GetUserFromContext(), newPassword);
             return
                 error == AccountService.Error.NoError ? Ok(new { ErrorCode = ErrorCode.Success }) :
-                error == AccountService.Error.PasswordNotValid ? Ok(new { ErrorCode = ErrorCode.CredentialsNotValid }) :
-                (IHttpActionResult)Unauthorized();
+                error == AccountService.Error.PasswordNotValid ? (IHttpActionResult)Content(HttpStatusCode.Unauthorized, new { ErrorCode = ErrorCode.CredentialsNotValid }) :
+                (IHttpActionResult)(IHttpActionResult)Content(HttpStatusCode.Unauthorized, new { ErrorCode = ErrorCode.Unspecified });
         }
 
         [HttpPost]
-        [Route("change_login")]
         public async Task<IHttpActionResult> ChangeLogin(string newLogin)
         {
             AccountService.Error error = await accountService_.ChangeUsernameAsync(GetUserFromContext(), newLogin);
             return
                 error == AccountService.Error.NoError ? Ok(new { ErrorCode = ErrorCode.Success }) :
-                error == AccountService.Error.RepositoryConflict ? Ok(new { ErrorCode = ErrorCode.UserAlreadyExists }) :
-                error == AccountService.Error.UsernameNotValid ? Ok(new { ErrorCode = ErrorCode.CredentialsNotValid }) :
-                (IHttpActionResult)Unauthorized();
+                error == AccountService.Error.RepositoryConflict ? (IHttpActionResult)Content(HttpStatusCode.Unauthorized, new { ErrorCode = ErrorCode.UserAlreadyExists }) :
+                error == AccountService.Error.UsernameNotValid ? (IHttpActionResult)Content(HttpStatusCode.Unauthorized, new { ErrorCode = ErrorCode.CredentialsNotValid }) :
+                (IHttpActionResult)(IHttpActionResult)Content(HttpStatusCode.Unauthorized, new { ErrorCode = ErrorCode.Unspecified });
         }
 
         protected override void Dispose(bool disposing) => base.Dispose(disposing);

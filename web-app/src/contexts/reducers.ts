@@ -5,7 +5,6 @@ import updateUIState from "./ui/reducers";
 
 let updateRootState = (state: IRootState = initialRootState, action: RootAction): IRootState => {
 	return {
-		...state,
 		data: updateDataState(state.data, action),
 		ui: updateUIState(state.ui, action)
 	};

@@ -1,17 +1,17 @@
 import { IUIState, initialUIState } from "./model";
 import { RootAction } from "../actions";
 
-import { isRegistrationFromAction } from "./registrationForm/actions";
-import updateRegistrationForm from "./registrationForm/reducers";
+import { isLogInFormAction } from "./logInForm/actions";
+import updateLogInForm from "./logInForm/reducers";
 
 let updateUIState = (state: IUIState = initialUIState, action: RootAction): IUIState => {
-	if (isRegistrationFromAction(action)) {
+	if (isLogInFormAction(action)) {
 		return {
 			...state,
-			registrationForm: updateRegistrationForm(state.registrationForm, action)
+			logInForm: updateLogInForm(state.logInForm, action)
 		};
 	}
-	return { ...state };
+	return state;
 }
 
 export default updateUIState;
