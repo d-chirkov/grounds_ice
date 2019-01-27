@@ -35,7 +35,7 @@ let SignUpForm = (props: ISignUpFormProps) => {
 					id="SignInForm.Password" 
 					type="text" 
 					className={props.passwordError != null ? "p-error" : undefined}
-					tooltip={props.passwordError != null ? props.passwordError : undefined}
+					tooltip={props.passwordError ? props.passwordError : undefined}
 					size={30} 
 					feedback={false}
 					onChange={(e) => { props.updatePasswordInput(e.currentTarget.value); }} 
@@ -48,7 +48,7 @@ let SignUpForm = (props: ISignUpFormProps) => {
 				<Password 
 					id="SignInForm.Password" 
 					type="text" 
-					className={props.passwordError != null ? "p-error" : undefined}
+					className={props.passwordError ? "p-error" : undefined}
 					size={30} 
 					feedback={false}
 					onChange={(e) => { props.updatePasswordRepeatInput(e.currentTarget.value); }} 

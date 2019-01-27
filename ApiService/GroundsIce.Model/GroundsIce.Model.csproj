@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BA6A56CE-7CAF-4BB7-96C3-0FEE63031B4F}</ProjectGuid>
+    <ProjectGuid>{1E6583C8-C225-4CE2-A9FE-5575BFA47879}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>GroundsIce.Model</RootNamespace>
     <AssemblyName>GroundsIce.Model</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -41,11 +41,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Accounting\ICredentialsValidator.cs" />
-    <Compile Include="Repositories\IAccountRepository.cs" />
+    <Compile Include="Abstractions\Repositories\IAccountRepository.cs" />
+    <Compile Include="Abstractions\Validators\IStringValidator.cs" />
+    <Compile Include="Entities\Account.cs" />
+    <Compile Include="Repositories\InMemoryAccountRepository.cs" />
+    <Compile Include="Validators\Common\LengthValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="User.cs" />
-    <Compile Include="Accounting\AccountService.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Validators\Login\" />
+    <Folder Include="Validators\Password\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

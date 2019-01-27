@@ -1,19 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.28307.271
+VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.WebService", "GroundsIce.WebService\GroundsIce.WebService.csproj", "{E7279478-2A30-4A54-87F6-E68390BECD8E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.WebApi", "GroundsIce.WebApi\GroundsIce.WebApi.csproj", "{F71A7FE0-CA3A-4715-A7CA-1E7D70661DB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.Model", "GroundsIce.Model\GroundsIce.Model.csproj", "{BA6A56CE-7CAF-4BB7-96C3-0FEE63031B4F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.Model", "GroundsIce.Model\GroundsIce.Model.csproj", "{1E6583C8-C225-4CE2-A9FE-5575BFA47879}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.Repositories", "GroundsIce.Repositories\GroundsIce.Repositories.csproj", "{2BA7E966-71B5-4AFC-925A-B61808251B5A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.Model.Tests", "GroundsIce.Model.Tests\GroundsIce.Model.Tests.csproj", "{5668EE3A-BAA8-4E0B-8CA6-A28A77A6CE80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.Model.Tests", "GroundsIce.Model.Tests\GroundsIce.Model.Tests.csproj", "{5C9F7947-7361-4959-A809-6060CA5555FF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.Accounting.CredentialsValidators", "GroundsIce.Accounting.CredentialsValidators\GroundsIce.Accounting.CredentialsValidators.csproj", "{BECB8C10-E0D8-4B80-B5BF-84C499377D10}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.Accounting.CredentialsValidators.Tests", "GroundsIce.Accounting.CredentialsValidators.Tests\GroundsIce.Accounting.CredentialsValidators.Tests.csproj", "{311788CD-DD10-49D6-9227-02F05AE7AAA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.WebApi.Tests", "GroundsIce.WebApi.Tests\GroundsIce.WebApi.Tests.csproj", "{D487E752-16EF-4CAB-9B20-3F9FC578BA00}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,35 +17,27 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E7279478-2A30-4A54-87F6-E68390BECD8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7279478-2A30-4A54-87F6-E68390BECD8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7279478-2A30-4A54-87F6-E68390BECD8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7279478-2A30-4A54-87F6-E68390BECD8E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BA6A56CE-7CAF-4BB7-96C3-0FEE63031B4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BA6A56CE-7CAF-4BB7-96C3-0FEE63031B4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BA6A56CE-7CAF-4BB7-96C3-0FEE63031B4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BA6A56CE-7CAF-4BB7-96C3-0FEE63031B4F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2BA7E966-71B5-4AFC-925A-B61808251B5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2BA7E966-71B5-4AFC-925A-B61808251B5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2BA7E966-71B5-4AFC-925A-B61808251B5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2BA7E966-71B5-4AFC-925A-B61808251B5A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5C9F7947-7361-4959-A809-6060CA5555FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5C9F7947-7361-4959-A809-6060CA5555FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5C9F7947-7361-4959-A809-6060CA5555FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5C9F7947-7361-4959-A809-6060CA5555FF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BECB8C10-E0D8-4B80-B5BF-84C499377D10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BECB8C10-E0D8-4B80-B5BF-84C499377D10}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BECB8C10-E0D8-4B80-B5BF-84C499377D10}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BECB8C10-E0D8-4B80-B5BF-84C499377D10}.Release|Any CPU.Build.0 = Release|Any CPU
-		{311788CD-DD10-49D6-9227-02F05AE7AAA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{311788CD-DD10-49D6-9227-02F05AE7AAA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{311788CD-DD10-49D6-9227-02F05AE7AAA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{311788CD-DD10-49D6-9227-02F05AE7AAA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F71A7FE0-CA3A-4715-A7CA-1E7D70661DB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F71A7FE0-CA3A-4715-A7CA-1E7D70661DB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F71A7FE0-CA3A-4715-A7CA-1E7D70661DB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F71A7FE0-CA3A-4715-A7CA-1E7D70661DB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E6583C8-C225-4CE2-A9FE-5575BFA47879}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E6583C8-C225-4CE2-A9FE-5575BFA47879}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E6583C8-C225-4CE2-A9FE-5575BFA47879}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E6583C8-C225-4CE2-A9FE-5575BFA47879}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5668EE3A-BAA8-4E0B-8CA6-A28A77A6CE80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5668EE3A-BAA8-4E0B-8CA6-A28A77A6CE80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5668EE3A-BAA8-4E0B-8CA6-A28A77A6CE80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5668EE3A-BAA8-4E0B-8CA6-A28A77A6CE80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D487E752-16EF-4CAB-9B20-3F9FC578BA00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D487E752-16EF-4CAB-9B20-3F9FC578BA00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D487E752-16EF-4CAB-9B20-3F9FC578BA00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D487E752-16EF-4CAB-9B20-3F9FC578BA00}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4C1411D2-0928-4FA6-94C5-E74436A61C63}
+		SolutionGuid = {2F76BB26-673A-4B91-A982-24E85D5342F6}
 	EndGlobalSection
 EndGlobal

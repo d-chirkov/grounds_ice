@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("GroundsIce.Model.Tests")]
+[assembly: AssemblyTitle("Model.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("GroundsIce.Model.Tests")]
+[assembly: AssemblyProduct("Model.Tests")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("5c9f7947-7361-4959-a809-6060ca5555ff")]
+[assembly: Guid("5668ee3a-baa8-4e0b-8ca6-a28a77a6ce80")]
 
 // Version information for an assembly consists of the following four values:
 //
