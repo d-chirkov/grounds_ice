@@ -16,7 +16,7 @@ namespace GroundsIce.WebApi.Controllers.Account
 	[RoutePrefix("api/account")]
     public class AccountController : ApiController
     {
-        public enum ValueType : int
+        public enum ValueType
         {
             Success = 1000,
 			LoginAlreadyExists = 2000,
@@ -33,29 +33,32 @@ namespace GroundsIce.WebApi.Controllers.Account
         public AccountController(IAccountRepository accountRepository)
         {
             _accountRepository = accountRepository ?? throw new ArgumentNullException("accountRepository");
-            _loginValidators = new List<IStringValidator>();
-            _passwordValidators = new List<IStringValidator>();
         }
 
-        public void SetLoginValidators(IEnumerable<IStringValidator> loginValidators)
+		public void SetLoginValidators(IEnumerable<IStringValidator> validators)
 		{
-			if (loginValidators == null || loginValidators.Any(v => v == null)) throw new ArgumentNullException();
-			_loginValidators = loginValidators;
-        }
+			CheckValidators(validators);
+			_loginValidators = validators;
+		}
 
-		public void SetPasswordValidators(IEnumerable<IStringValidator> passwordValidators)
+		public void SetPasswordValidators(IEnumerable<IStringValidator> validators)
 		{
-			if (passwordValidators == null || passwordValidators.Any(v => v == null)) throw new ArgumentNullException();
-			_passwordValidators = passwordValidators;
+			CheckValidators(validators);
+			_passwordValidators = validators;
+		}
+
+		private void CheckValidators(IEnumerable<IStringValidator> validators)
+		{
+			if (validators == null || validators.Any(v => v == null)) throw new ArgumentNullException();
 		}
 
 		[Route("register")]
         [AllowAnonymous]
         [HttpPost]
-        public async Task<Value> Register(DTO.LoginAndPassword loginAndPasswordDto)
+        public async Task<Value> Register(DTO.LoginAndPassword dto)
         {
-			string login = loginAndPasswordDto?.Login ?? throw new ArgumentNullException("Login");
-			string password = loginAndPasswordDto?.Password ?? throw new ArgumentNullException("Password");
+			string login = dto?.Login ?? throw new ArgumentNullException("Login");
+			string password = dto?.Password ?? throw new ArgumentNullException("Password");
 			ValueType result =
 				!await IsValueValidated(login, _loginValidators) ? ValueType.LoginNotValid :
 				!await IsValueValidated(password, _passwordValidators) ? ValueType.PasswordNotValid :
@@ -63,23 +66,6 @@ namespace GroundsIce.WebApi.Controllers.Account
 				ValueType.Success;
 			return new Value((int)result);
         }
-
-		private async Task<bool> IsValueValidated(string value, IEnumerable<IStringValidator> validators)
-		{
-			foreach (IStringValidator validator in validators)
-			{
-				if (!await validator.ValidateAsync(value))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		private long GetUserIdFromRequest()
-		{
-			return (long)(Request?.Properties["USER_ID"] ?? throw new ArgumentNullException("USER_ID"));
-		}
 
         [Route("get_account")]
         [HttpPost]
@@ -94,9 +80,9 @@ namespace GroundsIce.WebApi.Controllers.Account
 
         [Route("change_login")]
         [HttpPost]
-        public async Task<Value> ChangeLogin(DTO.NewLogin newLoginDto)
+        public async Task<Value> ChangeLogin(DTO.NewLogin dto)
         {
-			string newLogin = newLoginDto?.Login ?? throw new ArgumentNullException("Login");
+			string newLogin = dto?.Login ?? throw new ArgumentNullException("Login");
 			return await ChangeCredentials(async (long userId) =>
 			{
 				 return
@@ -108,10 +94,10 @@ namespace GroundsIce.WebApi.Controllers.Account
 
         [Route("change_password")]
         [HttpPost]
-        public async Task<Value> ChangePassword(DTO.OldAndNewPasswords oldAndNewPasswordsDto)
+        public async Task<Value> ChangePassword(DTO.OldAndNewPasswords dto)
         {
-			string oldPassword = oldAndNewPasswordsDto?.OldPassword ?? throw new ArgumentNullException("OldPassword");
-			string newPassword = oldAndNewPasswordsDto?.NewPassword ?? throw new ArgumentNullException("NewPassword");
+			string oldPassword = dto?.OldPassword ?? throw new ArgumentNullException("OldPassword");
+			string newPassword = dto?.NewPassword ?? throw new ArgumentNullException("NewPassword");
 			return await ChangeCredentials(async (long userId) =>
 			{
 				if (!await IsValueValidated(newPassword, _passwordValidators))
@@ -121,6 +107,11 @@ namespace GroundsIce.WebApi.Controllers.Account
 				bool changed = await _accountRepository.ChangePasswordAsync(userId, oldPassword, newPassword);
 				return changed ? ValueType.Success : ValueType.OldPasswordNotValid;
 			});
+		}
+
+		private long GetUserIdFromRequest()
+		{
+			return (long)(Request?.Properties["USER_ID"] ?? throw new ArgumentNullException("USER_ID"));
 		}
 
 		private async Task<Value> ChangeCredentials(Func<long, Task<ValueType>> change)
@@ -136,6 +127,21 @@ namespace GroundsIce.WebApi.Controllers.Account
 				result = ValueType.AccountNotExists;
 			}
 			return new Value((int)result);
+		}
+
+		private async Task<bool> IsValueValidated(string value, IEnumerable<IStringValidator> validators)
+		{
+			if (validators != null)
+			{
+				foreach (IStringValidator validator in validators)
+				{
+					if (!await validator.ValidateAsync(value))
+					{
+						return false;
+					}
+				}
+			}
+			return true;
 		}
 	}
 }
