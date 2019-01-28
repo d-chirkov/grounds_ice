@@ -14,6 +14,6 @@ namespace GroundsIce.Model.Abstractions.Repositories
         Task<Account> GetAccountAsync(string login, string password);
         Task<Account> GetAccountAsync(long userId);
         Task<bool> ChangeLoginAsync(long userId, string newLogin);
-        Task ChangePasswordAsync(long userId, string newPassword);
+        Task<bool> ChangePasswordAsync(long userId, string oldPassword, string newPassword);
     }
 }

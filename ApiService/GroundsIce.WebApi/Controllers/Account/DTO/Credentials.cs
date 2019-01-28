@@ -5,9 +5,9 @@ using System.Web;
 
 namespace GroundsIce.WebApi.Controllers.Account.DTO
 {
-	public class Credentials
+	public class LoginAndPassword
 	{
-		public Credentials(string login, string password)
+		public LoginAndPassword(string login, string password)
 		{
 			Login = login;
 			Password = password;
@@ -15,5 +15,27 @@ namespace GroundsIce.WebApi.Controllers.Account.DTO
 
 		public string Login { get; set; }
 		public string Password { get; set; }
+	}
+
+	public class OldAndNewPasswords
+	{
+		public OldAndNewPasswords(string oldPassword, string newPassword)
+		{
+			OldPassword = oldPassword;
+			NewPassword = newPassword;
+		}
+
+		public string OldPassword { get; set; }
+		public string NewPassword { get; set; }
+	}
+
+	public class NewLogin
+	{
+		public NewLogin(string login)
+		{
+			Login = login;
+		}
+
+		public string Login { get; set; }
 	}
 }

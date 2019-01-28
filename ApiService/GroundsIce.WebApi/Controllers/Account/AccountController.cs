@@ -23,6 +23,7 @@ namespace GroundsIce.WebApi.Controllers.Account
 			LoginNotValid = 4001,
             PasswordNotValid = 4002,
 			AccountNotExists = 5000,
+			OldPasswordNotValid = 6000,
         }
 
         private IEnumerable<IStringValidator> _loginValidators;
@@ -48,27 +49,13 @@ namespace GroundsIce.WebApi.Controllers.Account
 			_passwordValidators = passwordValidators;
 		}
 
-		[Route("test")]
-		[AllowAnonymous]
-		[HttpPost]
-		public async Task<Value> Test()
-		{
-			return new Value((int)ValueType.Success);
-		}
-
-		public class LoginPassword
-		{
-			public string Login { get; set; }
-			public string Password { get; set; }
-		}
-
 		[Route("register")]
         [AllowAnonymous]
         [HttpPost]
-        public async Task<Value> Register(DTO.Credentials credentials)
+        public async Task<Value> Register(DTO.LoginAndPassword loginAndPasswordDto)
         {
-			string login = credentials?.Login ?? throw new ArgumentNullException("Login");
-			string password = credentials?.Password ?? throw new ArgumentNullException("Password");
+			string login = loginAndPasswordDto?.Login ?? throw new ArgumentNullException("Login");
+			string password = loginAndPasswordDto?.Password ?? throw new ArgumentNullException("Password");
 			ValueType result =
 				!await IsValueValidated(login, _loginValidators) ? ValueType.LoginNotValid :
 				!await IsValueValidated(password, _passwordValidators) ? ValueType.PasswordNotValid :
@@ -107,9 +94,9 @@ namespace GroundsIce.WebApi.Controllers.Account
 
         [Route("change_login")]
         [HttpPost]
-        public async Task<Value> ChangeLogin(DTO.Credentials credentials)
+        public async Task<Value> ChangeLogin(DTO.NewLogin newLoginDto)
         {
-			string newLogin = credentials?.Login ?? throw new ArgumentNullException("Login");
+			string newLogin = newLoginDto?.Login ?? throw new ArgumentNullException("Login");
 			return await ChangeCredentials(async (long userId) =>
 			{
 				 return
@@ -121,17 +108,18 @@ namespace GroundsIce.WebApi.Controllers.Account
 
         [Route("change_password")]
         [HttpPost]
-        public async Task<Value> ChangePassword(DTO.Credentials credentials)
+        public async Task<Value> ChangePassword(DTO.OldAndNewPasswords oldAndNewPasswordsDto)
         {
-			string newPassword = credentials?.Password ?? throw new ArgumentNullException("Password");
+			string oldPassword = oldAndNewPasswordsDto?.OldPassword ?? throw new ArgumentNullException("OldPassword");
+			string newPassword = oldAndNewPasswordsDto?.NewPassword ?? throw new ArgumentNullException("NewPassword");
 			return await ChangeCredentials(async (long userId) =>
 			{
 				if (!await IsValueValidated(newPassword, _passwordValidators))
 				{
 					return ValueType.PasswordNotValid;
 				}
-				await _accountRepository.ChangePasswordAsync(userId, newPassword);
-				return ValueType.Success;
+				bool changed = await _accountRepository.ChangePasswordAsync(userId, oldPassword, newPassword);
+				return changed ? ValueType.Success : ValueType.OldPasswordNotValid;
 			});
 		}
 

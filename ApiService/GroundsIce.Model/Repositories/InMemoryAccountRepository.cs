@@ -93,9 +93,10 @@ namespace GroundsIce.Model.Repositories
             return true;
         }
 
-        public async Task ChangePasswordAsync(long userId, string newPassword)
-        {
+		public async Task<bool> ChangePasswordAsync(long userId, string oldPassword, string newPassword)
+		{
             if (userId < 0) throw new ArgumentOutOfRangeException("userId");
+            if (oldPassword == null) throw new ArgumentNullException("oldPassword");
             if (newPassword == null) throw new ArgumentNullException("newPassword");
             await _access.WaitAsync();
             if (!_storage.ContainsKey(userId))
@@ -103,9 +104,14 @@ namespace GroundsIce.Model.Repositories
                 _access.Release();
 				throw new UserIdNotFoundException();
             }
+			if (_storage[userId].Password != oldPassword)
+			{
+				_access.Release();
+				return false;
+			}
             _storage[userId].Password = newPassword;
             _access.Release();
-            return;
+            return true;
         }
 
     }

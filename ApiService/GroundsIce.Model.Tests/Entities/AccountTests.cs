@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
 
 namespace GroundsIce.Model.Entities.Tests
@@ -17,7 +18,8 @@ namespace GroundsIce.Model.Entities.Tests
         public void Ctor_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new Account(-1, ""));
-        }
+			Assert.Throws<ArgumentOutOfRangeException>(() => new Account(-1, null));
+		}
 
         [Test]
         public void Ctor_ThrowArgumentNullException_When_LoginIsNull()
@@ -26,13 +28,13 @@ namespace GroundsIce.Model.Entities.Tests
         }
 		
         [Test]
-        public void Ctor_Create_When_LoginAndUserIdAreValid()
+        public void Ctor_Create_When_LoginIsNotNullAndUserIdIsGreaterThenZero()
         {
             Assert.DoesNotThrow(() => new Account(_userId, "a"));
         }
 
         [Test]
-        public void Ctor_SaveUserAndLoginAsProperties_When_LoginAndUserIdAreValid()
+        public void Ctor_SaveUserAndLoginAsProperties_When_LoginIsNotNullAndUserIdIsGreaterThenZero()
         {
             string login = "a";
             var account = new Account(_userId, login);

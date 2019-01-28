@@ -40,7 +40,7 @@ namespace GroundsIce.Model.Repositories.Tests
             Assert.NotNull(account);
             Assert.IsTrue(account.UserId >= 0);
             Assert.AreEqual(_login, account.Login);
-        }
+		}
 
         [Test]
         public async Task CreateAccountAsync_SaveAccountInStorage_When_PassingValidLoginAndPassword()
@@ -51,9 +51,9 @@ namespace GroundsIce.Model.Repositories.Tests
 
         private void _ThrowArgumentNullException_When_PassingNullLoginOrPassword(Func<string, string, Task<Account>> func)
         {
-            Assert.ThrowsAsync<ArgumentNullException>(async () => await func(_login, null));
-            Assert.ThrowsAsync<ArgumentNullException>(async () => await func(null, _password));
-            Assert.ThrowsAsync<ArgumentNullException>(async () => await func(null, null));
+            Assert.ThrowsAsync<ArgumentNullException>(() => func(_login, null));
+            Assert.ThrowsAsync<ArgumentNullException>(() => func(null, _password));
+            Assert.ThrowsAsync<ArgumentNullException>(() => func(null, null));
         }
 
         [Test]
@@ -87,7 +87,18 @@ namespace GroundsIce.Model.Repositories.Tests
             await _CreateAccountAsync_ReturnNullAcount_When_CreatingAccountWithSameLoginSecondTime(_password + "a");
         }
 
-        [Test]
+		[Test]
+		public async Task CreateAccountAsync_DoNotChangeExistingAccount_When_WhenPassingAlreadyUsingLogin()
+		{
+			_storage[_userId] = _loginPassword;
+			Account firstAccount = await _repo.CreateAccountAsync(_login, _password);
+			Assert.IsNull(firstAccount);
+			Assert.AreEqual(_storage.Count, 1);
+			Assert.AreEqual(_storage[_userId].Login, _login);
+			Assert.AreEqual(_storage[_userId].Password, _password);
+		}
+
+		[Test]
         public async Task GetAccountAsync_ReturnAccountByLoginAndPassword_When_AccountExistsInStorage()
         {
             _storage[_userId] = _loginPassword;
@@ -125,7 +136,7 @@ namespace GroundsIce.Model.Repositories.Tests
         }
 
         [Test]
-        public async Task GetAccountAsync_ReturnNull_When_AccountWithUserIdNotExistsInStorage()
+        public async Task GetAccountAsync_ReturnNullAccount_When_AccountWithUserIdNotExistsInStorage()
         {
             _storage[_userId] = _loginPassword;
             Account account = await _repo.GetAccountAsync(_userId + 1);
@@ -135,48 +146,47 @@ namespace GroundsIce.Model.Repositories.Tests
         [Test]
         public void GetAccountAsync_ThrowArgumentOutOfRangeException_When_PassedUserIdIsLessThenZero()
         {
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await _repo.GetAccountAsync(-1));
-        }
-
-        private void _ThrowArgumentNullException_When_NewValueIsNull(
-            Func<long, string, Task> changeValue)
-        {
-            Assert.ThrowsAsync<ArgumentNullException>(async () => await changeValue(_userId, null));
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _repo.GetAccountAsync(-1));
         }
 
         [Test]
-        public void ChangeLoginAsync_ThrowArgumentNullException_When_NewValueIsNull()
+        public void ChangeLoginAsync_ThrowArgumentNullException_When_NewLoginIsNull()
         {
-			_ThrowArgumentNullException_When_NewValueIsNull(_repo.ChangeLoginAsync);
+            Assert.ThrowsAsync<ArgumentNullException>(() => _repo.ChangeLoginAsync(_userId, null));
         }
 
 		[Test]
-		public void ChangePasswordAsync_ThrowArgumentNullException_When_NewValueIsNull()
+		public void ChangePasswordAsync_ThrowArgumentNullException_When_OldOrNewPasswordIsNull()
 		{
-			_ThrowArgumentNullException_When_NewValueIsNull(_repo.ChangePasswordAsync);
+			Assert.ThrowsAsync<ArgumentNullException>(() => _repo.ChangePasswordAsync(_userId, null, "a"));
+			Assert.ThrowsAsync<ArgumentNullException>(() => _repo.ChangePasswordAsync(_userId, "a", null));
+			Assert.ThrowsAsync<ArgumentNullException>(() => _repo.ChangePasswordAsync(_userId, null, null));
 		}
 
 		private void _ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero(
-			Func<long, string, Task> changeValue)
+			Func<long, Task> changeValue)
 		{
-			Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await changeValue(-1, "a"));
-			Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await changeValue(-1, null));
+			Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => changeValue(-1));
 		}
 
 		[Test]
 		public void ChangeLoginAsync_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero()
 		{
-			_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero(_repo.ChangeLoginAsync);
+			_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero((long id) => _repo.ChangeLoginAsync(id, "a"));
+			_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero((long id) => _repo.ChangeLoginAsync(id, null));
 		}
 
 		[Test]
 		public void ChangePasswordAsync_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero()
 		{
-			_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero(_repo.ChangePasswordAsync);
+			_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero((long id) => _repo.ChangePasswordAsync(id, "a", "a"));
+			_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero((long id) => _repo.ChangePasswordAsync(id, "a", null));
+			_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero((long id) => _repo.ChangePasswordAsync(id, null, "a"));
+			_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero((long id) => _repo.ChangePasswordAsync(id, null, null));
 		}
 
         [Test]
-        public async Task ChangeLoginAsync_ChangeLoginForUser_When_NewLoginNotExistsInStorage()
+        public async Task ChangeLoginAsync_ReturnTrueAndChangeLoginForUser_When_NewLoginNotExistsInStorage()
         {
             string newLogin = _login + "a";
 			_storage[_userId] = _loginPassword;
@@ -186,45 +196,50 @@ namespace GroundsIce.Model.Repositories.Tests
         }
 
         [Test]
-        public void ChangeLoginAsync_ReturnFalseAndDoNotChangeStorage_When_NewLoginAlreadyExistsInStorage()
+        public async Task ChangeLoginAsync_ReturnFalseAndDoNotChangeStorage_When_NewLoginAlreadyExistsInStorage()
         {
             _storage[_userId] = _loginPassword;
             string newLogin = _login + "a";
             _storage[_userId + 1] = new LoginPassword { Login = newLogin, Password = _password };
             bool changed = false;
-			Assert.DoesNotThrowAsync(async () => changed = await _repo.ChangeLoginAsync(_userId, newLogin));
+			changed = await _repo.ChangeLoginAsync(_userId, newLogin);
             Assert.IsFalse(changed);
             Assert.AreEqual(_storage[_userId].Login, _login);
         }
-
-        private void _ThrowUserIdNotFoundException_When_UserIdNotExistsInStorage(
-            Func<long, string, Task> func, 
-            string newValue)
-        {
-            _storage[_userId] = _loginPassword;
-            Assert.ThrowsAsync<UserIdNotFoundException>(async () => await func(_userId + 1, newValue));
-        }
-
+		
         [Test]
         public void ChangeLoginAsync_ThrowUserIdNotFoundException_When_UserIdNotExistsInStorage()
         {
-            _ThrowUserIdNotFoundException_When_UserIdNotExistsInStorage(_repo.ChangeLoginAsync, _login + "a");
+			_storage[_userId] = _loginPassword;
+			Assert.ThrowsAsync<UserIdNotFoundException>(() => _repo.ChangeLoginAsync(_userId + 1, _login + "a"));
         }
 
 
         [Test]
         public void ChangePasswordAsync_ThrowUserIdNotFoundException_When_UserIdNotExistsInStorage()
         {
-            _ThrowUserIdNotFoundException_When_UserIdNotExistsInStorage(_repo.ChangePasswordAsync, _password + "a");
+			_storage[_userId] = _loginPassword;
+			Assert.ThrowsAsync<UserIdNotFoundException>(() => _repo.ChangePasswordAsync(_userId + 1, _password, _password + "b"));
         }
 
         [Test]
-        public void ChangePasswordAsync_ChangePasswordForUser_When_NewPasswordPassed()
+        public async Task ChangePasswordAsync_ReturnTrueAndChangePassword_When_OldAndNewPasswordAreValid()
         {
             string newPassword = _password + "a";
 			_storage[_userId] = _loginPassword;
-			Assert.DoesNotThrowAsync(async () => await _repo.ChangePasswordAsync(_userId, newPassword));
+			bool changed = await _repo.ChangePasswordAsync(_userId, _password, newPassword);
+			Assert.IsTrue(changed);
 			Assert.AreEqual(_storage[_userId].Password, newPassword);
         }
-    }
+
+		[Test]
+		public async Task ChangePasswordAsync_ReturnsFalseAndDoNotChangePassword_When_OldPasswordIsNotValid()
+		{
+			string newPassword = _password + "a";
+			_storage[_userId] = _loginPassword;
+			bool changed = await _repo.ChangePasswordAsync(_userId, _password + "a", newPassword);
+			Assert.IsFalse(changed);
+			Assert.AreEqual(_storage[_userId].Password, _password);
+		}
+	}
 }
