@@ -2,21 +2,25 @@ import "./LogInDialog.css"
 
 import React from "react";
 import { connect } from "react-redux";
+
 import { Dialog } from "primereact/dialog";
+import { Button } from "primereact/button";
+
+import { Messager, IMessage } from "../../Messager";
+import { signUp, SignUpError} from "../../api/interface/signUp";
+import { signIn, SignInError } from "../../api/interface/signIn";
+
 import SignInForm from "./SignInForm";
 import UserAgreementForm from "./UserAgreementForm"
 import SignUpForm from "./SignUpForm"
 
 interface ILogInDialogStateProps {
 	isLoggedIn: boolean,
-	serverError: string | null
 }
 
 interface ILogInDialogDispatchProps {
-	signUp: (username: string, password: string) => void
-	signIn: (username: string, password: string) => void
-	closeDialog: () => void,
-	clearServerError: () => void
+	setAccount: (token:string, userId: string, login: string) => void,
+	closeDialog: () => void
 }
 
 interface ILogInDialogProps extends ILogInDialogStateProps, ILogInDialogDispatchProps {
@@ -30,12 +34,12 @@ enum LogInVariant {
 
 interface ILogInDialogState {
 	variant: LogInVariant,
-	username: string,
+	login: string,
 	password: string,
 	passwordRepeat: string,
-	usernameError: string | null,
-	passwordError: string | null,
-	userAgreementChecked: boolean,
+	isLoginIsInvalid: boolean,
+	isPasswordIsInvalid: boolean,
+	isUserAgreementChecked: boolean,
 	loading: boolean
 }
 
@@ -46,93 +50,127 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 		this.state = {
 			loading: false,
 			variant: LogInVariant.SignIn,
-			username: "",
+			login: "",
 			password: "",
 			passwordRepeat: "",
-			usernameError: null,
-			passwordError: null,
-			userAgreementChecked: false
+			isLoginIsInvalid: false,
+			isPasswordIsInvalid: false,
+			isUserAgreementChecked: false
 		};
-		this.getHeader = this.getHeader.bind(this);
-		this.getWelcome = this.getWelcome.bind(this);
-		this.signIn = this.signIn.bind(this);
-		this.signUp = this.signUp.bind(this);
-		this.updateUsernameInput = this.updateUsernameInput.bind(this);
-		this.updatePasswordInput = this.updatePasswordInput.bind(this);
-		this.updatePasswordRepeatInput = this.updatePasswordRepeatInput.bind(this);
-	}
-	
-	getHeader(): string {
-		switch (this.state.variant) {
-			case LogInVariant.SignIn: return "Вход";
-			case LogInVariant.UserAgreement: return "Соглашение";
-			case LogInVariant.SignUp: return "Регистрация";
-		}
-	}
-	
-	getWelcome(): string {
-		switch (this.state.variant) {
-			case LogInVariant.SignIn: return "Здравствуйте";
-			case LogInVariant.SignUp: return "Добро пожаловать";
-			default: return "Добро пожаловать";
-		}
 	}
 	
 	signIn() {
-		let {username, password} = this.state;
-		let isError: boolean = false;
-		if (username.length === 0) {
-			this.setState({usernameError: "Введите логин"});
-			isError = true;
+		let {login, password: password} = this.state;
+		let errorMessageHeader = "Ошибка авторизации";
+		let warnings: string[] = [];
+		let isUsernameError = false;
+		let isPasswordError = false;
+		if (login.length === 0) {
+			warnings = [...warnings, "Введите логин"];
+			isUsernameError = true;
 		}
 		if (password.length === 0) {
-			this.setState({passwordError: "Введите пароль"});
-			isError = true;
+			warnings = [...warnings, "Введите пароль"];
+			isPasswordError = true;
 		}
-		if (!isError) {
+		if (isUsernameError || isPasswordError) {
+			Messager.showErrors(warnings.map(v => ({header: errorMessageHeader, message: v})))
+			this.setState({isLoginIsInvalid: isUsernameError, isPasswordIsInvalid: isPasswordError});
+		} else {
 			this.setState({loading: true});
-			this.props.signIn(username, password);
+			signIn(login, password, 
+				(token: string, userId: string, login: string) => {
+					this.props.setAccount(token, userId, login);
+				},
+				(error: SignInError) => {
+					let showWarning = (message: string) =>  Messager.showError(errorMessageHeader, message);
+					switch(error) {
+						case SignInError.Unauthorized: 
+							showWarning("Неверный логин или пароль");
+							isUsernameError = true;
+							isPasswordError = true;
+							break;
+						case SignInError.Unexpected: 
+							showWarning("Неизвестная ошибка"); 
+							break;
+					}
+					this.setState({loading: false, isLoginIsInvalid: isUsernameError, isPasswordIsInvalid: isPasswordError});
+				});
 		}
 	}
 	
 	signUp() {
-		let {username, password, passwordRepeat} = this.state;
-		let isError: boolean = false;
-		if (username.length === 0) {
-			this.setState({usernameError: "Введите логин"});
-			isError = true;
+		let {login, password, passwordRepeat} = this.state;
+		let errorMessageHeader = "Ошибка регистрации";
+		let warnings: string[] = [];
+		let isUsernameError = false;
+		let isPasswordError = false;
+		if (login.length === 0) {
+			warnings = [...warnings, "Введите логин"];
+			isUsernameError = true;
 		}
 		if (password.length === 0) {
-			this.setState({passwordError: "Введите пароль"});
-			isError = true;
+			warnings = [...warnings, "Введите пароль"];
+			isPasswordError = true;
 		}
 		if (password !== passwordRepeat) {
-			this.setState({passwordError: "Пароли не совпадают"});
-			isError = true;
+			warnings = [...warnings, "Пароли не совпадают"];
+			isPasswordError = true;
 		}
-		if (!isError) {
+		if (isUsernameError || isPasswordError) {
+			Messager.showErrors(warnings.map(v => ({header: errorMessageHeader, message: v})))
+			this.setState({isLoginIsInvalid: isUsernameError, isPasswordIsInvalid: isPasswordError});
+		} else {
 			this.setState({loading: true});
-			this.props.signUp(username, password);
+			signUp(login, password, 
+				(token: string, userId: string, login: string) => {
+					this.props.setAccount(token, userId, login);
+				},
+				(error: SignUpError) => {
+					let showWarning = (message: string) =>  Messager.showError(errorMessageHeader, message);
+					switch(error) {
+						case SignUpError.LoginAlreadyExists: 
+							showWarning("Логин уже используется"); 
+							isUsernameError = true; 
+							break;
+						case SignUpError.LoginNotValid: 
+							showWarning("Этот логин не может быть использован");
+							isUsernameError = true; 
+							break;
+						case SignUpError.PasswordNotValid:
+							showWarning("Этот пароль не может быть использован");
+							isPasswordError = true; 
+							break;
+						case SignUpError.Unexpected:
+							showWarning("Неизвестная ошибка");
+							break;
+					}
+					this.setState({loading: false, isLoginIsInvalid: isUsernameError, isPasswordIsInvalid: isPasswordError});
+				});
 		}
 	}
 	
-	updateUsernameInput(username: string) {
-		this.setState({username, usernameError: null});
+	updateUsernameInput(login: string) {
+		this.setState({login, isLoginIsInvalid: false});
 	}
  	
 	updatePasswordInput(password: string) {
-		this.setState({password, passwordError: null});
+		this.setState({password, isPasswordIsInvalid: false});
 	}
 	
 	updatePasswordRepeatInput(passwordRepeat: string) {
-		this.setState({passwordRepeat, passwordError: null});
+		this.setState({passwordRepeat, isPasswordIsInvalid: false});
+	}
+	
+	swicthToUserAgreement() {
+		this.setState({ variant: LogInVariant.UserAgreement, isLoginIsInvalid: false, isPasswordIsInvalid: false })
+	}
+	
+	swicthToSignUp() {
+		this.setState({isUserAgreementChecked: true}); setTimeout(() => this.setState({ variant: LogInVariant.SignUp }), 500);
 	}
 	
 	componentDidUpdate() {
-		if (this.props.serverError != null) {
-			this.props.clearServerError();
-			this.setState({loading: false});
-		}
 		if (this.props.isLoggedIn) {
 			this.props.closeDialog();
 		}
@@ -145,64 +183,62 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 				visible={ true }
 				style={{ width: '40vw', height: "23vw" }}
 				contentStyle={{ border: "0px", height: "23vw" }}
-				closeOnEscape={ true }
 				showHeader={ false }
 				modal={ true }
 				blockScroll={ true }
-				onHide={ () => { this.props.closeDialog() } }
+				onHide={ () => this.props.closeDialog() }
 				>
-					<Button 
-						id="LogInDialog_CloseButton"
-						icon="pi pi-times" 
-						className="p-button-rounded p-button-secondary" 
-						style={{position:"absolute", top:0, right:0}} 
-						onClick={() => { this.props.closeDialog() }} />
-					{variant == LogInVariant.SignIn ? 
-						<SignInForm 
-							loading={this.state.loading} 
-							usernameError={this.state.usernameError}
-							passwordError={this.state.passwordError}
-							onSignInClick={() => this.signIn()}
-							switchToRegistration={ () => this.setState({ variant: LogInVariant.UserAgreement }) }
-							updateUsernameInput={ this.updateUsernameInput }
-							updatePasswordInput={ this.updatePasswordInput }
-							/> :
-					variant == LogInVariant.UserAgreement ? 
-						<UserAgreementForm 
-							userAgreementChecked={ this.state.userAgreementChecked }
-							onUserAgreementChecked={ 
-							() => { this.setState({userAgreementChecked: true}); setTimeout(() => this.setState({ variant: LogInVariant.SignUp }), 1000) } }/> :
-					variant == LogInVariant.SignUp ? 
-						<SignUpForm 
-							loading={this.state.loading} 
-							usernameError={this.state.usernameError}
-							passwordError={this.state.passwordError}
-							onSignUpClick={() => this.signUp()}
-							updateUsernameInput={ this.updateUsernameInput }
-							updatePasswordInput={ this.updatePasswordInput }
-							updatePasswordRepeatInput={ this.updatePasswordRepeatInput }
-							/> : ""
-					}
+				<Button 
+					id="LogInDialog_CloseButton"
+					icon="pi pi-times" 
+					className="p-button-rounded p-button-secondary" 
+					style={{position:"absolute", top:0, right:0}} 
+					onClick={() => this.props.closeDialog() } />
+				{ 
+				variant == LogInVariant.SignIn ? 
+					<SignInForm 
+						loading={this.state.loading} 
+						isLoginIsInvalid={this.state.isLoginIsInvalid}
+						isPasswordIsInvalid={this.state.isPasswordIsInvalid}
+						onSignInClick={() => this.signIn()}
+						switchToRegistration={ () => this.swicthToUserAgreement() }
+						updateLoginInput={ v => this.updateUsernameInput(v) }
+						updatePasswordInput={ v => this.updatePasswordInput(v) }
+						/> 
+					:
+				variant == LogInVariant.UserAgreement ? 
+					<UserAgreementForm 
+						isUserAgreementChecked={ this.state.isUserAgreementChecked }
+						onUserAgreementChecked={ () => this.swicthToSignUp() }/> 
+					:
+				variant == LogInVariant.SignUp ? 
+					<SignUpForm 
+						loading={this.state.loading} 
+						isLoginIsInvalid={this.state.isLoginIsInvalid}
+						isPasswordIsInvalid={this.state.isPasswordIsInvalid}
+						onSignUpClick={() => this.signUp()}
+						updateLoginInput={ v => this.updateUsernameInput(v) }
+						updatePasswordInput={ v => this.updatePasswordInput(v) }
+						updatePasswordRepeatInput={ v => this.updatePasswordRepeatInput(v) }
+						/> 
+					: ""
+				}
 			</Dialog>
 		</div>
 		);
 	}
 }
 
-import { LogInFormShowAction, LogInFormSetServerErrorAction } from "../../contexts/ui/logInForm/actions";
-import { SignUpAction, SignInAction } from "../../contexts/data/account/actions";
-import { Button } from "primereact/button";
+import { LogInFormShowAction } from "../../contexts/ui/logInForm/actions";
+import { SetAccountAction } from "../../contexts/data/account/actions";
 
 let mapStateToProps = (state: any): ILogInDialogStateProps => ({
-	isLoggedIn: state.data.account != null,
-	serverError: state.ui.logInForm.serverError
+	isLoggedIn: state.data.account != null
 })
 
 let mapDispatchToProps = (dispatch: any): ILogInDialogDispatchProps => ({
-	signUp: (username: string, password: string) => dispatch(SignUpAction(username, password)),
-	signIn: (username: string, password: string) => dispatch(SignInAction(username, password)),
-	closeDialog: () => dispatch(new LogInFormShowAction(false)),
-	clearServerError: () => dispatch(new LogInFormSetServerErrorAction(null))
+	setAccount: (token:string, userId: string, login: string) => dispatch(new SetAccountAction(token, userId, login)),
+	closeDialog: () => dispatch(new LogInFormShowAction(false))
 })
 
 export default connect<ILogInDialogStateProps, ILogInDialogDispatchProps>(mapStateToProps, mapDispatchToProps)(LogInDialog);

@@ -6,11 +6,11 @@ import { Password } from "primereact/password";
 
 interface ISignInFormProps {
 	loading: boolean,
-	usernameError: string | null,
-	passwordError: string | null,
+	isLoginIsInvalid: boolean,
+	isPasswordIsInvalid: boolean,
 	onSignInClick: () => void,
 	switchToRegistration: () => void,
-	updateUsernameInput: (username: string) => void,
+	updateLoginInput: (login: string) => void,
 	updatePasswordInput: (password: string) => void,
 }
 
@@ -20,22 +20,18 @@ let SignInForm = (props: ISignInFormProps) => {
 		<div className="w3-panel">
 			<span>
 				<InputText 
-					id="SignInForm.Username" 
 					type="text" 
-					className={props.usernameError != null ? "p-error" : undefined}
-					tooltip={props.usernameError != null ? props.usernameError : undefined}
+					className={props.isLoginIsInvalid ? "p-error" : undefined}
 					size={30} 
-					onChange={(e) => { props.updateUsernameInput(e.currentTarget.value); }} 
+					onChange={(e) => { props.updateLoginInput(e.currentTarget.value); }} 
 					placeholder="Логин"/>
 			</span>
 		</div>
 		<div className="w3-panel">
 			<span>
 				<Password 
-					id="SignInForm.Password" 
 					type="text" 
-					className={props.passwordError != null ? "p-error" : undefined}
-					tooltip={props.passwordError != null ? props.passwordError : undefined}
+					className={props.isPasswordIsInvalid ? "p-error" : undefined}
 					size={30} 
 					feedback={false}
 					onChange={(e) => { props.updatePasswordInput(e.currentTarget.value); }} 

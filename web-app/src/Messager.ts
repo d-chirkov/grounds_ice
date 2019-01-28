@@ -1,17 +1,22 @@
-class Messager {
+export interface IMessage {
+	header: string,
+	message: string
+}
+
+export class Messager {
 	static growl_: any
 	
-	setGrowl(growl: any) {
+	static setGrowl(growl: any) {
 		Messager.growl_ = growl;
 	}
 	
-	showWarning(header: string, message: string) {
+	static showErrors(messages: IMessage[]) {
 		if (Messager.growl_ != undefined) {
-			Messager.growl_.show({severity: 'error', summary: header, detail: message });
+			Messager.growl_.show(messages.map(v => ({severity: 'error', summary: v.header, detail: v.message})));
 		}
 	}
+	
+	static showError(header: string, message: string) {
+		this.showErrors([{header, message}]);
+	}
 }
-
-let messager: Messager = new Messager();
-
-export default messager;

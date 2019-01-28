@@ -31,6 +31,9 @@ let updateAccount = (state: IAccount | null | undefined, action: AccountAction):
 				token: action.userName
 			};
 		}
+		case AccountActionType.ACCOUNT_UNSET: {
+			return null;
+		}
 		default: {
 			return { ...state };
 		}

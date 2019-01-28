@@ -1,67 +1,11 @@
-// Public interface
-
-type onSuccessCallback = (token: string, userId: string, login: string) => void;
-type onSignUpSuccessCallback = onSuccessCallback;
-type onSignInSuccessCallback = onSuccessCallback;
-
-export enum SignUpError {
-	Unexpected,
-	LoginAlreadyExists,
-	LoginNotValid,
-	PasswordNotValid,
-}
-
-type onSignUpFailCallback = (error: SignUpError) => void;
-
-export enum SignInError {
-	Unexpected,
-	Unauthorized,
-}
-
-type onSignInFailCallback = (error: SignInError) => void;
-
-export function signUp(login: string, password: string, onSuccess: onSignUpSuccessCallback, onFail: onSignUpFailCallback) {
-	let account = new AccountController();
-	account.Register({Login: login, Password: password})
-		.then(() => account.GetToken(login, password))
-		.then(() => account.GetAccount())
-		.then(value => onSuccess(account.token!, value.Payload!.UserId, value.Payload!.Login))
-		.catch(ex => {
-			if ("Type" in ex) {
-				switch(ex.Type) {
-					case ValueType.LoginAlreadyExists: onFail(SignUpError.LoginAlreadyExists); break;
-					case ValueType.LoginNotValid: onFail(SignUpError.LoginNotValid); break;
-					case ValueType.PasswordNotValid: onFail(SignUpError.PasswordNotValid); break;
-				}
-			}
-			onFail(SignUpError.Unexpected);
-		});
-}
-
-export function signIn(login: string, password: string, onSuccess: onSignInSuccessCallback, onFail: onSignInFailCallback) {
-	let account = new AccountController();
-	account.GetToken(login, password)
-		.then(() => account.GetAccount())
-		.then(value => onSuccess(account.token!, value.Payload!.UserId, value.Payload!.Login))
-		.catch(ex => {
-			if ("isUnauthorized" in ex) {
-				onFail(SignInError.Unauthorized);
-			} else {
-				onFail(SignInError.Unexpected);
-			}
-		});
-}
-
-// Remote AccountController API
-
 import fetch from "isomorphic-fetch";
-import { serverAddress } from "./urls";
+import { serverAddress } from "../urls";
 
 export let fetTokenUrl = serverAddress + "token";
 export let registerUrl = serverAddress + "api/account/register";
 export let getAccountUrl = serverAddress + "api/account/get_account";
 
-enum ValueType {
+export enum ValueType {
 	Success = 1000,
 	LoginAlreadyExists = 2000,
 	LoginNotValid = 4001,
@@ -75,7 +19,7 @@ interface AccountException {
 	valueType?: ValueType
 }
 
-interface Credintials {
+interface LoginAndPassword {
 	Login: string | null,
 	Password: string | null
 }
@@ -95,20 +39,20 @@ let initialValue: Value = {
 	Payload: null
 }
 
-class AccountController {
+export class AccountController {
 	
 	public token: string | null = null;
 	
 	// Remote API functions
 	
-	public Register(credentials: Credintials): Promise<Value> {
+	public Register(dto: LoginAndPassword): Promise<Value> {
 		let request: RequestInit = {
 			method: "Post",
 			headers: {
 				"Accept": "application/json",
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify(credentials)
+			body: JSON.stringify(dto)
 		}
 		return fetch(registerUrl, request)
 			.then(res => this.getValueFrom(res))

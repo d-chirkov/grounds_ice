@@ -8,12 +8,6 @@ let updateLogInForm = (state: ILogInForm = initialLogInForm, action: LogInFormAc
 			visible: action.visible
 		};
 	}
-	if (action.type == LogInFormActionType.LOGIN_SET_SERVER_ERROR) {
-		return {
-			...state,
-			serverError: action.serverError
-		};
-	}
 	return {...state};
 }
 

@@ -7,7 +7,7 @@ import { ScrollPanel } from "primereact/scrollpanel";
 
 interface IUserAgreementFormProps {
 	onUserAgreementChecked: () => void,
-	userAgreementChecked: boolean
+	isUserAgreementChecked: boolean
 }
 
 let UserAgreementForm = (props: IUserAgreementFormProps) => {
@@ -23,7 +23,7 @@ let UserAgreementForm = (props: IUserAgreementFormProps) => {
 			</ScrollPanel>
 		</div>
 		<div className="w3-panel">
-			<Checkbox inputId="UserAgreementForm.Agree" onChange={() => props.onUserAgreementChecked()} checked={props.userAgreementChecked} disabled={props.userAgreementChecked}></Checkbox>
+			<Checkbox inputId="UserAgreementForm.Agree" onChange={() => props.onUserAgreementChecked()} checked={props.isUserAgreementChecked} disabled={props.isUserAgreementChecked}></Checkbox>
 			<label htmlFor="UserAgreementForm.Agree" className="p-checkbox-label">Согласен</label>
 		</div>
 	</div>)

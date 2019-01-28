@@ -17,12 +17,12 @@ namespace GroundsIce.WebApi.Providers
         public OAuthProvider(string publicClientId, IAccountRepository accountRepository)
         {
             _publicClientId = publicClientId ?? throw new ArgumentNullException("publicClientId");
-            _accountRepository = accountRepository ?? throw new ArgumentNullException("publicClientId");
+            _accountRepository = accountRepository ?? throw new ArgumentNullException("accountRepository");
         }
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
-            context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
+			context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
             Account account = await _accountRepository.GetAccountAsync(context.UserName, context.Password);
             if (account == null)
             {

@@ -6,12 +6,12 @@ import { Password } from "primereact/password";
 
 interface ISignUpFormProps {
 	loading: boolean,
-	usernameError: string | null,
-	passwordError: string | null,
+	isLoginIsInvalid: boolean,
+	isPasswordIsInvalid: boolean,
 	onSignUpClick: () => void,
-	updateUsernameInput: (username: string) => void,
+	updateLoginInput: (login: string) => void,
 	updatePasswordInput: (password: string) => void,
-	updatePasswordRepeatInput: (password: string) => void,
+	updatePasswordRepeatInput: (passwordRepeat: string) => void,
 }
 
 let SignUpForm = (props: ISignUpFormProps) => {
@@ -20,22 +20,18 @@ let SignUpForm = (props: ISignUpFormProps) => {
 		<div className="w3-panel">
 			<span>
 				<InputText 
-					id="SignInForm.Username" 
 					type="text" 
-					className={props.usernameError != null ? "p-error" : undefined}
-					tooltip={props.usernameError != null ? props.usernameError : undefined}
+					className={props.isLoginIsInvalid ? "p-error" : undefined}
 					size={30} 
-					onChange={(e) => { props.updateUsernameInput(e.currentTarget.value); }} 
+					onChange={(e) => { props.updateLoginInput(e.currentTarget.value); }} 
 					placeholder="Логин"/>
 			</span>
 		</div>
 		<div className="w3-panel">
 			<span>
 				<Password 
-					id="SignInForm.Password" 
 					type="text" 
-					className={props.passwordError != null ? "p-error" : undefined}
-					tooltip={props.passwordError ? props.passwordError : undefined}
+					className={props.isPasswordIsInvalid ? "p-error" : undefined}
 					size={30} 
 					feedback={false}
 					onChange={(e) => { props.updatePasswordInput(e.currentTarget.value); }} 
@@ -46,14 +42,12 @@ let SignUpForm = (props: ISignUpFormProps) => {
 		<div className="w3-panel">
 			<span>
 				<Password 
-					id="SignInForm.Password" 
 					type="text" 
-					className={props.passwordError ? "p-error" : undefined}
+					className={props.isPasswordIsInvalid ? "p-error" : undefined}
 					size={30} 
 					feedback={false}
 					onChange={(e) => { props.updatePasswordRepeatInput(e.currentTarget.value); }} 
-					placeholder="Повторите пароль"
-					value={props.passwordError != null ? "" : undefined}/>
+					placeholder="Повторите пароль"/>
 			</span>
 		</div>
 		<div className="w3-panel">

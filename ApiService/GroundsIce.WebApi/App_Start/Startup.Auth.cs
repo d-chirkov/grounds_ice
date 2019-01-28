@@ -18,7 +18,7 @@ namespace GroundsIce.WebApi
             {
                 TokenEndpointPath = new PathString("/token"),
                 Provider = new OAuthProvider(publicClientId, accountRepository),
-                //AuthorizeEndpointPath = new PathString("/api/account/login"),
+                AuthorizeEndpointPath = new PathString("/api/account/login"),
                 AccessTokenExpireTimeSpan = TimeSpan.FromDays(14),
                 // In production mode set AllowInsecureHttp = false
                 AllowInsecureHttp = true
