@@ -83,14 +83,14 @@ namespace GroundsIce.WebApi.Controllers.Account
         public async Task<Value> ChangeLogin(DTO.NewLogin dto)
         {
 			string newLogin = dto?.Login ?? throw new ArgumentNullException("Login");
-			return await ChangeCredentials(async (long userId) =>
-			{
-				 return
-					 !await IsValueValidated(newLogin, _loginValidators) ? ValueType.LoginNotValid :
-					 !await _accountRepository.ChangeLoginAsync(userId, newLogin) ? ValueType.LoginAlreadyExists :
-					 ValueType.Success;
-			});
-        }
+			ValueType result;
+			long userId = GetUserIdFromRequest();
+			result = 
+				!await IsValueValidated(newLogin, _loginValidators) ? ValueType.LoginNotValid :
+				!await _accountRepository.ChangeLoginAsync(userId, newLogin) ? ValueType.LoginAlreadyExists :
+				ValueType.Success;
+			return new Value((int)result);
+		}
 
         [Route("change_password")]
         [HttpPost]
@@ -98,35 +98,18 @@ namespace GroundsIce.WebApi.Controllers.Account
         {
 			string oldPassword = dto?.OldPassword ?? throw new ArgumentNullException("OldPassword");
 			string newPassword = dto?.NewPassword ?? throw new ArgumentNullException("NewPassword");
-			return await ChangeCredentials(async (long userId) =>
-			{
-				if (!await IsValueValidated(newPassword, _passwordValidators))
-				{
-					return ValueType.PasswordNotValid;
-				}
-				bool changed = await _accountRepository.ChangePasswordAsync(userId, oldPassword, newPassword);
-				return changed ? ValueType.Success : ValueType.OldPasswordNotValid;
-			});
+			ValueType result;
+			long userId = GetUserIdFromRequest();
+			result =
+				!await IsValueValidated(newPassword, _passwordValidators) ? ValueType.PasswordNotValid :
+				!await _accountRepository.ChangePasswordAsync(userId, oldPassword, newPassword) ? ValueType.OldPasswordNotValid :
+				ValueType.Success;
+			return new Value((int)result);
 		}
 
 		private long GetUserIdFromRequest()
 		{
 			return (long)(Request?.Properties["USER_ID"] ?? throw new ArgumentNullException("USER_ID"));
-		}
-
-		private async Task<Value> ChangeCredentials(Func<long, Task<ValueType>> change)
-		{
-			long userId = GetUserIdFromRequest();
-			ValueType result;
-			try
-			{
-				result = await change(userId);
-			}
-			catch (UserIdNotFoundException)
-			{
-				result = ValueType.AccountNotExists;
-			}
-			return new Value((int)result);
 		}
 
 		private async Task<bool> IsValueValidated(string value, IEnumerable<IStringValidator> validators)

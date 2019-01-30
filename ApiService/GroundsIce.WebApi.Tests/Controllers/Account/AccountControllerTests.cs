@@ -59,7 +59,7 @@ namespace GroundsIce.WebApi.Controllers.Account.Tests
                 .ReturnsAsync(new Account(_validUserId, _validLogin));
             _accountRepositoryMock
                 .Setup(e => e.ChangeLoginAsync(It.Is<long>(v => v != _validUserId), It.IsAny<string>()))
-				.Throws(new UserIdNotFoundException());
+				.ThrowsAsync(new Exception());
             _accountRepositoryMock
                 .Setup(e => e.ChangeLoginAsync(_validUserId, _validNewLogin))
                 .ReturnsAsync(true);
@@ -68,7 +68,7 @@ namespace GroundsIce.WebApi.Controllers.Account.Tests
 				.ReturnsAsync(false);
             _accountRepositoryMock
                 .Setup(e => e.ChangePasswordAsync(It.Is<long>(v => v != _validUserId), It.IsAny<string>(), It.IsAny<string>()))
-                .Throws(new UserIdNotFoundException());
+                .ReturnsAsync(false);
 			_accountRepositoryMock
 				.Setup(e => e.ChangePasswordAsync(_validUserId, It.Is<string>(v => v != _validPassword), It.IsAny<string>()))
 				.ReturnsAsync(false);
@@ -258,32 +258,37 @@ namespace GroundsIce.WebApi.Controllers.Account.Tests
 			Assert.AreEqual(value.Payload.UserId, _validUserId);
 		}
 
-		private void _ReturnsAccountNotExistsWithNullPayload_When_RequestedAccountNotExistsInRepo(Func<Value> func)
+		private void _ReturnsAccountControllerValueType_When_RequestedAccountNotExistsInRepo(
+			Func<Value> func,
+			AccountController.ValueType expectedValueType)
 		{
 			SetUserIdToRequest(_notExistingUserId);
 			Value value = func();
-			Assert.AreEqual(value.Type, (int)AccountController.ValueType.AccountNotExists);
+			Assert.AreEqual(value.Type, (int)expectedValueType);
 			Assert.IsNull(value.Payload);
 		}
 
 		[Test]
 		public void GetAccount_ReturnsAccountNotExistsWithNullPayload_When_RequestedAccountNotExistsInRepo()
 		{
-			_ReturnsAccountNotExistsWithNullPayload_When_RequestedAccountNotExistsInRepo(() => _accountController.GetAccount().Result);
+			_ReturnsAccountControllerValueType_When_RequestedAccountNotExistsInRepo(
+				() => _accountController.GetAccount().Result, 
+				AccountController.ValueType.AccountNotExists);
 		}
 
 		[Test]
-		public void ChangeLogin_ReturnsAccountNotExistsWithNullAccount_When_RequestedAccountNotExistsInRepo()
+		public void ChangeLogin_ThrowsException_When_RequestedAccountNotExistsInRepo()
 		{
-			_ReturnsAccountNotExistsWithNullPayload_When_RequestedAccountNotExistsInRepo(
-				() => _accountController.ChangeLogin(new DTO.NewLogin(_validNewLogin)).Result);
+			SetUserIdToRequest(_notExistingUserId);
+			Assert.ThrowsAsync<Exception>(() => _accountController.ChangeLogin(new DTO.NewLogin(_validNewLogin)));
 		}
 
 		[Test]
-		public void ChangePassword_ReturnsAccountNotExistsWithNullAccount_When_RequestedAccountNotExistsInRepo()
+		public void ChangePassword_ReturnsAccountOldPasswordNotValid_When_RequestedAccountNotExistsInRepo()
 		{
-			_ReturnsAccountNotExistsWithNullPayload_When_RequestedAccountNotExistsInRepo(
-				() => _accountController.ChangePassword(new DTO.OldAndNewPasswords("a", "b")).Result);
+			_ReturnsAccountControllerValueType_When_RequestedAccountNotExistsInRepo(
+				() => _accountController.ChangePassword(new DTO.OldAndNewPasswords("a", "b")).Result,
+				AccountController.ValueType.OldPasswordNotValid);
 		}
 
 		[Test]

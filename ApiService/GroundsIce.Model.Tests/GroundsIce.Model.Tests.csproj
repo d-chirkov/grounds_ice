@@ -71,7 +71,6 @@
     <Compile Include="Entities\AccountTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\DbAccountRepositoryTests.cs" />
-    <Compile Include="Repositories\InMemoryAccountRepositoryTests.cs" />
     <Compile Include="Validators\Common\LengthValidatorTests.cs" />
   </ItemGroup>
   <ItemGroup>

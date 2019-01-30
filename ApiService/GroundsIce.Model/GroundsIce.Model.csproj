@@ -54,7 +54,6 @@
     <Compile Include="ConnectionFactories\SqlConnectionFactory.cs" />
     <Compile Include="Entities\Account.cs" />
     <Compile Include="Repositories\DbAccountRepository.cs" />
-    <Compile Include="Repositories\InMemoryAccountRepository.cs" />
     <Compile Include="Validators\Common\LengthValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

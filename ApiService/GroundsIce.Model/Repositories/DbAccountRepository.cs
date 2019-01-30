@@ -77,67 +77,45 @@ namespace GroundsIce.Model.Repositories
 			using (var connection = await _connectionFactory.GetConnectionAsync())
 			{
 				var accounts = await connection.QueryAsync<DbAccount>(sql, sqlParams);
-				if (accounts.Count() == 0)
-				{
-					return null;
-				}
-				else if (accounts.Count() > 1)
-				{
-					throw new DbAccountRepositoryException("Multiple accounts were found by login and password");
-				}
-				else
-				{
-					DbAccount dbAccount = accounts.FirstOrDefault();
-					if (dbAccount == null)
-					{
-						throw new DbAccountRepositoryException("Null account was returned");
-					}
-					return new Account(dbAccount.UserId, dbAccount.Login);
-				}
+				DbAccount dbAccount = 
+					accounts.Count() == 0 ? null :
+					accounts.Count() > 1 ? throw new DbAccountRepositoryException("Multiple accounts were found by login and password") :
+					accounts.FirstOrDefault() ?? throw new DbAccountRepositoryException("Null account was returned");
+				return dbAccount != null ? new Account(dbAccount.UserId, dbAccount.Login) : null;
 			}
 		}
 
 		public async Task<bool> ChangeLoginAsync(long userId, string newLogin)
 		{
-			try
+			if (userId < 0) throw new ArgumentOutOfRangeException("userId");
+			if (newLogin == null) throw new ArgumentNullException("newLogin");
+			using (var connection = await _connectionFactory.GetConnectionAsync())
 			{
-				string sqlQuery = $"UPDATE {_tableName} SET Login = @NewLogin WHERE UserId = @UserId";
-				bool changed = await ChangeCredentialsAsync(userId, sqlQuery, new { UserId = userId, NewLogin = newLogin });
-				return changed ? true : throw new DbAccountRepositoryException($"Couldn't change login without conflicts");
-			}
-			catch (SqlException ex) when(ex.Number == 2627 || ex.Number == 2601)
-			{
-				return false;
+				try
+				{
+					string sqlQuery = $"UPDATE {_tableName} SET Login = @NewLogin WHERE UserId = @UserId";
+					int changedRows = await connection.ExecuteAsync(sqlQuery, new { UserId = userId, NewLogin = newLogin });
+					return changedRows == 1 ? true : throw new DbAccountRepositoryException($"Couldn't change login without conflicts");
+				}
+				catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
+				{
+					return false;
+				}
 			}
 		}
 
 		public async Task<bool> ChangePasswordAsync(long userId, string oldPassword, string newPassword)
 		{
+			if (userId < 0) throw new ArgumentOutOfRangeException("userId");
+			if (oldPassword == null) throw new ArgumentNullException("oldPassword");
+			if (newPassword == null) throw new ArgumentNullException("newPassword");
 			string sqlQuery = $"UPDATE {_tableName} SET Password = @NewPassword WHERE UserId = @UserId AND Password = @OldPassword";
-			return await ChangeCredentialsAsync(userId, sqlQuery, new { UserId = userId, OldPassword = oldPassword, NewPassword = newPassword });
-		}
-
-		private async Task<bool> ChangeCredentialsAsync<T>(long userId, string sql, T sqlParams)
-		{
-			//TODO: Use stored procedures with transactions
 			using (var connection = await _connectionFactory.GetConnectionAsync())
 			{
-				int accountsUpdated = await connection.ExecuteAsync(sql, sqlParams);
-				if (accountsUpdated == 1)
-				{
-					return true;
-				}
-				if (accountsUpdated == 0)
-				{
-					var accountWithId = await connection.GetAsync<DbAccount>(userId);
-					return accountWithId != null ? false : throw new UserIdNotFoundException();
-				}
-				else
-				{
-					throw new DbAccountRepositoryException($"Unpexpected accounts count were found when changing credentials: {accountsUpdated}");
-				}
+				int changedRows = await connection.ExecuteAsync(sqlQuery, 
+					new { UserId = userId, OldPassword = oldPassword, NewPassword = newPassword });
+				return changedRows == 1;
 			}
 		}
-
 	}
 }
