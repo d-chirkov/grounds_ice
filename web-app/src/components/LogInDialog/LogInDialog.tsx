@@ -241,4 +241,6 @@ let mapDispatchToProps = (dispatch: any): ILogInDialogDispatchProps => ({
 	closeDialog: () => dispatch(new LogInFormShowAction(false))
 })
 
-export default connect<ILogInDialogStateProps, ILogInDialogDispatchProps>(mapStateToProps, mapDispatchToProps)(LogInDialog);
+let LogInDialogHOC = connect<ILogInDialogStateProps, ILogInDialogDispatchProps>(mapStateToProps, mapDispatchToProps)(LogInDialog);
+
+export { LogInDialogHOC as LogInDialog };

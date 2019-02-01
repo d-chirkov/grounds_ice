@@ -1,5 +1,7 @@
-import React, { CSSProperties } from "react";
+import React from "react";
 import { connect } from "react-redux";
+import { HashRouter, Route, Switch, RouteComponentProps, withRouter } from "react-router-dom";
+
 import { IRootState } from "../contexts/model";
 import { UnsetAccountAction } from "../contexts/data/account/actions";
 import { LogInFormShowAction } from "../contexts/ui/logInForm/actions";
@@ -8,13 +10,14 @@ import { Button } from "primereact/button";
 import { Growl } from "primereact/growl";
 import { TieredMenu } from "primereact/tieredmenu";
 
-import LogInDialog from "./LogInDialog/LogInDialog";
+import { LogInDialog } from "./LogInDialog/LogInDialog";
 
 import { Messager } from "../Messager";
 
 interface IHeaderMenuState {
 	isLoggedIn: boolean,
-	userName: string | null,
+	login: string | null,
+	userId: string | null,
 	isLogInDialogVisible: boolean,
 }
 
@@ -24,14 +27,14 @@ interface IHeaderMenuDispatch {
 	logOut: () => void
 }
 
-interface IHeaderMenuProps extends IHeaderMenuState, IHeaderMenuDispatch {
+interface IHeaderMenuProps extends IHeaderMenuState, IHeaderMenuDispatch, RouteComponentProps {
 }
 
 let HeaderMenu = (props: IHeaderMenuProps) => {
-	let { isLogInDialogVisible, isLoggedIn, userName, showLogInDialog, logOut } = props;
+	let { isLogInDialogVisible, isLoggedIn, login, userId, showLogInDialog, logOut, history } = props;
 	let popupHeaderMenu: TieredMenu | null = null;
 	let popupHeaderMenuModel = [
-		{ label: "Профиль", command: (e:any) => popupHeaderMenu!.toggle(e) }, 
+		{ label: "Профиль", command: (e:any) => { popupHeaderMenu!.toggle(e); history.push(`/profile/id${userId}`); } }, 
 		{ separator: true },
 		{ label: "Выйти", command: (e:any) => {popupHeaderMenu!.toggle(e); logOut();} }];
 	return (<div>
@@ -41,26 +44,30 @@ let HeaderMenu = (props: IHeaderMenuProps) => {
 					<Button className="w3-amber" label="Вход и регистрация" onClick={ showLogInDialog } /> :
 					<div>
 						<TieredMenu style={{marginTop:"12px"}} model={popupHeaderMenuModel} popup={true} ref={el => popupHeaderMenu = el} />
-						<Button label={userName!} onClick={ e => popupHeaderMenu!.toggle(e) } />
+						<Button label={login!} onClick={ e => popupHeaderMenu!.toggle(e) } />
 					</div>
 				}
 			</div>
 		</Toolbar>
 		<Growl ref={(el) => Messager.setGrowl(el)} style={{marginTop:"50px"}} />
 		{isLogInDialogVisible && <LogInDialog />}
+		
 	</div>)
 }
 
 let mapStateToProps = (state: IRootState): IHeaderMenuState => ({
 	isLoggedIn: state.data.account != null,
-	userName: state.data.account != null ? state.data.account.username : null,
+	login: state.data.account != null ? state.data.account.login : null,
+	userId: state.data.account != null ? state.data.account.userId : null,
 	isLogInDialogVisible: state.ui.logInForm.visible,
 })
 
 let mapDispatchToProps = (dispatch: any): IHeaderMenuDispatch => ({
 	showLogInDialog: () => dispatch(new LogInFormShowAction(true)),
 	closeLogInDialog: () => dispatch(new LogInFormShowAction(false)),
-	logOut:() => dispatch(new UnsetAccountAction()),
+	logOut:() => dispatch(new UnsetAccountAction())
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(HeaderMenu);
+let HeaderMenuHOC = withRouter(connect(mapStateToProps, mapDispatchToProps)(HeaderMenu));
+
+export { HeaderMenuHOC as HeaderMenu };
