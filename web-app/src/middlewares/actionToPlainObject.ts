@@ -11,8 +11,9 @@ const actionToPlainObject = (store: any) => (next: any) => (action: Action) => {
 function isObjectLike(val: any): val is {} {
 	return isPresent(val) && typeof val === 'object'
 }
+
 function isPresent(obj: any) {
 	return obj !== undefined && obj !== null
 }
 
-export default actionToPlainObject;
+export { actionToPlainObject };

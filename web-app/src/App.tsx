@@ -7,7 +7,7 @@ import { ProfileView } from "./components/Profile/ProfileView";
 let App = () =>
 	<div>
 		<HashRouter>
-			<div className="main w3-light-grey">
+			<div className="main">
 				<HeaderMenu />
 				<Switch>
 					<Route path="/profile/id:userId" component={ProfileView} />

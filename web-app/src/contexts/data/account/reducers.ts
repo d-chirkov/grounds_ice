@@ -6,7 +6,7 @@ let updateAccount = (state: IAccount | null | undefined, action: AccountAction):
 		return {
 			token: action.token,
 			userId: action.userId,
-			login: action.userName
+			login: action.login
 		};
 	}
 	if (state === null || state === undefined) {
@@ -25,10 +25,10 @@ let updateAccount = (state: IAccount | null | undefined, action: AccountAction):
 				token: action.userId
 			};
 		}
-		case AccountActionType.ACCOUNT_SET_USERNAME: {
+		case AccountActionType.ACCOUNT_SET_LOGIN: {
 			return {
 				...state,
-				token: action.userName
+				token: action.login
 			};
 		}
 		case AccountActionType.ACCOUNT_UNSET: {

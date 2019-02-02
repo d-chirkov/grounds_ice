@@ -1,5 +1,5 @@
 import React from "react";
-import { IProfileInfo } from "./ProfileView";
+import { IProfileInfo, IProfileInfoEntry } from "./ProfileView";
 import { Link } from "react-router-dom";
 
 
@@ -11,34 +11,36 @@ interface IProfileInfoViewProps {
 
 export let ProfileInfoView = (props: IProfileInfoViewProps) => {
 	let {userId, isOwnProfileInfo, profileInfo} = props;
+	console.log(profileInfo);
 	return (
 		<div>
 			{isOwnProfileInfo && 
-				<Link to={`/profile/id${userId}/edit`} style={{position:"absolute", top:5, right:15}}>
+				<Link to={`/profile/id${userId}/edit`} style={{float:"right", position:"relative", top:2, right:7}} >
 					Изменить
 				</Link>
 			}
-			{profileInfo.surname && <ProfileInfoEntryView field="Фамилия" value={profileInfo.surname} />}
-			{profileInfo.firstname && <ProfileInfoEntryView field="Имя" value={profileInfo.firstname} />}
-			{profileInfo.middlename && <ProfileInfoEntryView field="Отчество" value={profileInfo.middlename} />}
-			{profileInfo.location && <ProfileInfoEntryView field="Местоположение" value={profileInfo.location} />}
+			{profileInfo.surname && <ProfileInfoEntryView fieldName="Фамилия" entry={profileInfo.surname} />}
+			{profileInfo.firstname && <ProfileInfoEntryView fieldName="Имя" entry={profileInfo.firstname} />}
+			{profileInfo.middlename && <ProfileInfoEntryView fieldName="Отчество" entry={profileInfo.middlename} />}
+			{profileInfo.location && <ProfileInfoEntryView fieldName="Местоположение" entry={profileInfo.location} />}
+			{profileInfo.description && <ProfileInfoEntryView fieldName="Описание" entry={profileInfo.description} />}
 		</div>
 	);
 }
 
 interface IProfileInfoEntryViewProps {
-	field: string
-	value: string
+	fieldName: string
+	entry: IProfileInfoEntry
 }
 
 let ProfileInfoEntryView = (props: IProfileInfoEntryViewProps) => {
-	let {field, value} = props;
+	let {fieldName, entry} = props;
 	return (<div>
-		<div style={{width:"150px", float:"left", height:"30px"}}>
-			{`${field}:`}
+		<div className="w3-text-blue-grey" style={{width:"150px", float:"left", height:"30px"}}>
+			{`${fieldName}:`}
 		</div>
 		<div style={{height:"30px"}}>
-			{value}
+			{entry.value}
 		</div>
 	</div>);
 }

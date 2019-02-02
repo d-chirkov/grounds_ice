@@ -4,7 +4,7 @@ import { Route, Switch, RouteComponentProps } from "react-router-dom";
 import { IRootState } from "../../contexts/model";
 
 import { ProfileInfoView } from "./ProfileInfoView";
-import { ProfileEditView } from "./ProfileEditView";
+import { ProfileEditView } from "./ProfileEdit/ProfileEditView";
 
 import { Card } from 'primereact/card';
 
@@ -36,11 +36,16 @@ interface IProfile {
 }
 
 export interface IProfileInfo {
-	firstname: string | null,
-	surname: string | null,
-	middlename: string | null,
-	location: string | null,
-	description: string | null,
+	firstname: IProfileInfoEntry | null,
+	surname: IProfileInfoEntry | null,
+	middlename: IProfileInfoEntry | null,
+	location: IProfileInfoEntry | null,
+	description: IProfileInfoEntry | null,
+}
+
+export interface IProfileInfoEntry {
+	value: string,
+	public: boolean,
 }
 
 let initialProfileInfo: IProfileInfo = {
@@ -73,38 +78,54 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 			//TODO: loading profile from api service
 			let profileInfo: IProfileInfo = {
 				...initialProfileInfo,
-				firstname: "Иван",
-				middlename: "Иваныч",
-				location: "Светлый Путь Ленина"
+				firstname: {value: "Иван", public: true},
+				middlename: {value: "Иваныч", public: true},
+				location: {value: "Светлый Путь Ленина", public: false}
 			}
 			this.setState({ loading: false, profile: {login: "ivan", avatar: null, profileInfo} });
 		}, 1000);
 	}
 	
+	private updateLocalProfileInfo(newValue: IProfileInfo) {
+		if (this.state.profile != null) {
+			for (var k in newValue) {
+				if (newValue.hasOwnProperty(k) && (newValue as any)[k] != null && (newValue as any)[k].value == "") {
+					(newValue as any)[k] = null;
+				}
+			}
+			let newProfile = {...this.state.profile, profileInfo: newValue};
+			this.setState({profile: newProfile});
+		}
+	}
+	
 	render() {
 		let {profile} = this.state;
-		return (<div className="w3-container" style={{margin: "auto", width:"800px", height:"100vh"}}>{
+		return (<div style={{margin: "auto", width:"850px", bottom:0, top:0}}>{
 			this.state.loading ? <p>LOADING</p> :
 			profile == null ? <p>ERROR</p> :
-			<div style={{position: "relative"}}>
-				<h3 className="w3-text-blue-grey">{this.props.isOwnProfile ? 
+			
+			<div>
+				<h3 className="w3-text-blue-grey" style={{marginLeft:"25px"}}>{this.props.isOwnProfile ? 
 					"МОЙ ПРОФИЛЬ" : 
 					`ПРОФИЛЬ ${profile.login}(id${this.state.userId})`}</h3>
-				<Card style={{position: "absolute", width: "250px", height: "250px", left: 0}}>
+				<Card style={{margin:"25px", marginTop:0, float:"left", width: "250px", height: "250px", left: 0}}>
 					АВАТАРКА
 				</Card>
-				<Card style={{position: "absolute", width: "500px", right: 0}}>
+				<Card style={{margin:"25px", marginTop:0, float:"left", width: "500px", right: 0}}>
 					<Switch>
+						{this.props.isOwnProfile && <Route 
+							path={`/profile/id${this.state.userId}/edit`} 
+							component={(p: any) => <ProfileEditView 
+								userId={this.state.userId}
+								profileInfo={profile!.profileInfo}
+								updateLocalProfileInfo={(v: IProfileInfo) => this.updateLocalProfileInfo(v)} />} 
+						/>}
 						<Route 
-							exact path={`/profile/id${this.state.userId}`} 
+							path={`/profile/id${this.state.userId}`} 
 							component={(p: any) => <ProfileInfoView {...p} 
+								userId={this.state.userId}  
 								profileInfo={profile!.profileInfo} 
-								isOwnProfileInfo={this.props.isOwnProfile} 
-								userId={this.state.userId} />} 
-						/>
-						<Route 
-							exact path={`/profile/id${this.state.userId}/edit`} 
-							component={(p: any) => <ProfileEditView/>} 
+								isOwnProfileInfo={this.props.isOwnProfile} />} 
 						/>
 					</Switch>
 				</Card>
@@ -112,9 +133,6 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 		}</div>);
 	}
 }
-
-//<Route exact path={`/profile/${this.state.userId}/edit`} component={} />
-// to={`/profile/id${this.state.userId}/edit`}
 
 let mapStateToProps = (state: IRootState, ownProps: IProfileViewProps): IProfileViewMapProps => ({
 	isOwnProfile: state.data.account !== null && state.data.account.userId == ownProps.match.params.userId.toString(),
