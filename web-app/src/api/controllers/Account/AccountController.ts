@@ -1,9 +1,13 @@
 import fetch from "isomorphic-fetch";
-import { serverAddress } from "../urls";
+import { serverAddress } from "../../urls";
+import { Value, getInitialValue } from "../../DTO/Value";
+import * as DTO from "./DTO";
 
-export let fetTokenUrl = serverAddress + "token";
-export let registerUrl = serverAddress + "api/account/register";
-export let getAccountUrl = serverAddress + "api/account/get_account";
+let fetTokenUrl = serverAddress + "token";
+let registerUrl = serverAddress + "api/account/register";
+let getAccountUrl = serverAddress + "api/account/get_account";
+let changeLoginUrl = serverAddress + "api/account/change_login";
+let changePasswordUrl = serverAddress + "api/account/change_password";
 
 export enum ValueType {
 	Success = 1000,
@@ -11,17 +15,13 @@ export enum ValueType {
 	LoginNotValid = 4001,
 	PasswordNotValid = 4002,
 	AccountNotExists = 5000,
+	OldPasswordNotValid = 6000,
 }
 
 interface AccountException {
-	isUnauthorized?: boolean,
-	isUnexpected?: boolean,
+	isUnauthorized?: boolean
+	isUnexpected?: boolean
 	valueType?: ValueType
-}
-
-interface LoginAndPassword {
-	Login: string | null,
-	Password: string | null
 }
 
 interface Account {
@@ -29,51 +29,54 @@ interface Account {
 	Login: string
 }
 
-interface Value {
-	Type: ValueType, 
-	Payload: Account | null
-}
-
-let initialValue: Value = {
-	Type: 0,
-	Payload: null
-}
-
 export class AccountController {
+	
+	constructor(token: string | null = null) {
+		this.token = token;
+		console.log(token);
+	}
 	
 	public token: string | null = null;
 	
 	// Remote API functions
 	
-	public Register(dto: LoginAndPassword): Promise<Value> {
-		let request: RequestInit = {
-			method: "Post",
-			headers: {
-				"Accept": "application/json",
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(dto)
-		}
-		return fetch(registerUrl, request)
-			.then(res => this.getValueFrom(res))
-			.then(value => this.checkValueSuccess(value));
+	public Register(dto: DTO.LoginAndPassword): Promise<Value> {
+		return this.Interact(registerUrl, false, dto);
 	}
 	
-	public GetAccount(): Promise<Value> {
-		if (this.token == null) {
+	public GetAccount(): Promise<Value<Account>> {
+		return this.Interact<Account>(getAccountUrl, true).then(value => this.checkPayloadNotNull(value));
+	}
+	
+	public ChangeLogin(dto: DTO.NewLogin): Promise<Value> {
+		return this.Interact(changeLoginUrl, true, dto);
+	}
+	
+	public ChangePassword(dto: DTO.OldAndNewPasswords): Promise<Value> {
+		return this.Interact(changePasswordUrl, true, dto);
+	}
+	
+	private Interact<T = null>(url: string, authorized: boolean, dto: any = null): Promise<Value<T>> {
+		if (authorized && this.token == null) {
 			throw <AccountException>{isUnexpected: true};
 		}
 		let request: RequestInit = {
 			method: "Post",
 			headers: {
 				"Accept": "application/json",
-				"Authorization": "Bearer " + this.token
-			}
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(dto)
 		}; 
-		return fetch(getAccountUrl, request)
-			.then(res => this.getValueFrom(res))
-			.then(value => this.checkValueSuccess(value))
-			.then(value => this.checkPayloadNotNull(value));
+		if (authorized) {
+			request.headers = {...request.headers, "Authorization": "Bearer " + this.token};
+		}
+		if (dto != null) {
+			request.body = JSON.stringify(dto);
+		}
+		return fetch(url, request)
+			.then(res => this.getValueFrom<T>(res))
+			.then(value => this.checkValueSuccess(value));
 	}
 	
 	// GetToken not provided by account controller, but by ASP.NET OAuth provider with bearer tokens
@@ -120,31 +123,31 @@ export class AccountController {
 	
 	// Helpers
 	
-	private checkValueSuccess(value: Value): Value {
+	private checkValueSuccess<T = null>(value: Value<T>): Value<T> {
 		if (value.Type != ValueType.Success) {
 			throw <AccountException>{valueType: value.Type};
 		}
 		return value;
 	}
 	
-	private checkPayloadNotNull(value: Value): Value {
+	private checkPayloadNotNull<T = null>(value: Value<T>): Value<T> {
 		if (value.Payload == null) {
 			throw <AccountException>{isUnexpected: true};
 		}
 		return value;
 	}
 	
-	private getValueFrom(res: Response): Promise<Value> {
+	private getValueFrom<T = null>(res: Response): Promise<Value<T>> {
 		return this.checkHttpStatus(res).json()
 			.then((res:any) => {
-				let value: Value = initialValue;
+				let value = getInitialValue<T>();
 				if (res.hasOwnProperty("Type") && Object.values(ValueType).includes(res.Type)) {
 					value.Type = res.Type;
 				} else {
 					throw <AccountException>{isUnexpected: true};
 				}
 				if (res.hasOwnProperty("Payload")) {
-					value.Payload = res.Payload;
+					value.Payload = res.Payload as T;
 				}
 				return value;
 			})

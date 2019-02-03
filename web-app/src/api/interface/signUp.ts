@@ -1,18 +1,17 @@
-import { AccountController, ValueType } from "../controllers/Account";
+import { AccountController, ValueType } from "../controllers/Account/AccountController";
 
-type onSignUpSuccessCallback =  (token: string, userId: string, login: string) => void;;
+type onSuccess =  (token: string, userId: string, login: string) => void;;
 
-export enum SignUpError {
+export enum Error {
 	Unexpected,
 	LoginAlreadyExists,
 	LoginNotValid,
 	PasswordNotValid,
 }
 
-type onSignUpFailCallback = (error: SignUpError) => void;
+type onFail = (error: Error) => void;
 
-
-export function signUp(login: string, password: string, onSuccess: onSignUpSuccessCallback, onFail: onSignUpFailCallback) {
+export function perform(login: string, password: string, onSuccess: onSuccess, onFail: onFail) {
 	let account = new AccountController();
 	account.Register({Login: login, Password: password})
 		.then(() => account.GetToken(login, password))
@@ -21,11 +20,11 @@ export function signUp(login: string, password: string, onSuccess: onSignUpSucce
 		.catch(ex => {
 			if ("valueType" in ex) {
 				switch(ex.valueType) {
-					case ValueType.LoginAlreadyExists: onFail(SignUpError.LoginAlreadyExists); return;
-					case ValueType.LoginNotValid: onFail(SignUpError.LoginNotValid); return;
-					case ValueType.PasswordNotValid: onFail(SignUpError.PasswordNotValid); return;
+					case ValueType.LoginAlreadyExists: onFail(Error.LoginAlreadyExists); return;
+					case ValueType.LoginNotValid: onFail(Error.LoginNotValid); return;
+					case ValueType.PasswordNotValid: onFail(Error.PasswordNotValid); return;
 				}
 			}
-			onFail(SignUpError.Unexpected);
+			onFail(Error.Unexpected);
 		});
 }

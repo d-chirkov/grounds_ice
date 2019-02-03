@@ -22,13 +22,13 @@ let updateAccount = (state: IAccount | null | undefined, action: AccountAction):
 		case AccountActionType.ACCOUNT_SET_USER_ID: {
 			return {
 				...state,
-				token: action.userId
+				userId: action.userId
 			};
 		}
 		case AccountActionType.ACCOUNT_SET_LOGIN: {
 			return {
 				...state,
-				token: action.login
+				login: action.login
 			};
 		}
 		case AccountActionType.ACCOUNT_UNSET: {

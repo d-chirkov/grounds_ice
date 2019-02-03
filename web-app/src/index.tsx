@@ -6,11 +6,9 @@ import 'primereact/resources/themes/nova-light/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import './w3.css';
-import { storeFactory } from "./storeFactory";
+import {store} from "./store/store"
 
 import App from "./App";
-
-export let store = storeFactory();
 
 ReactDOM.render(
 	<Provider store={store}>

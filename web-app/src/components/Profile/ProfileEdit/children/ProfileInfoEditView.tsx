@@ -1,11 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
-import { IRootState } from "../../../../contexts/model";
+import { IRootState } from "../../../../store/contexts/model";
 import { IProfileInfo, IProfileInfoEntry } from "../../ProfileView";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Checkbox } from "primereact/checkbox";
 import { Button } from "primereact/button";
+import { IProfileEditWindowProps, saveButton } from "../ProfileEditView";
+
 
 interface IProfileInfoEditViewMapProps {
 }
@@ -13,36 +15,48 @@ interface IProfileInfoEditViewMapProps {
 interface IProfileInfoEditViewMapDispatch {
 }
 
-interface IProfileInfoEditViewProps extends IProfileInfoEditViewMapProps, IProfileInfoEditViewMapDispatch {
+interface IProfileInfoEditViewProps extends IProfileInfoEditViewMapProps, IProfileInfoEditViewMapDispatch, IProfileEditWindowProps {
 	profileInfo: IProfileInfo
 	updateLocalProfileInfo: (newValue: IProfileInfo) => void
 }
 
 interface IProfileInfoEditViewState {
-	profileInfo: IProfileInfo
+	loading: boolean
+	newProfileInfoInput: IProfileInfo
 }
 
 class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IProfileInfoEditViewState> {
 	constructor(props: IProfileInfoEditViewProps) {
 		super(props);
-		this.state = { profileInfo: props.profileInfo };
+		this.state = { 
+			loading: false,
+			newProfileInfoInput: props.profileInfo 
+		};
 	}
 	
-	saveProfileInfo() {
-		this.props.updateLocalProfileInfo(this.state.profileInfo);
+	updateProfileInfo() {
+		this.setState({loading: true});
+		this.props.setEditable(false);
+		// TODO: call api
+		setTimeout(() => {
+			this.props.updateLocalProfileInfo(this.state.newProfileInfoInput);
+			this.setState({loading: false});
+			this.props.setEditable(true);
+			this.props.onChangesSaved(); 
+		}, 500);
 	}
 	
 	render() {
-		let {profileInfo} = this.state;
+		let {newProfileInfoInput: profileInfo} = this.state;
 		return (<div>
 			<h4>Изменить информацию профиля</h4>
 			<div className="w3-container">
-				{this.inputField("Фамилия", profileInfo.surname, (v, p) => this.setState({profileInfo: {...profileInfo, surname: {value:v, public:p}}}))}
-				{this.inputField("Имя", profileInfo.firstname, (v, p) => this.setState({profileInfo: {...profileInfo, firstname: {value:v, public:p}}}))}
-				{this.inputField("Отчество", profileInfo.middlename, (v, p) => this.setState({profileInfo: {...profileInfo, middlename: {value:v, public:p}}}))}
-				{this.inputField("Местоположение", profileInfo.location, (v, p) => this.setState({profileInfo: {...profileInfo, location: {value:v, public:p}}}))}
+				{this.inputField("Фамилия", profileInfo.surname, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, surname: {value:v, public:p}}}))}
+				{this.inputField("Имя", profileInfo.firstname, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, firstname: {value:v, public:p}}}))}
+				{this.inputField("Отчество", profileInfo.middlename, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, middlename: {value:v, public:p}}}))}
+				{this.inputField("Местоположение", profileInfo.location, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, location: {value:v, public:p}}}))}
 				{this.descriptionField()}
-				<Button style={{float:"right"}} label="Сохранить" icon="pi pi-save" iconPos="left" onClick={() => this.saveProfileInfo()} />
+				{saveButton(this.state.loading, this.props.isEditable, () => this.updateProfileInfo())}
 			</div>
 		</div>);
 	}
@@ -70,14 +84,14 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 	}
 	
 	private descriptionField() {
-		let description = this.state.profileInfo.description;
+		let description = this.state.newProfileInfoInput.description;
 		let isPublic: boolean = description ? description.public : false;
 		let fieldName = "Описание";
 		return (
 		<div style={{paddingBottom:"14px"}}>
 			<InputTextarea rows={5} cols={30} autoResize={true}
 				onChange={(e) => 
-					this.setState({profileInfo: {...this.state.profileInfo, description: 
+					this.setState({newProfileInfoInput: {...this.state.newProfileInfoInput, description: 
 					{ public: isPublic, value: e.currentTarget.value}}})} 
 				placeholder={fieldName}
 				value={description ? description.value : undefined}
@@ -85,7 +99,7 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 			<Checkbox 
 				inputId={fieldName}
 				onChange={e => { description && description.value != "" && 
-					this.setState({profileInfo: {...this.state.profileInfo, description: 
+					this.setState({newProfileInfoInput: {...this.state.newProfileInfoInput, description: 
 					{ public: !e.checked, value: description.value }}}) }} 
 				checked={ !isPublic } 
 				disabled={ description == null || description.value == ""}

@@ -1,5 +1,5 @@
-import { IDataState, initialDataState } from "./data/model";
-import { IUIState, initialUIState } from "./ui/model";
+import { IDataState, initialDataState } from "../contexts/data/model";
+import { IUIState, initialUIState } from "../contexts/ui/model";
 
 export interface IRootState {
 	data: IDataState,

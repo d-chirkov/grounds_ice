@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Route, Switch, RouteComponentProps } from "react-router-dom";
-import { IRootState } from "../../contexts/model";
+import { IRootState } from "../../store/contexts/model";
 
 import { ProfileInfoView } from "./ProfileInfoView";
 import { ProfileEditView } from "./ProfileEdit/ProfileEditView";
@@ -13,6 +13,7 @@ interface IProfileViewRouteProps {
 }
 
 interface IProfileViewMapProps {
+	userId: string
 	isOwnProfile: boolean
 }
 
@@ -23,8 +24,6 @@ interface IProfileViewProps extends IProfileViewMapProps, IProfileViewMapDispatc
 }
 
 interface IProfileViewState {
-	isOwnProfile: boolean
-	userId: string
 	loading: boolean
 	profile: IProfile | null
 }
@@ -61,8 +60,6 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 	constructor(props: IProfileViewProps) {
 		super(props);
 		this.state = {
-			isOwnProfile: props.isOwnProfile,
-			userId: props.match.params.userId.toString(),
 			loading: false,
 			profile: null
 		}
@@ -100,6 +97,7 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 	
 	render() {
 		let {profile} = this.state;
+		let {userId} = this.props;
 		return (<div style={{margin: "auto", width:"850px", bottom:0, top:0}}>{
 			this.state.loading ? <p>LOADING</p> :
 			profile == null ? <p>ERROR</p> :
@@ -107,23 +105,23 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 			<div>
 				<h3 className="w3-text-blue-grey" style={{marginLeft:"25px"}}>{this.props.isOwnProfile ? 
 					"МОЙ ПРОФИЛЬ" : 
-					`ПРОФИЛЬ ${profile.login}(id${this.state.userId})`}</h3>
+					`ПРОФИЛЬ ${profile.login}(id${userId})`}</h3>
 				<Card style={{margin:"25px", marginTop:0, float:"left", width: "250px", height: "250px", left: 0}}>
 					АВАТАРКА
 				</Card>
 				<Card style={{margin:"25px", marginTop:0, float:"left", width: "500px", right: 0}}>
 					<Switch>
 						{this.props.isOwnProfile && <Route 
-							path={`/profile/id${this.state.userId}/edit`} 
+							path={`/profile/id${userId}/edit`} 
 							component={(p: any) => <ProfileEditView 
-								userId={this.state.userId}
+								userId={userId}
 								profileInfo={profile!.profileInfo}
 								updateLocalProfileInfo={(v: IProfileInfo) => this.updateLocalProfileInfo(v)} />} 
 						/>}
 						<Route 
-							path={`/profile/id${this.state.userId}`} 
+							path={`/profile/id${userId}`} 
 							component={(p: any) => <ProfileInfoView {...p} 
-								userId={this.state.userId}  
+								userId={userId}  
 								profileInfo={profile!.profileInfo} 
 								isOwnProfileInfo={this.props.isOwnProfile} />} 
 						/>
@@ -135,6 +133,7 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 }
 
 let mapStateToProps = (state: IRootState, ownProps: IProfileViewProps): IProfileViewMapProps => ({
+	userId: ownProps.match.params.userId.toString(),
 	isOwnProfile: state.data.account !== null && state.data.account.userId == ownProps.match.params.userId.toString(),
 })
 

@@ -1,7 +1,7 @@
 import { createStore, applyMiddleware } from "redux";
 import thunk from "redux-thunk";
-import { actionToPlainObject } from "./middlewares/actionToPlainObject";
-import { saver } from "./middlewares/storeSaver";
+import { actionToPlainObject } from "../middlewares/actionToPlainObject";
+import { saver } from "../middlewares/storeSaver";
 import updateRootState from "./contexts/reducers";
 import { initialRootState } from "./contexts/model";
 

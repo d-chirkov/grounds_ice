@@ -1,24 +1,24 @@
-import { AccountController } from "../controllers/Account";
+import { AccountController } from "../controllers/Account/AccountController";
 
-type onSignInSuccessCallback = (token: string, userId: string, login: string) => void;
+type onSuccess = (token: string, userId: string, login: string) => void;
 
-export enum SignInError {
+export enum Error {
 	Unexpected,
 	Unauthorized,
 }
 
-type onSignInFailCallback = (error: SignInError) => void;
+type onFail = (error: Error) => void;
 
-export function signIn(login: string, password: string, onSuccess: onSignInSuccessCallback, onFail: onSignInFailCallback) {
+export function perform(login: string, password: string, onSuccess: onSuccess, onFail: onFail) {
 	let account = new AccountController();
 	account.GetToken(login, password)
 		.then(() => account.GetAccount())
 		.then(value => onSuccess(account.token!, value.Payload!.UserId, value.Payload!.Login))
 		.catch(ex => {
 			if ("isUnauthorized" in ex) {
-				onFail(SignInError.Unauthorized);
+				onFail(Error.Unauthorized);
 			} else {
-				onFail(SignInError.Unexpected);
+				onFail(Error.Unexpected);
 			}
 		});
 }

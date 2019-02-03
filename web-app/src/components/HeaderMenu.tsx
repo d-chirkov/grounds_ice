@@ -2,9 +2,9 @@ import React from "react";
 import { connect } from "react-redux";
 import { HashRouter, Route, Switch, RouteComponentProps, withRouter } from "react-router-dom";
 
-import { IRootState } from "../contexts/model";
-import { UnsetAccountAction } from "../contexts/data/account/actions";
-import { LogInFormShowAction } from "../contexts/ui/logInForm/actions";
+import { IRootState } from "../store/contexts/model";
+import { UnsetAccountAction } from "../store/contexts/data/account/actions";
+import { LogInFormShowAction } from "../store/contexts/ui/logInForm/actions";
 import { Toolbar } from "primereact/toolbar";
 import { Button } from "primereact/button";
 import { Growl } from "primereact/growl";

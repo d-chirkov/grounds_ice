@@ -7,8 +7,8 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 
 import { Messager, IMessage } from "../../Messager";
-import { signUp, SignUpError} from "../../api/interface/signUp";
-import { signIn, SignInError } from "../../api/interface/signIn";
+import * as SignUp from "../../api/interface/signUp";
+import * as SignIn from "../../api/interface/signIn";
 
 import SignInForm from "./SignInForm";
 import UserAgreementForm from "./UserAgreementForm"
@@ -78,19 +78,19 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 			this.setState({isLoginIsInvalid: isUsernameError, isPasswordIsInvalid: isPasswordError});
 		} else {
 			this.setState({loading: true});
-			signIn(login, password, 
+			SignIn.perform(login, password, 
 				(token: string, userId: string, login: string) => {
 					this.props.setAccount(token, userId, login);
 				},
-				(error: SignInError) => {
+				(error: SignIn.Error) => {
 					let showWarning = (message: string) =>  Messager.showError(errorMessageHeader, message);
 					switch(error) {
-						case SignInError.Unauthorized: 
+						case SignIn.Error.Unauthorized: 
 							showWarning("Неверный логин или пароль");
 							isUsernameError = true;
 							isPasswordError = true;
 							break;
-						case SignInError.Unexpected: 
+						case SignIn.Error.Unexpected: 
 							showWarning("Неизвестная ошибка"); 
 							break;
 					}
@@ -122,26 +122,26 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 			this.setState({isLoginIsInvalid: isUsernameError, isPasswordIsInvalid: isPasswordError});
 		} else {
 			this.setState({loading: true});
-			signUp(login, password, 
+			SignUp.perform(login, password, 
 				(token: string, userId: string, login: string) => {
 					this.props.setAccount(token, userId, login);
 				},
-				(error: SignUpError) => {
+				(error: SignUp.Error) => {
 					let showWarning = (message: string) =>  Messager.showError(errorMessageHeader, message);
 					switch(error) {
-						case SignUpError.LoginAlreadyExists: 
+						case SignUp.Error.LoginAlreadyExists: 
 							showWarning("Логин уже используется"); 
 							isUsernameError = true; 
 							break;
-						case SignUpError.LoginNotValid: 
+						case SignUp.Error.LoginNotValid: 
 							showWarning("Этот логин не может быть использован");
 							isUsernameError = true; 
 							break;
-						case SignUpError.PasswordNotValid:
+						case SignUp.Error.PasswordNotValid:
 							showWarning("Этот пароль не может быть использован");
 							isPasswordError = true; 
 							break;
-						case SignUpError.Unexpected:
+						case SignUp.Error.Unexpected:
 							showWarning("Неизвестная ошибка");
 							break;
 					}
@@ -229,8 +229,8 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 	}
 }
 
-import { LogInFormShowAction } from "../../contexts/ui/logInForm/actions";
-import { SetAccountAction } from "../../contexts/data/account/actions";
+import { LogInFormShowAction } from "../../store/contexts/ui/logInForm/actions";
+import { SetAccountAction } from "../../store/contexts/data/account/actions";
 
 let mapStateToProps = (state: any): ILogInDialogStateProps => ({
 	isLoggedIn: state.data.account != null
