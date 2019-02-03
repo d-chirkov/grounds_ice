@@ -39,7 +39,7 @@ let ProfileInfoEntryView = (props: IProfileInfoEntryViewProps) => {
 		<div className="w3-text-blue-grey" style={{width:"150px", float:"left", height:"30px"}}>
 			{`${fieldName}:`}
 		</div>
-		<div style={{height:"30px"}}>
+		<div style={{float: "left", height:"30px", width:"250px", wordWrap:"break-word"}}>
 			{entry.value}
 		</div>
 	</div>);

@@ -51,10 +51,10 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 		return (<div>
 			<h4>Изменить информацию профиля</h4>
 			<div className="w3-container">
-				{this.inputField("Фамилия", profileInfo.surname, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, surname: {value:v, public:p}}}))}
-				{this.inputField("Имя", profileInfo.firstname, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, firstname: {value:v, public:p}}}))}
-				{this.inputField("Отчество", profileInfo.middlename, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, middlename: {value:v, public:p}}}))}
-				{this.inputField("Местоположение", profileInfo.location, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, location: {value:v, public:p}}}))}
+				{this.inputField("Фамилия", profileInfo.surname, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, surname: {value:v, isPublic:p}}}))}
+				{this.inputField("Имя", profileInfo.firstname, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, firstname: {value:v, isPublic:p}}}))}
+				{this.inputField("Отчество", profileInfo.middlename, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, middlename: {value:v, isPublic:p}}}))}
+				{this.inputField("Местоположение", profileInfo.location, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, location: {value:v, isPublic:p}}}))}
 				{this.descriptionField()}
 				{saveButton(this.state.loading, this.props.isEditable, () => this.updateProfileInfo())}
 			</div>
@@ -62,7 +62,7 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 	}
 	
 	private inputField(fieldName: string, entry: IProfileInfoEntry|null, update: (val: string, pub: boolean) => void) {
-		let isPublic: boolean = entry ? entry.public : false;
+		let isPublic: boolean = entry ? entry.isPublic : false;
 		return (
 		<div style={{paddingBottom:"14px"}}>
 			<InputText 
@@ -85,14 +85,14 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 	
 	private descriptionField() {
 		let description = this.state.newProfileInfoInput.description;
-		let isPublic: boolean = description ? description.public : false;
+		let isPublic: boolean = description ? description.isPublic : false;
 		let fieldName = "Описание";
 		return (
 		<div style={{paddingBottom:"14px"}}>
 			<InputTextarea rows={5} cols={30} autoResize={true}
 				onChange={(e) => 
 					this.setState({newProfileInfoInput: {...this.state.newProfileInfoInput, description: 
-					{ public: isPublic, value: e.currentTarget.value}}})} 
+					{ isPublic: isPublic, value: e.currentTarget.value}}})} 
 				placeholder={fieldName}
 				value={description ? description.value : undefined}
 					/>
@@ -100,7 +100,7 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 				inputId={fieldName}
 				onChange={e => { description && description.value != "" && 
 					this.setState({newProfileInfoInput: {...this.state.newProfileInfoInput, description: 
-					{ public: !e.checked, value: description.value }}}) }} 
+					{ isPublic: !e.checked, value: description.value }}}) }} 
 				checked={ !isPublic } 
 				disabled={ description == null || description.value == ""}
 				style={{marginLeft:"20px"}}/>

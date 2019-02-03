@@ -50,12 +50,19 @@
   <ItemGroup>
     <Compile Include="Abstractions\IConnectionFactory.cs" />
     <Compile Include="Abstractions\Repositories\IAccountRepository.cs" />
+    <Compile Include="Abstractions\Repositories\IProfileRepository.cs" />
+    <Compile Include="Abstractions\Validators\IProfileInfoValidator.cs" />
     <Compile Include="Abstractions\Validators\IStringValidator.cs" />
     <Compile Include="ConnectionFactories\SqlConnectionFactory.cs" />
     <Compile Include="Entities\Account.cs" />
+    <Compile Include="Entities\Profile.cs" />
+    <Compile Include="Entities\ProfileInfo.cs" />
+    <Compile Include="Entities\ProfileInfoEntry.cs" />
     <Compile Include="Repositories\DbAccountRepository.cs" />
+    <Compile Include="Repositories\DbProfileRepository.cs" />
     <Compile Include="Validators\Common\LengthValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Validators\ProfileInfoValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Validators\Login\" />

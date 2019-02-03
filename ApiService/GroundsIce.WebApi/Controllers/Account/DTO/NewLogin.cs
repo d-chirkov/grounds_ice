@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace GroundsIce.WebApi.Controllers.Account.DTO
+﻿namespace GroundsIce.WebApi.Controllers.Account.DTO
 {
 	public class NewLogin
 	{

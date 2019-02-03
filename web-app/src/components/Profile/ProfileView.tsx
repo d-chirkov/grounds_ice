@@ -44,7 +44,7 @@ export interface IProfileInfo {
 
 export interface IProfileInfoEntry {
 	value: string,
-	public: boolean,
+	isPublic: boolean,
 }
 
 let initialProfileInfo: IProfileInfo = {
@@ -75,9 +75,9 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 			//TODO: loading profile from api service
 			let profileInfo: IProfileInfo = {
 				...initialProfileInfo,
-				firstname: {value: "Иван", public: true},
-				middlename: {value: "Иваныч", public: true},
-				location: {value: "Светлый Путь Ленина", public: false}
+				firstname: {value: "Иван", isPublic: true},
+				middlename: {value: "Иваныч", isPublic: true},
+				location: {value: "Светлый Путь Ленина", isPublic: false}
 			}
 			this.setState({ loading: false, profile: {login: "ivan", avatar: null, profileInfo} });
 		}, 1000);

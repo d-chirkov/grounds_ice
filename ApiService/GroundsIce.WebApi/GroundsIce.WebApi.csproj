@@ -127,6 +127,8 @@
     <Compile Include="Controllers\Account\DTO\LoginAndPassword.cs" />
     <Compile Include="Controllers\Account\DTO\NewLogin.cs" />
     <Compile Include="Controllers\Account\DTO\OldAndNewPasswords.cs" />
+    <Compile Include="Controllers\Profile\DTO\ProfileRequest.cs" />
+    <Compile Include="Controllers\Profile\ProfileController.cs" />
     <Compile Include="DTO\Value.cs" />
     <Compile Include="Providers\OAuthProvider.cs" />
     <Compile Include="Startup.cs" />

@@ -17,7 +17,8 @@ namespace GroundsIce.Model.Repositories.Tests
 	class DbAccountRepositoryTests
 	{
 		private IConnectionFactory _connectionFactory = new SqlConnectionFactory(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=GroundsIce.DB.Test;Integrated Security=True;Pooling=False");
-		private const string _tableName = "Accounts";
+		private const string _accountsTableName = "Accounts";
+		private const string _profileInfoTableName = "ProfileInfo";
 		private const string _validLogin = "login";
 		private const string _validPassword = "password";
 		private const string _anotherValidLogin = "loginn";
@@ -37,12 +38,12 @@ namespace GroundsIce.Model.Repositories.Tests
 			_repository = new DbAccountRepository(_connectionFactory);
 			using (var connection = await _connectionFactory.GetConnectionAsync())
 			{
-				await connection.ExecuteAsync($"DELETE FROM {_tableName}");
+				await connection.ExecuteAsync($"DELETE FROM {_accountsTableName}");
 			}
 		}
 
 		[Test]
-		public void Ctor_Throw_When_ConnectionFactoryIsNull()
+		public void Ctor_ThrowArgumentNullException_When_ConnectionFactoryIsNull()
 		{
 			Assert.Throws<ArgumentNullException>(() => new DbAccountRepository(null));
 		}

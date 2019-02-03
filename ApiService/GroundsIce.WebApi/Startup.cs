@@ -6,12 +6,14 @@ using Autofac.Integration.WebApi;
 using GroundsIce.Model.Repositories;
 using GroundsIce.Model.Abstractions.Repositories;
 using System.Net.Http.Formatting;
-using GroundsIce.WebApi.Controllers.Account;
 using GroundsIce.Model.Validators.Common;
 using GroundsIce.Model.Abstractions.Validators;
 using GroundsIce.Model.ConnectionFactories;
 using GroundsIce.Model.Abstractions;
 using System.Collections.Generic;
+using GroundsIce.Model.Validators;
+using GroundsIce.WebApi.Controllers.Account;
+using GroundsIce.WebApi.Controllers.Profile;
 
 [assembly: OwinStartup(typeof(GroundsIce.WebApi.Startup))]
 
@@ -23,15 +25,27 @@ namespace GroundsIce.WebApi
 
 		public void Configuration(IAppBuilder app)
         {
-			//using GroundsIce.Model.
 			var builder = new ContainerBuilder();
 			string sqlConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=GroundsIce.DB;Integrated Security=True;Pooling=False";
 			builder.Register(c => new SqlConnectionFactory(sqlConnectionString)).As<IConnectionFactory>().SingleInstance();
 
 			builder.RegisterType<DbAccountRepository>().As<IAccountRepository>().InstancePerRequest();
+			builder.RegisterType<DbProfileRepository>().As<IProfileRepository>().InstancePerRequest();
 
 			builder.Register(c => new LengthValidator(5, 20)).Keyed<IStringValidator>(CredentialType.Login).SingleInstance();
 			builder.Register(c => new LengthValidator(8, 30)).Keyed<IStringValidator>(CredentialType.Password).SingleInstance();
+
+			builder.Register(c => {
+				var v = new ProfileInfoValidator();
+				v.AddFirstNameValidator(new LengthValidator(1, 50));
+				v.AddMiddelNameValidator(new LengthValidator(1, 50));
+				v.AddSurameValidator(new LengthValidator(1, 50));
+				v.AddLocationValidator(new LengthValidator(1, 50));
+				v.AddDescriptionValidator(new LengthValidator(1, 300));
+				return v;
+			}).As<IProfileInfoValidator>();
+
+			builder.RegisterType<ProfileController>().InstancePerRequest();
 
 			builder.RegisterType<AccountController>().OnActivated(c => {
 				c.Instance.SetLoginValidators(c.Context.ResolveKeyed<IEnumerable<IStringValidator>>(CredentialType.Login));
