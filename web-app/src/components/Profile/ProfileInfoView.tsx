@@ -1,16 +1,18 @@
 import React from "react";
-import { IProfileInfo, IProfileInfoEntry } from "./ProfileView";
 import { Link } from "react-router-dom";
+import * as Model from "../../api/Profile/Model"
+import { isUndefined } from "util";
 
 
 interface IProfileInfoViewProps {
 	userId: string
 	isOwnProfileInfo: boolean
-	profileInfo: IProfileInfo
+	profileInfo: Model.ProfileInfoEntry[]
 }
 
 export let ProfileInfoView = (props: IProfileInfoViewProps) => {
 	let {userId, isOwnProfileInfo, profileInfo} = props;
+	console.log("ProfileInfoView");
 	console.log(profileInfo);
 	return (
 		<div>
@@ -19,28 +21,31 @@ export let ProfileInfoView = (props: IProfileInfoViewProps) => {
 					Изменить
 				</Link>
 			}
-			{profileInfo.surname && <ProfileInfoEntryView fieldName="Фамилия" entry={profileInfo.surname} />}
-			{profileInfo.firstname && <ProfileInfoEntryView fieldName="Имя" entry={profileInfo.firstname} />}
-			{profileInfo.middlename && <ProfileInfoEntryView fieldName="Отчество" entry={profileInfo.middlename} />}
-			{profileInfo.location && <ProfileInfoEntryView fieldName="Местоположение" entry={profileInfo.location} />}
-			{profileInfo.description && <ProfileInfoEntryView fieldName="Описание" entry={profileInfo.description} />}
+			<ProfileInfoEntryView fieldName="Фамилия" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.LastName)} />
+			<ProfileInfoEntryView fieldName="Имя" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.FirstName)} />
+			<ProfileInfoEntryView fieldName="Отчество" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.MiddleName)} />
+			<ProfileInfoEntryView fieldName="Местоположение" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.Location)} />
+			<ProfileInfoEntryView fieldName="Описание" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.Description)} />
 		</div>
 	);
 }
 
 interface IProfileInfoEntryViewProps {
 	fieldName: string
-	entry: IProfileInfoEntry
+	entry?: Model.ProfileInfoEntry
 }
 
 let ProfileInfoEntryView = (props: IProfileInfoEntryViewProps) => {
 	let {fieldName, entry} = props;
+	if (isUndefined(entry)) {
+		return null;
+	}
 	return (<div>
 		<div className="w3-text-blue-grey" style={{width:"150px", float:"left", height:"30px"}}>
 			{`${fieldName}:`}
 		</div>
 		<div style={{float: "left", height:"30px", width:"250px", wordWrap:"break-word"}}>
-			{entry.value}
+			{entry.Value}
 		</div>
 	</div>);
 }

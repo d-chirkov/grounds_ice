@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { IRootState } from "../../../../store/contexts/model";
 import { InputText } from "primereact/inputtext";
 import { IProfileEditWindowProps, saveButton } from "../ProfileEditView";
-import * as ChangeLogin from "../../../../api/interface/changeLogin";
+import * as ChangeLogin from "../../../../api/Account/interface/changeLogin";
 import { Messager } from "../../../../Messager";
 import { SetLoginAction } from "../../../../store/contexts/data/account/actions";
 

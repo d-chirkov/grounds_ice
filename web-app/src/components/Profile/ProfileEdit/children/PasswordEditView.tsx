@@ -4,7 +4,7 @@ import { IRootState } from "../../../../store/contexts/model";
 import { Password } from "primereact/password";
 import { IProfileEditWindowProps, saveButton } from "../ProfileEditView";
 import { Messager } from "../../../../Messager";
-import * as ChangePassword from "../../../../api/interface/changePassword";
+import * as ChangePassword from "../../../../api/Account/interface/changePassword";
 
 interface IPasswordEditViewMapProps {
 }

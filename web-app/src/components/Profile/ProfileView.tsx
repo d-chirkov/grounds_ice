@@ -6,7 +6,13 @@ import { IRootState } from "../../store/contexts/model";
 import { ProfileInfoView } from "./ProfileInfoView";
 import { ProfileEditView } from "./ProfileEdit/ProfileEditView";
 
-import { Card } from 'primereact/card';
+import { Card } from "primereact/card";
+
+import * as Model from "../../api/Profile/Model";
+import * as GetProfile from "../../api/Profile/interface/getProfile";
+import { loadavg } from "os";
+import { ValueType } from "../../api/Profile/ProfileController";
+import { Messager } from "../../Messager";
 
 interface IProfileViewRouteProps {
 	userId: string
@@ -25,34 +31,7 @@ interface IProfileViewProps extends IProfileViewMapProps, IProfileViewMapDispatc
 
 interface IProfileViewState {
 	loading: boolean
-	profile: IProfile | null
-}
-
-interface IProfile {
-	login: string
-	avatar: string | null
-	profileInfo: IProfileInfo
-}
-
-export interface IProfileInfo {
-	firstname: IProfileInfoEntry | null,
-	surname: IProfileInfoEntry | null,
-	middlename: IProfileInfoEntry | null,
-	location: IProfileInfoEntry | null,
-	description: IProfileInfoEntry | null,
-}
-
-export interface IProfileInfoEntry {
-	value: string,
-	isPublic: boolean,
-}
-
-let initialProfileInfo: IProfileInfo = {
-	firstname: null,
-	surname: null,
-	middlename: null,
-	location:  null,
-	description: null,
+	profile: Model.Profile | null
 }
 
 class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> {
@@ -71,33 +50,47 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 	
 	private loadProfile() {
 		this.setState({ loading: true });
-		setTimeout(() => {
-			//TODO: loading profile from api service
-			let profileInfo: IProfileInfo = {
-				...initialProfileInfo,
-				firstname: {value: "Иван", isPublic: true},
-				middlename: {value: "Иваныч", isPublic: true},
-				location: {value: "Светлый Путь Ленина", isPublic: false}
+		let { userId } = this.props;
+		GetProfile.perform(userId, 
+		(profile) => {
+			console.log("loaded profile");
+			console.log(profile);
+			this.setState({ loading: false, profile });
+		},
+		(error) => {
+			let showWarning = (message: string) =>  Messager.showError("Ошибка", message);
+			switch(error) {
+				case GetProfile.Error.ProfileNotExists: 
+					showWarning("Профиль не найден");
+					break;
+				case GetProfile.Error.Unexpected: 
+					showWarning("Неизвестная ошибка"); 
+					break;
 			}
-			this.setState({ loading: false, profile: {login: "ivan", avatar: null, profileInfo} });
-		}, 1000);
+			this.setState({ loading: false });
+		})
 	}
 	
-	private updateLocalProfileInfo(newValue: IProfileInfo) {
-		if (this.state.profile != null) {
-			for (var k in newValue) {
-				if (newValue.hasOwnProperty(k) && (newValue as any)[k] != null && (newValue as any)[k].value == "") {
-					(newValue as any)[k] = null;
-				}
-			}
-			let newProfile = {...this.state.profile, profileInfo: newValue};
-			this.setState({profile: newProfile});
+	private updateLocalProfileInfo(newValue: Model.ProfileInfoEntry[]) {
+		let { profile } = this.state;
+		console.log("updateLocalProfileInfo this state");
+		console.log(profile);
+		if (profile != null) {
+			profile.ProfileInfo = newValue;
+			console.log("updateLocalProfileInfo");
+			console.log(newValue);
+			//this.state.profile!.ProfileInfo.
+			this.setState({ profile: {ProfileInfo: newValue, Login: profile.Login, Avatar: profile.Avatar} });
 		}
 	}
 	
 	render() {
-		let {profile} = this.state;
-		let {userId} = this.props;
+		let { profile } = this.state;
+		let { userId } = this.props;
+		console.log("render");
+		if (profile != null) {
+			console.log(profile.ProfileInfo);
+		}
 		return (<div style={{margin: "auto", width:"850px", bottom:0, top:0}}>{
 			this.state.loading ? <p>LOADING</p> :
 			profile == null ? <p>ERROR</p> :
@@ -105,7 +98,7 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 			<div>
 				<h3 className="w3-text-blue-grey" style={{marginLeft:"25px"}}>{this.props.isOwnProfile ? 
 					"МОЙ ПРОФИЛЬ" : 
-					`ПРОФИЛЬ ${profile.login}(id${userId})`}</h3>
+					`ПРОФИЛЬ ${profile.Login}(id${userId})`}</h3>
 				<Card style={{margin:"25px", marginTop:0, float:"left", width: "250px", height: "250px", left: 0}}>
 					АВАТАРКА
 				</Card>
@@ -115,14 +108,14 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 							path={`/profile/id${userId}/edit`} 
 							component={(p: any) => <ProfileEditView 
 								userId={userId}
-								profileInfo={profile!.profileInfo}
-								updateLocalProfileInfo={(v: IProfileInfo) => this.updateLocalProfileInfo(v)} />} 
+								profileInfo={[...profile!.ProfileInfo]}
+								updateLocalProfileInfo={v => this.updateLocalProfileInfo(v)} />} 
 						/>}
 						<Route 
 							path={`/profile/id${userId}`} 
 							component={(p: any) => <ProfileInfoView {...p} 
 								userId={userId}  
-								profileInfo={profile!.profileInfo} 
+								profileInfo={[...profile!.ProfileInfo]} 
 								isOwnProfileInfo={this.props.isOwnProfile} />} 
 						/>
 					</Switch>

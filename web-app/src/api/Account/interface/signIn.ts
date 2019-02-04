@@ -1,4 +1,4 @@
-import { AccountController } from "../controllers/Account/AccountController";
+import { AccountController } from "../AccountController";
 
 type onSuccess = (token: string, userId: string, login: string) => void;
 

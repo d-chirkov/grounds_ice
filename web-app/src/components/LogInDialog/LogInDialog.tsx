@@ -7,8 +7,8 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 
 import { Messager, IMessage } from "../../Messager";
-import * as SignUp from "../../api/interface/signUp";
-import * as SignIn from "../../api/interface/signIn";
+import * as SignUp from "../../api/Account/interface/signUp";
+import * as SignIn from "../../api/Account/interface/signIn";
 
 import SignInForm from "./SignInForm";
 import UserAgreementForm from "./UserAgreementForm"

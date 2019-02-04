@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
 
-import { IProfileInfo } from "../ProfileView";
 import { IRootState } from "../../../store/contexts/model";
+import * as Model from "../../../api/Profile/Model"
 
 import { LoginEditView } from "./children/LoginEditView";
 import { PasswordEditView } from "./children/PasswordEditView";
@@ -34,9 +34,9 @@ interface IProfileEditViewMapDispatch {
 }
 
 interface IProfileEditViewProps extends IProfileEditViewMapProps, RouteComponentProps {
-	userId: string,
-	profileInfo: IProfileInfo
-	updateLocalProfileInfo: (newValue: IProfileInfo) => void
+	userId: string
+	profileInfo: Array<Model.ProfileInfoEntry>
+	updateLocalProfileInfo: (newValue: Array<Model.ProfileInfoEntry>) => void
 }
 
 interface IProfileEditViewState {
@@ -60,7 +60,6 @@ class ProfileEditView extends React.Component<IProfileEditViewProps, IProfileEdi
 	}
 	
 	render() {
-		let {isEditable} = this.state;
 		let {profileInfo, updateLocalProfileInfo, userId} = this.props;
 		let profileWindowProps: IProfileEditWindowProps = {
 			isEditable: this.state.isEditable,
@@ -75,7 +74,7 @@ class ProfileEditView extends React.Component<IProfileEditViewProps, IProfileEdi
 			<hr />
 			<PasswordEditView {...profileWindowProps}/>
 			<hr />
-			<ProfileInfoEditView {...profileWindowProps} profileInfo={profileInfo} updateLocalProfileInfo={updateLocalProfileInfo}/>
+			<ProfileInfoEditView {...profileWindowProps} profileInfo={profileInfo} updateLocalProfileInfo={v => updateLocalProfileInfo(v)}/>
 		</div>);
 	}
 }

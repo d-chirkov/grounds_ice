@@ -7,8 +7,7 @@ export interface NewLogin {
 	Login: string
 }
 
-export interface OldAndNewPasswords
-{
+export interface OldAndNewPasswords {
 	OldPassword: string;
 	NewPassword: string;
 }

@@ -45,25 +45,15 @@ namespace GroundsIce.Model.Repositories
 			if (password == null) throw new ArgumentNullException("password");
 			using (var connection = await _connectionFactory.GetConnectionAsync())
 			{
-				using (var transaction = connection.BeginTransaction())
+				try
 				{
-					try
-					{
-						long userId = connection.Insert(new DbAccount { Login = login, Password = password }, transaction: transaction);
-						int insertedProfileInfo = await connection.ExecuteAsync(
-							$"INSERT INTO {_profileInfoTableName} (UserId) VALUES (@UserId)", 
-							new { UserId = userId }, 
-							transaction: transaction);
-						if (insertedProfileInfo != 1) throw new DbAccountRepositoryException("Couldn't insert profile info while creating account");
-						transaction.Commit();
-						return new Account(userId, login);
-					}
-					catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
-					{
-						return null;
-					}
+					long userId = connection.Insert(new DbAccount { Login = login, Password = password });
+					return new Account(userId, login);
 				}
-					
+				catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
+				{
+					return null;
+				}
 			}
 		}
 

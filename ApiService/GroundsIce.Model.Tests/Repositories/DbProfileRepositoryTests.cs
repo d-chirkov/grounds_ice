@@ -16,7 +16,6 @@ namespace GroundsIce.Model.Repositories.Tests
 	{
 		private IConnectionFactory _connectionFactory = new SqlConnectionFactory(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=GroundsIce.DB.Test;Integrated Security=True;Pooling=False");
 		private const string _accountsTableName = "Accounts";
-		private const string _profileInfoTableName = "ProfileInfo";
 		private const string _validLogin = "login";
 		private const string _validPassword = "password";
 		private const string _anotherValidLogin = "loginn";
@@ -86,7 +85,7 @@ namespace GroundsIce.Model.Repositories.Tests
 		[Test]
 		public void SetProfileInfoAsync_ThrowArgumentOutOfRangeException_When_PassingUserIdIsLessThenZero()
 		{
-			Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _subject.SetProfileInfoAsync(-1, new ProfileInfo()));
+			Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _subject.SetProfileInfoAsync(-1, new List<ProfileInfoEntry>()));
 		}
 
 		[Test]
@@ -96,9 +95,19 @@ namespace GroundsIce.Model.Repositories.Tests
 		}
 
 		[Test]
-		public async Task SetProfileInfoAsync_ReturnFalse_When_PassingUserIdNotExists()
+		public async Task SetProfileInfoAsync_ReturnFalse_When_PassingUserIdNotExistsWithEmptyProfileInfo()
 		{
-			bool updated = await _subject.SetProfileInfoAsync(1, new ProfileInfo());
+			bool updated = await _subject.SetProfileInfoAsync(1, new List<ProfileInfoEntry>());
+			Assert.IsFalse(updated);
+		}
+
+		[Test]
+		public async Task SetProfileInfoAsync_ReturnFalse_When_PassingUserIdNotExistsWithNotEmptyProfileInfo()
+		{
+			bool updated = await _subject.SetProfileInfoAsync(1, new List<ProfileInfoEntry>
+			{
+				new ProfileInfoEntry() { Type = ProfileInfoType.FirstName, Value = "a", IsPublic = true }
+			});
 			Assert.IsFalse(updated);
 		}
 
@@ -106,7 +115,7 @@ namespace GroundsIce.Model.Repositories.Tests
 		public async Task SetProfileInfoAsync_ReturnTrue_When_PassingEmptyProfileInfo()
 		{
 			Account account = await _accountRepository.CreateAccountAsync(_validLogin, _validPassword);
-			bool updated = await _subject.SetProfileInfoAsync(account.UserId, new ProfileInfo());
+			bool updated = await _subject.SetProfileInfoAsync(account.UserId, new List<ProfileInfoEntry>());
 			Assert.IsTrue(updated);
 		}
 
@@ -114,124 +123,45 @@ namespace GroundsIce.Model.Repositories.Tests
 		public async Task SetProfileInfoAsync_AffectGetProfileAsync_When_PassingEmptyProfileInfo()
 		{
 			Account account = await _accountRepository.CreateAccountAsync(_validLogin, _validPassword);
-			await _subject.SetProfileInfoAsync(account.UserId, new ProfileInfo());
+			await _subject.SetProfileInfoAsync(account.UserId, new List<ProfileInfoEntry>());
 			Profile profile = await _subject.GetProfileAsync(account.UserId);
-			Assert.IsNull(profile.ProfileInfo.FirstName);
-			Assert.IsNull(profile.ProfileInfo.MiddleName);
-			Assert.IsNull(profile.ProfileInfo.Surname);
-			Assert.IsNull(profile.ProfileInfo.Location);
-			Assert.IsNull(profile.ProfileInfo.Description);
+			Assert.AreEqual(profile.ProfileInfo.Count(), 0);
 		}
 
-		private async Task _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(long userId, ProfileInfo profileInfo)
+		private async Task _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(long userId, List<ProfileInfoEntry> profileInfo)
 		{
 			await _subject.SetProfileInfoAsync(userId, profileInfo);
 			Profile profile = await _subject.GetProfileAsync(userId);
 			Assert.AreEqual(profile.Login, _validLogin);
-			Assert.AreEqual(profile.ProfileInfo.FirstName, profileInfo.FirstName);
-			Assert.AreEqual(profile.ProfileInfo.MiddleName, profileInfo.MiddleName);
-			Assert.AreEqual(profile.ProfileInfo.Surname, profileInfo.Surname);
-			Assert.AreEqual(profile.ProfileInfo.Location, profileInfo.Location);
-			Assert.AreEqual(profile.ProfileInfo.Description, profileInfo.Description);
+			Assert.AreEqual(profile.ProfileInfo.Count(), profileInfo.Count());
+			foreach (var entry in profile.ProfileInfo)
+			{
+				Assert.AreEqual(profileInfo.FindAll(v => v.Equals(entry)).Count(), 1);
+			}
 		}
 
 		[Test]
-		public async Task SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfoWithFirstName()
+		public async Task SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo()
 		{
 			Account account = await _accountRepository.CreateAccountAsync(_validLogin, _validPassword);
-			await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
-				account.UserId,
-				new ProfileInfo(){
-					FirstName = new ProfileInfoEntry() { Value = "a", IsPublic = true }
-				}
-			);
-			await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
-				account.UserId,
-				new ProfileInfo()
-				{
-					FirstName = new ProfileInfoEntry() { Value = "a", IsPublic = false }
-				}
-			);
-		}
-
-		[Test]
-		public async Task SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfoWithMiddleName()
-		{
-			Account account = await _accountRepository.CreateAccountAsync(_validLogin, _validPassword);
-			await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
-				account.UserId,
-				new ProfileInfo()
-				{
-					MiddleName = new ProfileInfoEntry() { Value = "a", IsPublic = true }
-				}
-			);
-			await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
-				account.UserId,
-				new ProfileInfo()
-				{
-					MiddleName = new ProfileInfoEntry() { Value = "a", IsPublic = false }
-				}
-			);
-		}
-
-		[Test]
-		public async Task SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfoWithSurname()
-		{
-			Account account = await _accountRepository.CreateAccountAsync(_validLogin, _validPassword);
-			await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
-				account.UserId,
-				new ProfileInfo()
-				{
-					Surname = new ProfileInfoEntry() { Value = "a", IsPublic = true }
-				}
-			);
-			await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
-				account.UserId,
-				new ProfileInfo()
-				{
-					Surname = new ProfileInfoEntry() { Value = "a", IsPublic = false }
-				}
-			);
-		}
-
-		[Test]
-		public async Task SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfoWithLocation()
-		{
-			Account account = await _accountRepository.CreateAccountAsync(_validLogin, _validPassword);
-			await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
-				account.UserId,
-				new ProfileInfo()
-				{
-					Location = new ProfileInfoEntry() { Value = "a", IsPublic = true }
-				}
-			);
-			await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
-				account.UserId,
-				new ProfileInfo()
-				{
-					Location = new ProfileInfoEntry() { Value = "a", IsPublic = false }
-				}
-			);
-		}
-
-		[Test]
-		public async Task SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfoWithDescription()
-		{
-			Account account = await _accountRepository.CreateAccountAsync(_validLogin, _validPassword);
-			await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
-				account.UserId,
-				new ProfileInfo()
-				{
-					Description = new ProfileInfoEntry() { Value = "a", IsPublic = true }
-				}
-			);
-			await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
-				account.UserId,
-				new ProfileInfo()
-				{
-					Description = new ProfileInfoEntry() { Value = "a", IsPublic = false }
-				}
-			);
+			foreach (var typeName in Enum.GetNames(typeof(ProfileInfoType)))
+			{
+				var type = (ProfileInfoType)Enum.Parse(typeof(ProfileInfoType), typeName);
+				await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
+					account.UserId,
+					new[]
+					{
+						new ProfileInfoEntry() { Type = type, Value = "a", IsPublic = true }
+					}.ToList()
+				);
+				await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
+					account.UserId,
+					new[]
+					{
+						new ProfileInfoEntry() { Type = type, Value = "b", IsPublic = false }
+					}.ToList()
+				);
+			}
 		}
 
 		[Test]
@@ -240,13 +170,13 @@ namespace GroundsIce.Model.Repositories.Tests
 			Account account = await _accountRepository.CreateAccountAsync(_validLogin, _validPassword);
 			await _SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo(
 				account.UserId,
-				new ProfileInfo()
+				new List<ProfileInfoEntry>
 				{
-					FirstName = new ProfileInfoEntry() { Value = "a", IsPublic = true },
-					MiddleName = new ProfileInfoEntry() { Value = "b", IsPublic = false },
-					Surname = new ProfileInfoEntry() { Value = "c", IsPublic = true },
-					Location = new ProfileInfoEntry() { Value = "d", IsPublic = false },
-					Description = new ProfileInfoEntry() { Value = "e", IsPublic = true }
+					new ProfileInfoEntry { Type = ProfileInfoType.FirstName, Value = "a", IsPublic = false },
+					new ProfileInfoEntry { Type = ProfileInfoType.LastName, Value = "b", IsPublic = true },
+					new ProfileInfoEntry { Type = ProfileInfoType.MiddleName, Value = "c", IsPublic = false },
+					new ProfileInfoEntry { Type = ProfileInfoType.Location, Value = "d", IsPublic = true },
+					new ProfileInfoEntry { Type = ProfileInfoType.Description, Value = "e", IsPublic = false },
 				}
 			);
 		}
@@ -255,12 +185,56 @@ namespace GroundsIce.Model.Repositories.Tests
 		public async Task SetProfileInfoAsync_NotAffectGetProfileAsync_When_PassingProfileInfoWithNullOrEmptyValue()
 		{
 			Account account = await _accountRepository.CreateAccountAsync(_validLogin, _validPassword);
-			await _subject.SetProfileInfoAsync(account.UserId, new ProfileInfo() { FirstName = null } );
-			await _subject.SetProfileInfoAsync(account.UserId, new ProfileInfo() { FirstName = new ProfileInfoEntry() { Value = null, IsPublic = true } });
-			await _subject.SetProfileInfoAsync(account.UserId, new ProfileInfo() { FirstName = new ProfileInfoEntry() { Value = "", IsPublic = false } });
+			await _subject.SetProfileInfoAsync(account.UserId, new List<ProfileInfoEntry> { new ProfileInfoEntry { Value = null } });
+			await _subject.SetProfileInfoAsync(account.UserId, new List<ProfileInfoEntry> { new ProfileInfoEntry { Value = "" } });
 			Profile profile = await _subject.GetProfileAsync(account.UserId);
-			Assert.IsNull(profile.ProfileInfo.FirstName);
-			
+			Assert.AreEqual(profile.ProfileInfo.Count(), 0);
+		}
+
+		[Test]
+		public async Task SetProfileInfoAsync_NotAffectGetProfileAsync_For_OtherUsers()
+		{
+			Account account1 = await _accountRepository.CreateAccountAsync(_validLogin, _validPassword);
+			Account account2 = await _accountRepository.CreateAccountAsync(_anotherValidLogin, _anotherValidPassword);
+			var profileInfo1 = new List<ProfileInfoEntry>
+			{
+				new ProfileInfoEntry { Type = ProfileInfoType.FirstName, Value = "a", IsPublic = false },
+				new ProfileInfoEntry { Type = ProfileInfoType.LastName, Value = "b", IsPublic = true },
+				new ProfileInfoEntry { Type = ProfileInfoType.MiddleName, Value = "c", IsPublic = false },
+			};
+			var profileInfo2 = new List<ProfileInfoEntry>
+			{
+				new ProfileInfoEntry { Type = ProfileInfoType.MiddleName, Value = "c", IsPublic = false },
+				new ProfileInfoEntry { Type = ProfileInfoType.Location, Value = "d", IsPublic = true },
+				new ProfileInfoEntry { Type = ProfileInfoType.Description, Value = "e", IsPublic = false },
+			};
+			await _subject.SetProfileInfoAsync(account1.UserId, profileInfo1);
+			await _subject.SetProfileInfoAsync(account2.UserId, profileInfo2);
+			Profile profile1 = await _subject.GetProfileAsync(account1.UserId);
+			Assert.AreEqual(profile1.Login, _validLogin);
+			Assert.AreEqual(profile1.ProfileInfo.Count(), profileInfo1.Count());
+			foreach (var entry in profile1.ProfileInfo)
+			{
+				Assert.AreEqual(profileInfo1.FindAll(v => v.Equals(entry)).Count(), 1);
+			}
+			Profile profile2 = await _subject.GetProfileAsync(account2.UserId);
+			Assert.AreEqual(profile2.Login, _anotherValidLogin);
+			Assert.AreEqual(profile2.ProfileInfo.Count(), profileInfo1.Count());
+			foreach (var entry in profile2.ProfileInfo)
+			{
+				Assert.AreEqual(profileInfo2.FindAll(v => v.Equals(entry)).Count(), 1);
+			}
+			await _subject.SetProfileInfoAsync(account2.UserId, new List<ProfileInfoEntry>());
+			profile1 = await _subject.GetProfileAsync(account1.UserId);
+			Assert.AreEqual(profile1.Login, _validLogin);
+			Assert.AreEqual(profile1.ProfileInfo.Count(), profileInfo1.Count());
+			foreach (var entry in profile1.ProfileInfo)
+			{
+				Assert.AreEqual(profileInfo1.FindAll(v => v.Equals(entry)).Count(), 1);
+			}
+			profile2 = await _subject.GetProfileAsync(account2.UserId);
+			Assert.AreEqual(profile2.Login, _anotherValidLogin);
+			Assert.AreEqual(profile2.ProfileInfo.Count(), 0);
 		}
 	}
 }

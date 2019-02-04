@@ -26,12 +26,12 @@ namespace GroundsIce.WebApi.Controllers.Profile
 			BadData = 3000,
 		}
 
-		private IProfileInfoValidator _profileInfoValidator;
+		private IEnumerable<IProfileInfoValidator> _profileInfoValidators;
 		private IProfileRepository _profileRepository;
 
-		public ProfileController(IProfileInfoValidator profileInfoValidator, IProfileRepository profileRepository)
+		public ProfileController(IEnumerable<IProfileInfoValidator> profileInfoValidators, IProfileRepository profileRepository)
 		{
-			_profileInfoValidator = profileInfoValidator ?? throw new ArgumentNullException("profileInfoValidator");
+			_profileInfoValidators = profileInfoValidators ?? throw new ArgumentNullException("profileInfoValidator");
 			_profileRepository = profileRepository ?? throw new ArgumentNullException("profileRepository");
 		}
 
@@ -51,12 +51,7 @@ namespace GroundsIce.WebApi.Controllers.Profile
 			long? ownUserId = GetUserIdFromRequest();
 			if (!ownUserId.HasValue || (ownUserId.HasValue && ownUserId.Value != requestedUserId))
 			{
-				var profileInfo = profile.ProfileInfo;
-				if (NeedToCutdownEntry(profileInfo.FirstName)) profileInfo.FirstName = null;
-				if (NeedToCutdownEntry(profileInfo.MiddleName)) profileInfo.MiddleName = null;
-				if (NeedToCutdownEntry(profileInfo.Surname)) profileInfo.Surname = null;
-				if (NeedToCutdownEntry(profileInfo.Location)) profileInfo.Location = null;
-				if (NeedToCutdownEntry(profileInfo.Description)) profileInfo.Description = null;
+				profile.ProfileInfo = profile.ProfileInfo.Where(v => v.IsPublic).ToList();
 			}
 			return new Value<Profile>((int)ValueType.Success) { Payload = profile };
 		}
@@ -68,15 +63,19 @@ namespace GroundsIce.WebApi.Controllers.Profile
 
 		[Route("set_profile_info")]
 		[HttpPost]
-		public async Task<Value> SetProfileInfo(ProfileInfo profileInfo)
+		public async Task<Value> SetProfileInfo(DTO.ProfileInfoModel dto)
 		{
-			if (profileInfo == null) throw new ArgumentNullException("profileInfo");
+			if (dto == null) throw new ArgumentNullException("dto");
+			if (dto.ProfileInfo == null) throw new ArgumentNullException("dto.ProfileInfo");
 			long userId = GetUserIdFromRequest() ?? throw new ArgumentNullException("userId");
-			bool updated = false;
-			if (await _profileInfoValidator.ValidateAsync(profileInfo))
+			foreach (var validator in _profileInfoValidators)
 			{
-				updated = await _profileRepository.SetProfileInfoAsync(userId, profileInfo);
+				if (!await validator.ValidateAsync(dto.ProfileInfo))
+				{
+					return new Value((int)ValueType.BadData);
+				}
 			}
+			bool updated = await _profileRepository.SetProfileInfoAsync(userId, dto.ProfileInfo);
 			return updated ? new Value((int)ValueType.Success) : new Value((int)ValueType.BadData);
 		}
 

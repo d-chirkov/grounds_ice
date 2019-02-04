@@ -10,6 +10,6 @@ namespace GroundsIce.Model.Abstractions.Repositories
 	public interface IProfileRepository
 	{
 		Task<Profile> GetProfileAsync(long userId);
-		Task<bool> SetProfileInfoAsync(long userId, ProfileInfo profileInfo);
+		Task<bool> SetProfileInfoAsync(long userId, List<ProfileInfoEntry> profileInfo);
 	}
 }

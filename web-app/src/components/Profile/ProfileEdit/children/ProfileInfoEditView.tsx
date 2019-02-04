@@ -1,12 +1,14 @@
 import React from "react";
 import { connect } from "react-redux";
 import { IRootState } from "../../../../store/contexts/model";
-import { IProfileInfo, IProfileInfoEntry } from "../../ProfileView";
+import * as Model from "../../../../api/Profile/Model"
+import * as SetProfileInfo from "../../../../api/Profile/interface/setProfileInfo"
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Checkbox } from "primereact/checkbox";
-import { Button } from "primereact/button";
 import { IProfileEditWindowProps, saveButton } from "../ProfileEditView";
+import { isUndefined } from "util";
+import { Messager } from "../../../../Messager";
 
 
 interface IProfileInfoEditViewMapProps {
@@ -16,13 +18,13 @@ interface IProfileInfoEditViewMapDispatch {
 }
 
 interface IProfileInfoEditViewProps extends IProfileInfoEditViewMapProps, IProfileInfoEditViewMapDispatch, IProfileEditWindowProps {
-	profileInfo: IProfileInfo
-	updateLocalProfileInfo: (newValue: IProfileInfo) => void
+	profileInfo: Array<Model.ProfileInfoEntry>
+	updateLocalProfileInfo: (newValue: Array<Model.ProfileInfoEntry>) => void
 }
 
 interface IProfileInfoEditViewState {
 	loading: boolean
-	newProfileInfoInput: IProfileInfo
+	profileInfoInput: Array<Model.ProfileInfoEntry>
 }
 
 class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IProfileInfoEditViewState> {
@@ -30,79 +32,123 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 		super(props);
 		this.state = { 
 			loading: false,
-			newProfileInfoInput: props.profileInfo 
+			profileInfoInput: props.profileInfo 
 		};
 	}
 	
 	updateProfileInfo() {
 		this.setState({loading: true});
 		this.props.setEditable(false);
-		// TODO: call api
-		setTimeout(() => {
-			this.props.updateLocalProfileInfo(this.state.newProfileInfoInput);
+		let profileInfo: Model.ProfileInfoEntry[] = [];
+		console.log("state:");
+		let {profileInfoInput} = this.state;
+		console.log(profileInfoInput);
+		for (let i = 0; i < profileInfoInput.length; ++i) {
+			console.log(profileInfoInput[i].Value.length);
+			if (profileInfoInput[i].Value.length > 0) {
+				console.log("adding");
+				profileInfo.push(profileInfoInput[i]);
+			}
+		}
+		let cpy = [...profileInfo];
+		//let profileInfo = [...this.state.profileInfoInput.filter(v => v.Value.length > 0)];
+		console.log(profileInfo);
+		SetProfileInfo.perform(profileInfo,
+		() => {
+			console.log(profileInfo);
 			this.setState({loading: false});
 			this.props.setEditable(true);
+			this.props.updateLocalProfileInfo(cpy);
 			this.props.onChangesSaved(); 
-		}, 500);
+		},
+		(error) => {
+			this.setState({loading: false});
+			this.props.setEditable(true);
+			let showWarning = (message: string) =>  Messager.showError("Ошибка редактирования профиля", message);
+			switch(error) {
+				case SetProfileInfo.Error.BadData: 
+					showWarning("Введены недопустимые данные");
+					break;
+				case SetProfileInfo.Error.Unexpected:
+					showWarning("Неизвестная ошибка");
+					break;
+			}
+		});
 	}
 	
 	render() {
-		let {newProfileInfoInput: profileInfo} = this.state;
+		let {profileInfoInput} = this.state;
 		return (<div>
 			<h4>Изменить информацию профиля</h4>
 			<div className="w3-container">
-				{this.inputField("Фамилия", profileInfo.surname, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, surname: {value:v, isPublic:p}}}))}
-				{this.inputField("Имя", profileInfo.firstname, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, firstname: {value:v, isPublic:p}}}))}
-				{this.inputField("Отчество", profileInfo.middlename, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, middlename: {value:v, isPublic:p}}}))}
-				{this.inputField("Местоположение", profileInfo.location, (v, p) => this.setState({newProfileInfoInput: {...profileInfo, location: {value:v, isPublic:p}}}))}
-				{this.descriptionField()}
+				{}
+				{this.inputField( 
+					"Фамилия", 
+					this.getFieldByType(Model.ProfileInfoType.LastName, profileInfoInput),
+					(v, p) => this.setState({}))}
+				{this.inputField( 
+					"Имя", 
+					this.getFieldByType(Model.ProfileInfoType.FirstName, profileInfoInput),
+					(v, p) => this.setState({}))}
+				{this.inputField( 
+					"Отчество", 
+					this.getFieldByType(Model.ProfileInfoType.MiddleName, profileInfoInput),
+					(v, p) => this.setState({}))}
+				{this.inputField( 
+					"Местоположение", 
+					this.getFieldByType(Model.ProfileInfoType.Location, profileInfoInput),
+					(v, p) => this.setState({}))}
+				{this.descriptionField(this.getFieldByType(Model.ProfileInfoType.Description, profileInfoInput))}
 				{saveButton(this.state.loading, this.props.isEditable, () => this.updateProfileInfo())}
 			</div>
 		</div>);
 	}
 	
-	private inputField(fieldName: string, entry: IProfileInfoEntry|null, update: (val: string, pub: boolean) => void) {
-		let isPublic: boolean = entry ? entry.isPublic : false;
+	private getFieldByType(fieldType: Model.ProfileInfoType, profileInfo: Array<Model.ProfileInfoEntry>): Model.ProfileInfoEntry {
+		let found = profileInfo.find((v) => v.Type == fieldType);
+		if (isUndefined(found)) {
+			found = {Type: fieldType, Value: "", IsPublic: false};
+			profileInfo.push(found);
+		} 
+		return found;
+	}
+	
+	private inputField(fieldName: string, entry: Model.ProfileInfoEntry, update: (val: string, pub: boolean) => void) {
+		let isPublic: boolean = entry ? entry.IsPublic : false;
 		return (
 		<div style={{paddingBottom:"14px"}}>
 			<InputText 
 				type="text" 
 				size={30} 
-				onChange={(e) => update(e.currentTarget.value, isPublic)} 
+				onChange={(e) => { entry.Value = e.currentTarget.value; this.forceUpdate() }} 
 				placeholder={fieldName}
-				value={entry ? entry.value : undefined}
+				value={entry.Value}
 					/>
 			<Checkbox 
 				inputId={fieldName}
-				onChange={e => { entry && entry.value != "" && update(entry.value, !e.checked) } } 
+				onChange={e => { if (entry && entry.Value != "") entry.IsPublic = !e.checked; this.forceUpdate() } } 
 				checked={ !isPublic } 
-				disabled={ entry == null || entry.value == ""}
+				disabled={ entry.Value == ""}
 				style={{marginLeft:"20px"}}/>
 			<label htmlFor={fieldName} className="p-checkbox-label w3-text-blue-grey">Скрыть</label>
 		</div>
 		);
 	}
 	
-	private descriptionField() {
-		let description = this.state.newProfileInfoInput.description;
-		let isPublic: boolean = description ? description.isPublic : false;
+	private descriptionField(entry: Model.ProfileInfoEntry) {
 		let fieldName = "Описание";
 		return (
 		<div style={{paddingBottom:"14px"}}>
 			<InputTextarea rows={5} cols={30} autoResize={true}
-				onChange={(e) => 
-					this.setState({newProfileInfoInput: {...this.state.newProfileInfoInput, description: 
-					{ isPublic: isPublic, value: e.currentTarget.value}}})} 
+				onChange={(e) => { entry.Value = e.currentTarget.value; this.forceUpdate(); }}
 				placeholder={fieldName}
-				value={description ? description.value : undefined}
+				value={entry.Value && undefined}
 					/>
 			<Checkbox 
 				inputId={fieldName}
-				onChange={e => { description && description.value != "" && 
-					this.setState({newProfileInfoInput: {...this.state.newProfileInfoInput, description: 
-					{ isPublic: !e.checked, value: description.value }}}) }} 
-				checked={ !isPublic } 
-				disabled={ description == null || description.value == ""}
+				onChange={e => { entry.IsPublic = !e.checked; this.forceUpdate() }} 
+				checked={ !entry.IsPublic } 
+				disabled={ entry.Value == ""}
 				style={{marginLeft:"20px"}}/>
 			<label htmlFor={fieldName} className="p-checkbox-label w3-text-blue-grey">Скрыть</label>
 		</div>);

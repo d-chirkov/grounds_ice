@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,31 +21,32 @@ namespace GroundsIce.Model.Repositories
 
 	public class DbProfileRepository : IProfileRepository
 	{
-		[Table("ProfileInfo")]
-		class DbProfileInfo
+		private const string _profileInfoEntriesTableName = "ProfileInfoEntries";
+		private const string _profileInfoTypesTableName = "ProfileInfoTypes";
+		private const string _accountsTableName = "Accounts";
+
+		[Table("ProfileInfoEntries")]
+		class DbProfileInfoEntry
 		{
 			[Key]
 			public long UserId { get; set; }
-			public string FirstName { get; set; }
-			public bool IsFirstNamePublic { get; set; }
-			public string MiddleName { get; set; }
-			public bool IsMiddleNamePublic { get; set; }
-			public string Surname { get; set; }
-			public bool IsSurnamePublic { get; set; }
-			public string Location { get; set; }
-			public bool IsLocationPublic { get; set; }
-			public string Description { get; set; }
-			public bool IsDescriptionPublic { get; set; }
+			public string Type { get; set; }
+			public string Value { get; set; }
+			public bool IsPublic { get; set; }
 		}
 
-		class DbProfile : DbProfileInfo
+		static private Dictionary<string, ProfileInfoType> _fromDbProfileInfoTypesMapping = new Dictionary<string, ProfileInfoType>()
 		{
-			public string Login { get; set; }
-		}
+			{ "firstname", ProfileInfoType.FirstName },
+			{ "lastname", ProfileInfoType.LastName },
+			{ "middlename", ProfileInfoType.MiddleName },
+			{ "location", ProfileInfoType.Location },
+			{ "description", ProfileInfoType.Description },
+		};
+		static private Dictionary<ProfileInfoType, string> _toDbProfileInfoTypesMapping =
+			_fromDbProfileInfoTypesMapping.ToDictionary(x => x.Value, x => x.Key);
 
 		private IConnectionFactory _connectionFactory;
-		private const string _profileInfoTableName = "ProfileInfo";
-		private const string _accountsTableName = "Accounts";
 
 		public DbProfileRepository(IConnectionFactory connectionFactory)
 		{
@@ -53,69 +55,85 @@ namespace GroundsIce.Model.Repositories
 
 		public async Task<Profile> GetProfileAsync(long userId)
 		{
-			//TODO: change request for avatar
 			if (userId < 0) throw new ArgumentOutOfRangeException("userId");
-			string sqlQuery = $"SELECT a.Login, p.* FROM {_accountsTableName} a, {_profileInfoTableName} p WHERE a.UserId=p.UserId AND p.UserId=@UserId";
 			using (var connection = await _connectionFactory.GetConnectionAsync())
 			{
-				var dbResult = await connection.QueryAsync<DbProfile>(sqlQuery, new { UserId = userId });
-				DbProfile dbProfile =
-					dbResult.Count() == 0 ? null :
-					dbResult.Count() > 1 ? throw new DbProfileRepositoryException("Multiple profile infos were found by user id") :
-					dbResult.FirstOrDefault() ?? throw new DbProfileRepositoryException("Null profile info was returned");
-				return dbProfile == null ? null : new Profile()
+				string sqlQuery = $"SELECT Login FROM {_accountsTableName} WHERE UserId=@UserId";
+				var dbLogin = await connection.QueryAsync<string>(sqlQuery, new { UserId = userId });
+				string login =
+					dbLogin.Count() == 0 ? null :
+					dbLogin.Count() > 1 ? throw new DbProfileRepositoryException("Multiple profile infos were found by user id") :
+					dbLogin.First();
+				if (login == null)
 				{
-					Login = dbProfile.Login,
-					ProfileInfo = new ProfileInfo()
-					{
-						FirstName = CreateProfileInfoEntryFrom(dbProfile.FirstName, dbProfile.IsFirstNamePublic),
-						MiddleName = CreateProfileInfoEntryFrom(dbProfile.MiddleName, dbProfile.IsMiddleNamePublic),
-						Surname = CreateProfileInfoEntryFrom(dbProfile.Surname, dbProfile.IsSurnamePublic),
-						Location = CreateProfileInfoEntryFrom(dbProfile.Location, dbProfile.IsLocationPublic),
-						Description = CreateProfileInfoEntryFrom(dbProfile.Description, dbProfile.IsDescriptionPublic)
-					},
-					Avatar = null
+					return null;
+				}
+				sqlQuery = $"SELECT p.Value, p.IsPublic, t.Type " +
+					$"FROM {_profileInfoEntriesTableName} p, {_profileInfoTypesTableName} t " +
+					$"WHERE p.UserId=@UserId AND t.Id=p.TypeId";
+				var dbProfileInfoEntries = await connection.QueryAsync<DbProfileInfoEntry>(sqlQuery, new { UserId = userId });
+				var profileInfo = from dbEntry in dbProfileInfoEntries
+								  select new ProfileInfoEntry
+								  {
+									  Type = _fromDbProfileInfoTypesMapping[dbEntry.Type],
+									  Value = dbEntry.Value,
+									  IsPublic = dbEntry.IsPublic
+								  };
+				return new Profile
+				{
+					Login = login,
+					Avatar = null,
+					ProfileInfo = profileInfo.ToList()
 				};
 			}
 		}
 
-		private ProfileInfoEntry CreateProfileInfoEntryFrom(string value, bool isPublic)
-		{
-			return value != null && value != "" ? new ProfileInfoEntry() { Value = value, IsPublic = isPublic } : null;
-		}
-
-		public async Task<bool> SetProfileInfoAsync(long userId, ProfileInfo profileInfo)
+		public async Task<bool> SetProfileInfoAsync(long userId, List<ProfileInfoEntry> profileInfo)
 		{
 			if (userId < 0) throw new ArgumentOutOfRangeException("userId");
 			if (profileInfo == null) throw new ArgumentNullException("profileInfo");
 			using (var connection = await _connectionFactory.GetConnectionAsync())
+			using (var transaction = connection.BeginTransaction())
 			{
-				var dbProfileInfo = new DbProfileInfo
+				try
 				{
-					UserId = userId,
-					FirstName = GetValueFrom(profileInfo.FirstName),
-					IsFirstNamePublic = GetIsPublicFlagFrom(profileInfo.FirstName),
-					MiddleName = GetValueFrom(profileInfo.MiddleName),
-					IsMiddleNamePublic = GetIsPublicFlagFrom(profileInfo.MiddleName),
-					Surname = GetValueFrom(profileInfo.Surname),
-					IsSurnamePublic = GetIsPublicFlagFrom(profileInfo.Surname),
-					Location = GetValueFrom(profileInfo.Location),
-					IsLocationPublic = GetIsPublicFlagFrom(profileInfo.Location),
-					Description = GetValueFrom(profileInfo.Description),
-					IsDescriptionPublic = GetIsPublicFlagFrom(profileInfo.Description),
-				};
-				return await connection.UpdateAsync(dbProfileInfo);
+					string sqlQuery = $"DELETE FROM {_profileInfoEntriesTableName} WHERE UserId=@UserId";
+					await connection.ExecuteAsync(sqlQuery, new { UserId = userId }, transaction: transaction);
+					if (profileInfo.Count() == 0)
+					{
+						sqlQuery = $"SELECT UserId FROM {_accountsTableName} WHERE UserId=@UserId";
+						var foundUsers = await connection.QueryAsync<long>(sqlQuery, new { UserId = userId }, transaction: transaction);
+						bool userExists = foundUsers.Count() == 1;
+						if (userExists)
+						{
+							transaction.Commit();
+						}
+						return userExists;
+					}
+					var dbProfileInfoEntries = from entry in profileInfo
+											   where entry.Value != null && entry.Value.Length > 0
+											   select new DbProfileInfoEntry
+											   {
+												   UserId = userId,
+												   Type = _toDbProfileInfoTypesMapping[entry.Type],
+												   Value = entry.Value,
+												   IsPublic = entry.IsPublic
+											   };
+					sqlQuery = $"INSERT INTO {_profileInfoEntriesTableName} (UserId, Value, IsPublic, TypeId) " +
+						$"VALUES (@UserId, @Value, @IsPublic, (SELECT Id FROM {_profileInfoTypesTableName} WHERE Type=@Type))";
+					int inserted = await connection.ExecuteAsync(sqlQuery, dbProfileInfoEntries, transaction: transaction);
+					bool completed = inserted == profileInfo.Count();
+					if (completed)
+					{
+						transaction.Commit();
+					}
+					return completed;
+				}
+				catch (SqlException ex) when (ex.Number == 547)
+				{
+					return false;
+				}
 			}
-		}
-
-		private string GetValueFrom(ProfileInfoEntry entry)
-		{
-			return entry == null || entry.Value == null || entry.Value == "" ? null : entry.Value;
-		}
-
-		private bool GetIsPublicFlagFrom(ProfileInfoEntry entry)
-		{
-			return entry == null || entry.Value == null || entry.Value == "" ? false : entry.IsPublic;
 		}
 	}
 }

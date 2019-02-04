@@ -1,5 +1,5 @@
-import { AccountController, ValueType } from "../controllers/Account/AccountController";
-import { selectToken } from "../../store/selectors/authToken"
+import { AccountController, ValueType } from "../AccountController";
+import { selectToken } from "../../../store/selectors/authToken";
 
 type onSuccess =  () => void;;
 

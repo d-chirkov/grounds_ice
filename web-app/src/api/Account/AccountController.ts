@@ -1,6 +1,6 @@
 import fetch from "isomorphic-fetch";
-import { serverAddress } from "../../urls";
-import { Value, getInitialValue } from "../../DTO/Value";
+import { serverAddress } from "../urls";
+import { Value, getInitialValue } from "../DTO/Value";
 import * as DTO from "./DTO";
 
 let fetTokenUrl = serverAddress + "token";
@@ -33,7 +33,6 @@ export class AccountController {
 	
 	constructor(token: string | null = null) {
 		this.token = token;
-		console.log(token);
 	}
 	
 	public token: string | null = null;

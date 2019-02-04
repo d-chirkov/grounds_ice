@@ -10,6 +10,6 @@ namespace GroundsIce.Model.Entities
 	{
 		public string Login { get; set; }
 		public string Avatar { get; set; }
-		public ProfileInfo ProfileInfo { get; set; }
+		public List<ProfileInfoEntry> ProfileInfo { get; set; }
 	}
 }

@@ -8,12 +8,13 @@ namespace GroundsIce.Model.Entities
 {
 	public class ProfileInfoEntry : IEquatable<ProfileInfoEntry>
 	{
+		public ProfileInfoType Type { get; set; }
 		public string Value { get; set; }
 		public bool IsPublic { get; set; }
 
 		public bool Equals(ProfileInfoEntry other)
 		{
-			return other != null && Value == other.Value && IsPublic == other.IsPublic;
+			return other != null && Type == other.Type && Value == other.Value && IsPublic == other.IsPublic;
 		}
 	}
 }

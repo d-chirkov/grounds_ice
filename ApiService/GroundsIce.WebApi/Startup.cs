@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using GroundsIce.Model.Validators;
 using GroundsIce.WebApi.Controllers.Account;
 using GroundsIce.WebApi.Controllers.Profile;
+using GroundsIce.Model.Validators.ProfileInfo;
 
 [assembly: OwinStartup(typeof(GroundsIce.WebApi.Startup))]
 
@@ -35,15 +36,9 @@ namespace GroundsIce.WebApi
 			builder.Register(c => new LengthValidator(5, 20)).Keyed<IStringValidator>(CredentialType.Login).SingleInstance();
 			builder.Register(c => new LengthValidator(8, 30)).Keyed<IStringValidator>(CredentialType.Password).SingleInstance();
 
-			builder.Register(c => {
-				var v = new ProfileInfoValidator();
-				v.AddFirstNameValidator(new LengthValidator(1, 50));
-				v.AddMiddelNameValidator(new LengthValidator(1, 50));
-				v.AddSurameValidator(new LengthValidator(1, 50));
-				v.AddLocationValidator(new LengthValidator(1, 50));
-				v.AddDescriptionValidator(new LengthValidator(1, 300));
-				return v;
-			}).As<IProfileInfoValidator>();
+			builder.RegisterType<UniqueTypesValidator>().As<IProfileInfoValidator>();
+			builder.RegisterType<NoEmptyFieldsValidator>().As<IProfileInfoValidator>();
+			//TODO: add checking for field length in IProfileInfoValidator
 
 			builder.RegisterType<ProfileController>().InstancePerRequest();
 

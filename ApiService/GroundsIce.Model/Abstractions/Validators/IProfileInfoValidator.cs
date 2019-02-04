@@ -9,6 +9,6 @@ namespace GroundsIce.Model.Abstractions.Validators
 {
 	public interface IProfileInfoValidator
 	{
-		Task<bool> ValidateAsync(ProfileInfo profileInfo);
+		Task<bool> ValidateAsync(List<ProfileInfoEntry> profileInfo);
 	}
 }

@@ -37,9 +37,13 @@
     <Reference Include="Dapper.Contrib, Version=1.50.5.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Dapper.Contrib.1.50.5\lib\net451\Dapper.Contrib.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -56,13 +60,14 @@
     <Compile Include="ConnectionFactories\SqlConnectionFactory.cs" />
     <Compile Include="Entities\Account.cs" />
     <Compile Include="Entities\Profile.cs" />
-    <Compile Include="Entities\ProfileInfo.cs" />
     <Compile Include="Entities\ProfileInfoEntry.cs" />
+    <Compile Include="Entities\ProfileInfoType.cs" />
     <Compile Include="Repositories\DbAccountRepository.cs" />
     <Compile Include="Repositories\DbProfileRepository.cs" />
     <Compile Include="Validators\Common\LengthValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Validators\ProfileInfoValidator.cs" />
+    <Compile Include="Validators\ProfileInfo\NoEmptyFieldsValidator.cs" />
+    <Compile Include="Validators\ProfileInfo\UniqueTypesValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Validators\Login\" />
