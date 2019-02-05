@@ -40,13 +40,11 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 		this.setState({loading: true});
 		this.props.setEditable(false);
 		let profileInfo: Model.ProfileInfoEntry[] = [];
-		console.log("state:");
 		let {profileInfoInput} = this.state;
 		console.log(profileInfoInput);
 		for (let i = 0; i < profileInfoInput.length; ++i) {
 			console.log(profileInfoInput[i].Value.length);
 			if (profileInfoInput[i].Value.length > 0) {
-				console.log("adding");
 				profileInfo.push(profileInfoInput[i]);
 			}
 		}
@@ -55,7 +53,6 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 		console.log(profileInfo);
 		SetProfileInfo.perform(profileInfo,
 		() => {
-			console.log(profileInfo);
 			this.setState({loading: false});
 			this.props.setEditable(true);
 			this.props.updateLocalProfileInfo(cpy);
@@ -142,7 +139,7 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 			<InputTextarea rows={5} cols={30} autoResize={true}
 				onChange={(e) => { entry.Value = e.currentTarget.value; this.forceUpdate(); }}
 				placeholder={fieldName}
-				value={entry.Value && undefined}
+				value={entry.Value}
 					/>
 			<Checkbox 
 				inputId={fieldName}

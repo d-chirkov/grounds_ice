@@ -36,7 +36,7 @@ let HeaderMenu = (props: IHeaderMenuProps) => {
 	let popupHeaderMenuModel = [
 		{ label: "Профиль", command: (e:any) => { popupHeaderMenu!.toggle(e); history.push(`/profile/id${userId}`); } }, 
 		{ separator: true },
-		{ label: "Выйти", command: (e:any) => {popupHeaderMenu!.toggle(e); logOut();} }];
+		{ label: "Выйти", command: (e:any) => {popupHeaderMenu!.toggle(e); history.push(`/`); logOut();} }];
 	return (<div>
 		<Toolbar style={{ backgroundColor: "#293851", borderRadius: "0px" }}>
 			<div className="p-toolbar-group-right">

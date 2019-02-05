@@ -12,8 +12,7 @@ interface IProfileInfoViewProps {
 
 export let ProfileInfoView = (props: IProfileInfoViewProps) => {
 	let {userId, isOwnProfileInfo, profileInfo} = props;
-	console.log("ProfileInfoView");
-	console.log(profileInfo);
+	let isEmptyProfileInfo = profileInfo.length == 0;
 	return (
 		<div>
 			{isOwnProfileInfo && 
@@ -21,14 +20,21 @@ export let ProfileInfoView = (props: IProfileInfoViewProps) => {
 					Изменить
 				</Link>
 			}
+			{isEmptyProfileInfo && <div className="w3-text-grey" style={{textAlign:"center", width:"100%", float:"left", height:"30px"}}>
+				Здесь пока ничего нет
+			</div>}
 			<ProfileInfoEntryView fieldName="Фамилия" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.LastName)} />
 			<ProfileInfoEntryView fieldName="Имя" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.FirstName)} />
 			<ProfileInfoEntryView fieldName="Отчество" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.MiddleName)} />
 			<ProfileInfoEntryView fieldName="Местоположение" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.Location)} />
 			<ProfileInfoEntryView fieldName="Описание" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.Description)} />
+			<div>
+		<div className="w3-text-blue-grey" style={{width:"250px", float:"left", height:"30px"}} />
+	</div>
 		</div>
 	);
 }
+
 
 interface IProfileInfoEntryViewProps {
 	fieldName: string
@@ -40,11 +46,15 @@ let ProfileInfoEntryView = (props: IProfileInfoEntryViewProps) => {
 	if (isUndefined(entry)) {
 		return null;
 	}
+	let heightParam = "30px";
+	if (fieldName == "Описание") {
+		heightParam = "auto";
+	}
 	return (<div>
 		<div className="w3-text-blue-grey" style={{width:"150px", float:"left", height:"30px"}}>
 			{`${fieldName}:`}
 		</div>
-		<div style={{float: "left", height:"30px", width:"250px", wordWrap:"break-word"}}>
+		<div style={{float: "left", height:heightParam, width:"250px", wordWrap:"break-word"}}>
 			{entry.Value}
 		</div>
 	</div>);

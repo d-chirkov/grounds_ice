@@ -81,7 +81,7 @@ namespace GroundsIce.WebApi.Controllers.Profile
 
 		private long? GetUserIdFromRequest()
 		{
-			return (long?)(Request?.Properties["USER_ID"]);
+			return Request != null && Request.Properties.ContainsKey("USER_ID") ? (long?)(Request?.Properties["USER_ID"]) : null;
 		}
 	}
 }

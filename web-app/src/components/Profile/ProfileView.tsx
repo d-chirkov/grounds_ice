@@ -10,9 +10,8 @@ import { Card } from "primereact/card";
 
 import * as Model from "../../api/Profile/Model";
 import * as GetProfile from "../../api/Profile/interface/getProfile";
-import { loadavg } from "os";
-import { ValueType } from "../../api/Profile/ProfileController";
 import { Messager } from "../../Messager";
+import {ProgressSpinner} from 'primereact/progressspinner';
 
 interface IProfileViewRouteProps {
 	userId: string
@@ -45,55 +44,61 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 	}
 	
 	componentWillMount() {
-		this.loadProfile();
+		this.loadProfile(this.props.userId);
 	}
 	
-	private loadProfile() {
+	componentWillReceiveProps(nextProps: IProfileViewProps) {
+		let shouldUpdate = nextProps.userId != this.props.userId || nextProps.isOwnProfile != this.props.isOwnProfile;
+		if (shouldUpdate) {
+			this.loadProfile(nextProps.userId);
+		}
+	}
+	
+	private loadProfile(userId: string) {
+		console.log("loading");
 		this.setState({ loading: true });
-		let { userId } = this.props;
 		GetProfile.perform(userId, 
 		(profile) => {
-			console.log("loaded profile");
-			console.log(profile);
+			console.log("has profile");
 			this.setState({ loading: false, profile });
 		},
 		(error) => {
+			console.log("has error");
 			let showWarning = (message: string) =>  Messager.showError("Ошибка", message);
 			switch(error) {
 				case GetProfile.Error.ProfileNotExists: 
-					showWarning("Профиль не найден");
+					//showWarning("Профиль не найден");
 					break;
 				case GetProfile.Error.Unexpected: 
 					showWarning("Неизвестная ошибка"); 
 					break;
 			}
-			this.setState({ loading: false });
+			this.setState({ loading: false, profile: null });
 		})
 	}
 	
 	private updateLocalProfileInfo(newValue: Model.ProfileInfoEntry[]) {
 		let { profile } = this.state;
-		console.log("updateLocalProfileInfo this state");
-		console.log(profile);
 		if (profile != null) {
 			profile.ProfileInfo = newValue;
-			console.log("updateLocalProfileInfo");
-			console.log(newValue);
-			//this.state.profile!.ProfileInfo.
 			this.setState({ profile: {ProfileInfo: newValue, Login: profile.Login, Avatar: profile.Avatar} });
 		}
+	}
+	
+	private getSpinner() {
+		return (<ProgressSpinner style={{position:"absolute", top:"50%", left:"50%", transform:"translate(-50%, -50%)"}}/>)
 	}
 	
 	render() {
 		let { profile } = this.state;
 		let { userId } = this.props;
-		console.log("render");
-		if (profile != null) {
-			console.log(profile.ProfileInfo);
-		}
 		return (<div style={{margin: "auto", width:"850px", bottom:0, top:0}}>{
-			this.state.loading ? <p>LOADING</p> :
-			profile == null ? <p>ERROR</p> :
+			this.state.loading ? this.getSpinner() :
+			profile == null ? <h3 
+				className="w3-text-grey" 
+				style={{textAlign:"center", position:"absolute", top:"50%", left:"50%", transform:"translate(-50%, -50%)"}}> 
+					Профиль не найден 
+			</h3> :
 			
 			<div>
 				<h3 className="w3-text-blue-grey" style={{marginLeft:"25px"}}>{this.props.isOwnProfile ? 
