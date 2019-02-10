@@ -3,7 +3,6 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 
-
 interface ISignUpFormProps {
 	loading: boolean,
 	isLoginIsInvalid: boolean,

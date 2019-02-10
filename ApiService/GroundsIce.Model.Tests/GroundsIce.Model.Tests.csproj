@@ -73,6 +73,7 @@
     <Compile Include="Repositories\DbAccountRepositoryTests.cs" />
     <Compile Include="Repositories\DbProfileRepositoryTests.cs" />
     <Compile Include="Validators\Common\LengthValidatorTests.cs" />
+    <Compile Include="Validators\ProfileInfo\FieldsMaxLengthValidatorTests.cs" />
     <Compile Include="Validators\ProfileInfo\NoEmptyFieldsValidatorTests.cs" />
     <Compile Include="Validators\ProfileInfo\UniqueTypesValidatorTests.cs" />
   </ItemGroup>

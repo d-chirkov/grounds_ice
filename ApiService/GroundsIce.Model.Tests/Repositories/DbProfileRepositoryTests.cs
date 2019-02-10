@@ -175,8 +175,9 @@ namespace GroundsIce.Model.Repositories.Tests
 					new ProfileInfoEntry { Type = ProfileInfoType.FirstName, Value = "a", IsPublic = false },
 					new ProfileInfoEntry { Type = ProfileInfoType.LastName, Value = "b", IsPublic = true },
 					new ProfileInfoEntry { Type = ProfileInfoType.MiddleName, Value = "c", IsPublic = false },
-					new ProfileInfoEntry { Type = ProfileInfoType.Location, Value = "d", IsPublic = true },
-					new ProfileInfoEntry { Type = ProfileInfoType.Description, Value = "e", IsPublic = false },
+					new ProfileInfoEntry { Type = ProfileInfoType.Description, Value = "d", IsPublic = true },
+					new ProfileInfoEntry { Type = ProfileInfoType.City, Value = "e", IsPublic = false },
+					new ProfileInfoEntry { Type = ProfileInfoType.Region, Value = "f", IsPublic = false },
 				}
 			);
 		}
@@ -205,7 +206,7 @@ namespace GroundsIce.Model.Repositories.Tests
 			var profileInfo2 = new List<ProfileInfoEntry>
 			{
 				new ProfileInfoEntry { Type = ProfileInfoType.MiddleName, Value = "c", IsPublic = false },
-				new ProfileInfoEntry { Type = ProfileInfoType.Location, Value = "d", IsPublic = true },
+				new ProfileInfoEntry { Type = ProfileInfoType.City, Value = "d", IsPublic = true },
 				new ProfileInfoEntry { Type = ProfileInfoType.Description, Value = "e", IsPublic = false },
 			};
 			await _subject.SetProfileInfoAsync(account1.UserId, profileInfo1);

@@ -74,7 +74,7 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 			isPasswordError = true;
 		}
 		if (isUsernameError || isPasswordError) {
-			Messager.showErrors(warnings.map(v => ({header: errorMessageHeader, message: v})))
+			Messager.showManyErrors(warnings.map(v => ({header: errorMessageHeader, message: v})))
 			this.setState({isLoginIsInvalid: isUsernameError, isPasswordIsInvalid: isPasswordError});
 		} else {
 			this.setState({loading: true});
@@ -83,7 +83,7 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 					this.props.setAccount(token, userId, login);
 				},
 				(error: SignIn.Error) => {
-					let showWarning = (message: string) =>  Messager.showError(errorMessageHeader, message);
+					let showWarning = (message: string) =>  Messager.showError(message);
 					switch(error) {
 						case SignIn.Error.Unauthorized: 
 							showWarning("Неверный логин или пароль");
@@ -118,16 +118,17 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 			isPasswordError = true;
 		}
 		if (isUsernameError || isPasswordError) {
-			Messager.showErrors(warnings.map(v => ({header: errorMessageHeader, message: v})))
+			Messager.showManyErrors(warnings.map(v => ({header: errorMessageHeader, message: v})))
 			this.setState({isLoginIsInvalid: isUsernameError, isPasswordIsInvalid: isPasswordError});
 		} else {
 			this.setState({loading: true});
 			SignUp.perform(login, password, 
 				(token: string, userId: string, login: string) => {
+					Messager.showSuccess("Добро пожаловать, " + login + "!");
 					this.props.setAccount(token, userId, login);
 				},
 				(error: SignUp.Error) => {
-					let showWarning = (message: string) =>  Messager.showError(errorMessageHeader, message);
+					let showWarning = (message: string) =>  Messager.showError(message);
 					switch(error) {
 						case SignUp.Error.LoginAlreadyExists: 
 							showWarning("Логин уже используется"); 

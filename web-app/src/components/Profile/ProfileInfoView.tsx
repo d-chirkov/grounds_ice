@@ -23,39 +23,44 @@ export let ProfileInfoView = (props: IProfileInfoViewProps) => {
 			{isEmptyProfileInfo && <div className="w3-text-grey" style={{textAlign:"center", width:"100%", float:"left", height:"30px"}}>
 				Здесь пока ничего нет
 			</div>}
-			<ProfileInfoEntryView fieldName="Фамилия" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.LastName)} />
-			<ProfileInfoEntryView fieldName="Имя" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.FirstName)} />
-			<ProfileInfoEntryView fieldName="Отчество" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.MiddleName)} />
-			<ProfileInfoEntryView fieldName="Местоположение" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.Location)} />
-			<ProfileInfoEntryView fieldName="Описание" entry={profileInfo.find(v => v.Type == Model.ProfileInfoType.Description)} />
-			<div>
-		<div className="w3-text-blue-grey" style={{width:"250px", float:"left", height:"30px"}} />
-	</div>
+			<ProfileInfoEntryView fieldName="Фамилия" value={getValueByType(profileInfo, Model.ProfileInfoType.LastName)} />
+			<ProfileInfoEntryView fieldName="Имя" value={getValueByType(profileInfo, Model.ProfileInfoType.FirstName)} />
+			<ProfileInfoEntryView fieldName="Отчество" value={getValueByType(profileInfo, Model.ProfileInfoType.MiddleName)} />
+			<ProfileInfoEntryView fieldName="Город" value={getValueByType(profileInfo, Model.ProfileInfoType.City)} />
+			<ProfileInfoEntryView fieldName="Регион" value={getValueByType(profileInfo, Model.ProfileInfoType.Region)} />
+			<ProfileInfoEntryView fieldName="Описание" value={getValueByType(profileInfo, Model.ProfileInfoType.Description)} autoHeight={true} />
+			<div className="w3-text-blue-grey" style={{width:"250px", float:"left", height:"30px"}} />
 		</div>
 	);
 }
 
+function getValueByType(entries: Model.ProfileInfoEntry[], type: Model.ProfileInfoType): string | null {
+	let entry = entries.find(v => v.Type == type);
+	return isUndefined(entry) ? null : entry.Value
+}
 
 interface IProfileInfoEntryViewProps {
 	fieldName: string
-	entry?: Model.ProfileInfoEntry
+	value: string | null
+	autoHeight?: boolean
 }
 
-let ProfileInfoEntryView = (props: IProfileInfoEntryViewProps) => {
-	let {fieldName, entry} = props;
-	if (isUndefined(entry)) {
+let ProfileInfoEntryView = (props: IProfileInfoEntryViewProps, ) => {
+	let {fieldName, value, autoHeight} = props;
+	if (value == null) {
 		return null;
 	}
-	let heightParam = "30px";
-	if (fieldName == "Описание") {
-		heightParam = "auto";
+	if (isUndefined(autoHeight)) {
+		autoHeight = false;
 	}
+	// TODO: убрать костыль
+	let heightParam = autoHeight ? "auto" : "30px";
 	return (<div>
-		<div className="w3-text-blue-grey" style={{width:"150px", float:"left", height:"30px"}}>
+		<div className="w3-text-blue-grey" style={{width:"120px", float:"left", height:"30px"}}>
 			{`${fieldName}:`}
 		</div>
-		<div style={{float: "left", height:heightParam, width:"250px", wordWrap:"break-word"}}>
-			{entry.Value}
+		<div style={{float: "left", height:heightParam, width:"280px", wordWrap:"break-word"}}>
+			{value}
 		</div>
 	</div>);
 }

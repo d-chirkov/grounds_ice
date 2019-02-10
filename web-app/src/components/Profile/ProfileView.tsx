@@ -48,23 +48,19 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 	}
 	
 	componentWillReceiveProps(nextProps: IProfileViewProps) {
-		let shouldUpdate = nextProps.userId != this.props.userId || nextProps.isOwnProfile != this.props.isOwnProfile;
-		if (shouldUpdate) {
+		if (nextProps.userId != this.props.userId || nextProps.isOwnProfile != this.props.isOwnProfile) {
 			this.loadProfile(nextProps.userId);
 		}
 	}
 	
 	private loadProfile(userId: string) {
-		console.log("loading");
 		this.setState({ loading: true });
 		GetProfile.perform(userId, 
 		(profile) => {
-			console.log("has profile");
 			this.setState({ loading: false, profile });
 		},
 		(error) => {
-			console.log("has error");
-			let showWarning = (message: string) =>  Messager.showError("Ошибка", message);
+			let showWarning = (message: string) =>  Messager.showError(message);
 			switch(error) {
 				case GetProfile.Error.ProfileNotExists: 
 					//showWarning("Профиль не найден");

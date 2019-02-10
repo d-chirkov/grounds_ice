@@ -40,8 +40,9 @@ namespace GroundsIce.Model.Repositories
 			{ "firstname", ProfileInfoType.FirstName },
 			{ "lastname", ProfileInfoType.LastName },
 			{ "middlename", ProfileInfoType.MiddleName },
-			{ "location", ProfileInfoType.Location },
 			{ "description", ProfileInfoType.Description },
+			{ "city", ProfileInfoType.City },
+			{ "region", ProfileInfoType.Region },
 		};
 		static private Dictionary<ProfileInfoType, string> _toDbProfileInfoTypesMapping =
 			_fromDbProfileInfoTypesMapping.ToDictionary(x => x.Value, x => x.Key);

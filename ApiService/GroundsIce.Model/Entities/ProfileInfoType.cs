@@ -15,7 +15,8 @@ namespace GroundsIce.Model.Entities
 		FirstName,
 		LastName,
 		MiddleName,
-		Location,
-		Description
+		Description,
+		City,
+		Region
 	}
 }

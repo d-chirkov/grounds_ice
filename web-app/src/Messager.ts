@@ -1,5 +1,4 @@
 export interface IMessage {
-	header: string,
 	message: string
 }
 
@@ -10,13 +9,23 @@ export class Messager {
 		Messager.growl_ = growl;
 	}
 	
-	static showErrors(messages: IMessage[]) {
+	static showManyErrors(messages: IMessage[]) {
 		if (Messager.growl_ != undefined) {
-			Messager.growl_.show(messages.map(v => ({severity: 'error', summary: v.header, detail: v.message})));
+			Messager.growl_.show(messages.map(v => ({severity: 'error', summary: v.message})));
 		}
 	}
 	
-	static showError(header: string, message: string) {
-		this.showErrors([{header, message}]);
+	static showError(message: string) {
+		this.showManyErrors([{message}]);
+	}
+	
+	static showManySuccess(messages: IMessage[]) {
+		if (Messager.growl_ != undefined) {
+			Messager.growl_.show(messages.map(v => ({severity: 'success', summary: v.message})));
+		}
+	}
+	
+	static showSuccess(message: string) {
+		this.showManySuccess([{message}]);
 	}
 }

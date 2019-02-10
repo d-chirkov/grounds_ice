@@ -15,6 +15,7 @@ using GroundsIce.Model.Validators;
 using GroundsIce.WebApi.Controllers.Account;
 using GroundsIce.WebApi.Controllers.Profile;
 using GroundsIce.Model.Validators.ProfileInfo;
+using GroundsIce.Model.Entities;
 
 [assembly: OwinStartup(typeof(GroundsIce.WebApi.Startup))]
 
@@ -36,16 +37,31 @@ namespace GroundsIce.WebApi
 			builder.Register(c => new LengthValidator(5, 20)).Keyed<IStringValidator>(CredentialType.Login).SingleInstance();
 			builder.Register(c => new LengthValidator(8, 30)).Keyed<IStringValidator>(CredentialType.Password).SingleInstance();
 
-			builder.RegisterType<UniqueTypesValidator>().As<IProfileInfoValidator>();
-			builder.RegisterType<NoEmptyFieldsValidator>().As<IProfileInfoValidator>();
-			//TODO: add checking for field length in IProfileInfoValidator
+			builder.Register(c => new UniqueTypesValidator()).As<IProfileInfoValidator>().SingleInstance();
+			builder.Register(c => new NoEmptyFieldsValidator()).As<IProfileInfoValidator>().SingleInstance();
+			builder.Register(c =>
+			{
+				return new FieldsMaxLengthValidator()
+				{
+					TypesMaxLengths = new Dictionary<ProfileInfoType, int>() {
+						{ ProfileInfoType.FirstName, 30 },
+						{ ProfileInfoType.LastName, 30 },
+						{ ProfileInfoType.MiddleName, 30 },
+						{ ProfileInfoType.City, 35 },
+						{ ProfileInfoType.Region, 35 },
+						{ ProfileInfoType.Description, 300 },
+					}
+				};
+			}).As<IProfileInfoValidator>().SingleInstance();
 
-			builder.RegisterType<ProfileController>().InstancePerRequest();
+			// TODO: add whitespace checks for login and profile info
 
 			builder.RegisterType<AccountController>().OnActivated(c => {
 				c.Instance.SetLoginValidators(c.Context.ResolveKeyed<IEnumerable<IStringValidator>>(CredentialType.Login));
 				c.Instance.SetPasswordValidators(c.Context.ResolveKeyed<IEnumerable<IStringValidator>>(CredentialType.Password));
 			}).InstancePerRequest();
+
+			builder.RegisterType<ProfileController>().InstancePerRequest();
 
 			var config = GlobalConfiguration.Configuration;
 			var container = builder.Build();

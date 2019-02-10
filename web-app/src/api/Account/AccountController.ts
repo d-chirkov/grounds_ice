@@ -1,6 +1,8 @@
 import fetch from "isomorphic-fetch";
+import { BaseController, ApiException } from "../BaseController"
+import { Account } from "./Model"
 import { serverAddress } from "../urls";
-import { Value, getInitialValue } from "../DTO/Value";
+import { Value } from "../DTO/Value";
 import * as DTO from "./DTO";
 
 let fetTokenUrl = serverAddress + "token";
@@ -18,64 +20,31 @@ export enum ValueType {
 	OldPasswordNotValid = 6000,
 }
 
-interface AccountException {
-	isUnauthorized?: boolean
-	isUnexpected?: boolean
-	valueType?: ValueType
-}
-
-interface Account {
-	UserId: string,
-	Login: string
-}
-
-export class AccountController {
-	
+export class AccountController extends BaseController {
 	constructor(token: string | null = null) {
-		this.token = token;
+		super(token);
 	}
 	
-	public token: string | null = null;
+	protected IsTypeIsPossible(type: number): boolean {
+		return Object.values(ValueType).includes(type);
+	}
 	
 	// Remote API functions
 	
 	public Register(dto: DTO.LoginAndPassword): Promise<Value> {
-		return this.Interact(registerUrl, false, dto);
+		return this.Interact(registerUrl, dto);
 	}
 	
 	public GetAccount(): Promise<Value<Account>> {
-		return this.Interact<Account>(getAccountUrl, true).then(value => this.checkPayloadNotNull(value));
+		return this.Interact<Account>(getAccountUrl).then(value => this.checkPayloadNotNull(value));
 	}
 	
 	public ChangeLogin(dto: DTO.NewLogin): Promise<Value> {
-		return this.Interact(changeLoginUrl, true, dto);
+		return this.Interact(changeLoginUrl, dto);
 	}
 	
 	public ChangePassword(dto: DTO.OldAndNewPasswords): Promise<Value> {
-		return this.Interact(changePasswordUrl, true, dto);
-	}
-	
-	private Interact<T = null>(url: string, authorized: boolean, dto: any = null): Promise<Value<T>> {
-		if (authorized && this.token == null) {
-			throw <AccountException>{isUnexpected: true};
-		}
-		let request: RequestInit = {
-			method: "Post",
-			headers: {
-				"Accept": "application/json",
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(dto)
-		}; 
-		if (authorized) {
-			request.headers = {...request.headers, "Authorization": "Bearer " + this.token};
-		}
-		if (dto != null) {
-			request.body = JSON.stringify(dto);
-		}
-		return fetch(url, request)
-			.then(res => this.getValueFrom<T>(res))
-			.then(value => this.checkValueSuccess(value));
+		return this.Interact(changePasswordUrl, dto);
 	}
 	
 	// GetToken not provided by account controller, but by ASP.NET OAuth provider with bearer tokens
@@ -107,60 +76,17 @@ export class AccountController {
 		return fetch(fetTokenUrl, request)
 			.then(res => {
 				if (res.status == 400) {
-					throw <AccountException>{isUnauthorized: true};
+					throw <ApiException>{isUnauthorized: true};
 				}
 				return res;})
 			.then(res => this.checkHttpStatus(res).json())
 			.then(res => {
 				if (!res.hasOwnProperty("access_token")) {
-					throw <AccountException>{isUnauthorized: true};
+					throw <ApiException>{isUnauthorized: true};
 				}
 				this.token = res.access_token;
 				return res.access_token;
 			});
-	}
-	
-	// Helpers
-	
-	private checkValueSuccess<T = null>(value: Value<T>): Value<T> {
-		if (value.Type != ValueType.Success) {
-			throw <AccountException>{valueType: value.Type};
-		}
-		return value;
-	}
-	
-	private checkPayloadNotNull<T = null>(value: Value<T>): Value<T> {
-		if (value.Payload == null) {
-			throw <AccountException>{isUnexpected: true};
-		}
-		return value;
-	}
-	
-	private getValueFrom<T = null>(res: Response): Promise<Value<T>> {
-		return this.checkHttpStatus(res).json()
-			.then((res:any) => {
-				let value = getInitialValue<T>();
-				if (res.hasOwnProperty("Type") && Object.values(ValueType).includes(res.Type)) {
-					value.Type = res.Type;
-				} else {
-					throw <AccountException>{isUnexpected: true};
-				}
-				if (res.hasOwnProperty("Payload")) {
-					value.Payload = res.Payload as T;
-				}
-				return value;
-			})
-	}
-	
-	private checkHttpStatus (response: Response): any  {
-		let status = response.status;
-		if (status == 200) {
-			return response;
-		}
-		if (status == 401) {
-			throw <AccountException>{isUnauthorized: true};
-		}
-		throw <AccountException>{isUnexpected: true};
 	}
 }
 

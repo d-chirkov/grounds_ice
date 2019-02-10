@@ -3,7 +3,8 @@ export enum ProfileInfoType
 	FirstName = "FirstName",
 	LastName = "LastName",
 	MiddleName = "MiddleName",
-	Location = "Location",
+	City = "City",
+	Region = "Region",
 	Description = "Description"
 }
 

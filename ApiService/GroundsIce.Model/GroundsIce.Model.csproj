@@ -66,6 +66,7 @@
     <Compile Include="Repositories\DbProfileRepository.cs" />
     <Compile Include="Validators\Common\LengthValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Validators\ProfileInfo\FieldsMaxLengthValidator.cs" />
     <Compile Include="Validators\ProfileInfo\NoEmptyFieldsValidator.cs" />
     <Compile Include="Validators\ProfileInfo\UniqueTypesValidator.cs" />
   </ItemGroup>

@@ -4,6 +4,7 @@ import { IRootState } from "../../../../store/contexts/model";
 import { InputText } from "primereact/inputtext";
 import { IProfileEditWindowProps, saveButton } from "../ProfileEditView";
 import * as ChangeLogin from "../../../../api/Account/interface/changeLogin";
+import { filter } from "../../../../inputFilters/loginFilter"
 import { Messager } from "../../../../Messager";
 import { SetLoginAction } from "../../../../store/contexts/data/account/actions";
 
@@ -21,6 +22,7 @@ interface ILoginEditViewState {
 	loading: boolean
 	newLoginInput: string
 	isLoginInputIsInvalid: boolean
+	loginMaxLength: number
 }
 
 class LoginEditView extends React.Component<ILoginEditViewProps, ILoginEditViewState> {
@@ -29,13 +31,13 @@ class LoginEditView extends React.Component<ILoginEditViewProps, ILoginEditViewS
 		this.state = {
 			loading: false,
 			newLoginInput: "",
-			isLoginInputIsInvalid: false
+			isLoginInputIsInvalid: false,
+			loginMaxLength: 20
 		}
 	}
 	
 	updateLogin() {
 		let {newLoginInput} = this.state;
-		let errorMessageHeader = "Ошибка смены логина";
 		let warnings: string[] = [];
 		let isInvalidInput = false;
 		if (newLoginInput.length === 0) {
@@ -43,7 +45,7 @@ class LoginEditView extends React.Component<ILoginEditViewProps, ILoginEditViewS
 			isInvalidInput = true;
 		}
 		if (isInvalidInput) {
-			Messager.showErrors(warnings.map(v => ({header: errorMessageHeader, message: v})))
+			Messager.showManyErrors(warnings.map(v => ({message: v})))
 			this.setState({isLoginInputIsInvalid: true});
 			
 		} else {
@@ -56,18 +58,17 @@ class LoginEditView extends React.Component<ILoginEditViewProps, ILoginEditViewS
 					this.props.onChangesSaved(); 
 				},
 				(error: ChangeLogin.Error) => {
-					let showWarning = (message: string) =>  Messager.showError(errorMessageHeader, message);
 					switch(error) {
 						case ChangeLogin.Error.LoginAlreadyExists: 
-							showWarning("Логин уже используется"); 
+							Messager.showError("Логин уже используется"); 
 							isInvalidInput = true; 
 							break;
 						case ChangeLogin.Error.LoginNotValid: 
-							showWarning("Этот логин не может быть использован");
+							Messager.showError("Этот логин не может быть использован");
 							isInvalidInput = true; 
 							break;
 						case ChangeLogin.Error.Unexpected:
-							showWarning("Неизвестная ошибка");
+							Messager.showError("Неизвестная ошибка");
 							break;
 					}
 					this.setState({loading: false, isLoginInputIsInvalid: true});
@@ -77,7 +78,7 @@ class LoginEditView extends React.Component<ILoginEditViewProps, ILoginEditViewS
 	}
 	
 	updateLoginInput(newValue: string) {
-		this.setState({newLoginInput: newValue, isLoginInputIsInvalid: false})
+		this.setState({newLoginInput: filter(newValue), isLoginInputIsInvalid: false})
 	}
 	
 	render() {
@@ -88,9 +89,10 @@ class LoginEditView extends React.Component<ILoginEditViewProps, ILoginEditViewS
 					type="text" 
 					size={30} 
 					placeholder="Новый логин"
-					className={this.state.isLoginInputIsInvalid ? "p-error" : undefined}
 					disabled={!this.props.isEditable}
-					onChange={(e) => { this.setState({newLoginInput: e.currentTarget.value}) }} 
+					onChange={(e) => this.updateLoginInput(e.currentTarget.value)}
+					value={this.state.newLoginInput}
+					className={this.state.isLoginInputIsInvalid ? "p-error" : undefined}
 					/>
 				{saveButton(this.state.loading, this.props.isEditable, () => this.updateLogin())}
 			</div>

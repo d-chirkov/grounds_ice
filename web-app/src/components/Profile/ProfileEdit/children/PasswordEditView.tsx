@@ -4,6 +4,7 @@ import { IRootState } from "../../../../store/contexts/model";
 import { Password } from "primereact/password";
 import { IProfileEditWindowProps, saveButton } from "../ProfileEditView";
 import { Messager } from "../../../../Messager";
+import { filter } from "../../../../inputFilters/passwordFilter"
 import * as ChangePassword from "../../../../api/Account/interface/changePassword";
 
 interface IPasswordEditViewMapProps {
@@ -39,7 +40,6 @@ class PasswordEditView extends React.Component<IPasswordEditViewProps, IPassword
 	
 	updatePassword() {
 		let {oldPasswordInput, newPasswordInput, repeatNewPasswordInput} = this.state;
-		let errorMessageHeader = "Ошибка смены пароля";
 		let warnings: string[] = [];
 		let isOldPasswordInputIsInvalid = false;
 		let isNewPasswordsInputIsInvalid = false;
@@ -60,7 +60,7 @@ class PasswordEditView extends React.Component<IPasswordEditViewProps, IPassword
 			isNewPasswordsInputIsInvalid = true;
 		}
 		if (isOldPasswordInputIsInvalid || isNewPasswordsInputIsInvalid) {
-			Messager.showErrors(warnings.map(v => ({header: errorMessageHeader, message: v})))
+			Messager.showManyErrors(warnings.map(v => ({message: v})))
 			this.setState({isOldPasswordInputIsInvalid, isNewPasswordsInputIsInvalid});
 		} else {
 			this.setState({loading: true});
@@ -71,18 +71,17 @@ class PasswordEditView extends React.Component<IPasswordEditViewProps, IPassword
 					this.props.onChangesSaved(); 
 				},
 				(error: ChangePassword.Error) => {
-					let showWarning = (message: string) =>  Messager.showError(errorMessageHeader, message);
 					switch(error) {
 						case ChangePassword.Error.OldPasswordNotValid: 
-							showWarning("Старый пароль неверен"); 
+							Messager.showError("Старый пароль неверен"); 
 							isOldPasswordInputIsInvalid = true; 
 							break;
 						case ChangePassword.Error.PasswordNotValid: 
-							showWarning("Новый пароль не может быть использован");
+							Messager.showError("Новый пароль не может быть использован");
 							isNewPasswordsInputIsInvalid = true; 
 							break;
 						case ChangePassword.Error.Unexpected:
-							showWarning("Неизвестная ошибка");
+							Messager.showError("Неизвестная ошибка");
 							break;
 					}
 					this.setState({loading: false, isOldPasswordInputIsInvalid, isNewPasswordsInputIsInvalid});
@@ -92,15 +91,15 @@ class PasswordEditView extends React.Component<IPasswordEditViewProps, IPassword
 	}
 	
 	updateOldPasswordInput(newValue: string) {
-		this.setState({ isOldPasswordInputIsInvalid: false, oldPasswordInput: newValue });
+		this.setState({ isOldPasswordInputIsInvalid: false, oldPasswordInput: filter(newValue) });
 	}
 	
 	updateNewPasswordInput(newValue: string) {
-		this.setState({ isNewPasswordsInputIsInvalid: false, newPasswordInput: newValue });
+		this.setState({ isNewPasswordsInputIsInvalid: false, newPasswordInput: filter(newValue) });
 	}
 	
 	updateRepeatNewPasswordInput(newValue: string) {
-		this.setState({ isNewPasswordsInputIsInvalid: false, repeatNewPasswordInput: newValue });
+		this.setState({ isNewPasswordsInputIsInvalid: false, repeatNewPasswordInput: filter(newValue) });
 	}
 
 	render() {
@@ -113,7 +112,8 @@ class PasswordEditView extends React.Component<IPasswordEditViewProps, IPassword
 					className={this.state.isOldPasswordInputIsInvalid ? "p-error" : undefined}
 					feedback={false}
 					disabled={!this.props.isEditable}
-					onChange={(e) => this.updateOldPasswordInput(e.currentTarget.value) }
+					onChange={(e) => this.updateOldPasswordInput(e.currentTarget.value)}
+					value={this.state.oldPasswordInput}
 					placeholder="Старый пароль" />
 			</div>
 			<div className="w3-container" style={{paddingBottom:"14px"}}>
@@ -124,6 +124,7 @@ class PasswordEditView extends React.Component<IPasswordEditViewProps, IPassword
 					feedback={false}
 					disabled={!this.props.isEditable}
 					onChange={(e) => this.updateNewPasswordInput(e.currentTarget.value) }
+					value={this.state.newPasswordInput}
 					placeholder="Новый пароль" />
 			</div>
 			<div className="w3-container">
@@ -134,6 +135,7 @@ class PasswordEditView extends React.Component<IPasswordEditViewProps, IPassword
 					feedback={false}
 					disabled={!this.props.isEditable}
 					onChange={(e) => this.updateRepeatNewPasswordInput(e.currentTarget.value) }
+					value={this.state.repeatNewPasswordInput}
 					placeholder="Повторите новый пароль" />
 				{saveButton(this.state.loading, this.props.isEditable, () => this.updatePassword())}
 			</div>

@@ -10,6 +10,7 @@ import { ProfileInfoEditView } from "./children/ProfileInfoEditView";
 import { Link, withRouter, RouteComponentProps } from "react-router-dom";
 
 import { Button } from "primereact/button";
+import { Messager } from "../../../Messager";
 
 export interface IProfileEditWindowProps {
 	onChangesSaved: () => void
@@ -56,6 +57,7 @@ class ProfileEditView extends React.Component<IProfileEditViewProps, IProfileEdi
 	}
 	
 	onChangesSaved() {
+		Messager.showSuccess("Изменения приняты");
 		this.props.history.push(`/profile/id${this.props.userId}`);
 	}
 	
