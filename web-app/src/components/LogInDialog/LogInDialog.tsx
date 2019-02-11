@@ -1,4 +1,4 @@
-import "./LogInDialog.css"
+import "../../styles/PopupDialog.css"
 
 import React from "react";
 import { connect } from "react-redux";
@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 
-import { Messager, IMessage } from "../../Messager";
+import { Messager } from "../../Messager";
 import * as SignUp from "../../api/Account/interface/signUp";
 import * as SignIn from "../../api/Account/interface/signIn";
 
@@ -14,16 +14,17 @@ import SignInForm from "./SignInForm";
 import UserAgreementForm from "./UserAgreementForm"
 import SignUpForm from "./SignUpForm"
 
-interface ILogInDialogStateProps {
+interface ILogInDialogMapProps {
 	isLoggedIn: boolean,
+	isDialogVisible: boolean,
 }
 
-interface ILogInDialogDispatchProps {
+interface ILogInDialogDispatchMapProps {
 	setAccount: (token:string, userId: string, login: string) => void,
 	closeDialog: () => void
 }
 
-interface ILogInDialogProps extends ILogInDialogStateProps, ILogInDialogDispatchProps {
+interface ILogInDialogProps extends ILogInDialogMapProps, ILogInDialogDispatchMapProps {
 }
 
 enum LogInVariant {
@@ -43,20 +44,21 @@ interface ILogInDialogState {
 	loading: boolean
 }
 
+let initialLogInDialogState: ILogInDialogState = {
+	loading: false,
+	variant: LogInVariant.SignIn,
+	login: "",
+	password: "",
+	passwordRepeat: "",
+	isLoginIsInvalid: false,
+	isPasswordIsInvalid: false,
+	isUserAgreementChecked: false
+}
 
 class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> {
 	constructor(props: ILogInDialogProps) {
 		super(props);
-		this.state = {
-			loading: false,
-			variant: LogInVariant.SignIn,
-			login: "",
-			password: "",
-			passwordRepeat: "",
-			isLoginIsInvalid: false,
-			isPasswordIsInvalid: false,
-			isUserAgreementChecked: false
-		};
+		this.state = initialLogInDialogState;
 	}
 	
 	signIn() {
@@ -171,6 +173,16 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 		this.setState({isUserAgreementChecked: true}); setTimeout(() => this.setState({ variant: LogInVariant.SignUp }), 500);
 	}
 	
+	shouldComponentUpdate(nextProps: ILogInDialogProps): boolean {
+		if (!this.props.isDialogVisible && !nextProps.isDialogVisible) {
+			return false;
+		}
+		if (this.props.isDialogVisible != nextProps.isDialogVisible) {
+			this.setState(initialLogInDialogState);
+		}
+		return true;
+	}
+	
 	componentDidUpdate() {
 		if (this.props.isLoggedIn) {
 			this.props.closeDialog();
@@ -178,19 +190,24 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 	}
 	
 	render() { 
+		if (!this.props.isDialogVisible) {
+			return null;
+		}
 		let {variant} = this.state;
+		let dialogHeight = "23vw";
 		return (<div>
 			<Dialog
 				visible={ true }
-				style={{ width: '40vw', height: "23vw" }}
-				contentStyle={{ border: "0px", height: "23vw" }}
+				className="popup-dialog"
+				style={{ height: dialogHeight }}
+				contentStyle={{ border: "0px", height: dialogHeight }}
 				showHeader={ false }
 				modal={ true }
 				blockScroll={ true }
 				onHide={ () => this.props.closeDialog() }
 				>
 				<Button 
-					id="LogInDialog_CloseButton"
+					id="popup-dialog-close-button"
 					icon="pi pi-times" 
 					className="p-button-rounded p-button-secondary" 
 					style={{position:"absolute", top:0, right:0}} 
@@ -233,15 +250,16 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 import { LogInFormShowAction } from "../../store/contexts/ui/logInForm/actions";
 import { SetAccountAction } from "../../store/contexts/data/account/actions";
 
-let mapStateToProps = (state: any): ILogInDialogStateProps => ({
-	isLoggedIn: state.data.account != null
+let mapStateToProps = (state: any): ILogInDialogMapProps => ({
+	isLoggedIn: state.data.account != null,
+	isDialogVisible: state.ui.logInForm.visible
 })
 
-let mapDispatchToProps = (dispatch: any): ILogInDialogDispatchProps => ({
+let mapDispatchToProps = (dispatch: any): ILogInDialogDispatchMapProps => ({
 	setAccount: (token:string, userId: string, login: string) => dispatch(new SetAccountAction(token, userId, login)),
 	closeDialog: () => dispatch(new LogInFormShowAction(false))
 })
 
-let LogInDialogHOC = connect<ILogInDialogStateProps, ILogInDialogDispatchProps>(mapStateToProps, mapDispatchToProps)(LogInDialog);
+let LogInDialogHOC = connect<ILogInDialogMapProps, ILogInDialogDispatchMapProps>(mapStateToProps, mapDispatchToProps)(LogInDialog);
 
 export { LogInDialogHOC as LogInDialog };

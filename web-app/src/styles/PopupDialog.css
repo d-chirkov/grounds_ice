@@ -1,0 +1,17 @@
+.popup-dialog {
+	width: 40vw;
+	height: 20vw; 
+	box-shadow: 0 0 20px rgba(0,0,0,0.5) !important;
+}
+
+#popup-dialog-close-button {
+	outline: none;
+	border-color: inherit;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	border-width: 0px;
+}
+
+#popup-dialog-close-button:not(:hover) {
+	background-color: inherit;
+}

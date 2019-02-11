@@ -11,4 +11,4 @@ let updateLogInForm = (state: ILogInForm = initialLogInForm, action: LogInFormAc
 	return {...state};
 }
 
-export default updateLogInForm;
+export { updateLogInForm };
