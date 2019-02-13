@@ -31,11 +31,14 @@ interface IProfileInfoEditViewState {
 class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IProfileInfoEditViewState> {
 	constructor(props: IProfileInfoEditViewProps) {
 		super(props);
+		let profileInfoClone: Array<Model.ProfileInfoEntry> = [];
+		for(let e of props.profileInfo) {
+			profileInfoClone.push({...e});
+		}
 		this.state = { 
 			loading: false,
-			profileInfoInput: props.profileInfo,
+			profileInfoInput: profileInfoClone,
 		};
-		
 	}
 	
 	updateProfileInfo() {
