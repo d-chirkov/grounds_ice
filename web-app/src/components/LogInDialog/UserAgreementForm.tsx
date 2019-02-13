@@ -1,4 +1,4 @@
-import "./UserAgreementForm.css"
+import "../../styles/ScrollPanel.css"
 
 import React from "react";
 import { Checkbox } from "primereact/checkbox";
@@ -18,7 +18,7 @@ let UserAgreementForm = (props: IUserAgreementFormProps) => {
 	return (<div className="w3-container w3-center">
 		<h1 className="w3-opacity"><b>Соглашение</b></h1>
 		<div className="w3-panel">
-			<ScrollPanel className="UserAgreementForm_ScrollPanel" style={{width: '100%', height: '150px', }}>
+			<ScrollPanel className="gi-scroll-panel" style={{width: '100%', height: '150px', }}>
 				{getAgreement()}
 			</ScrollPanel>
 		</div>

@@ -133,8 +133,7 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 			<InputTextarea rows={5} cols={30} autoResize={true}
 				onChange={(e) => { entry.Value = filter(e.currentTarget.value, entry.Type); this.forceUpdate(); }}
 				placeholder={fieldName}
-				value={entry.Value}
-					/>
+				value={entry.Value}/>
 			<Checkbox 
 				inputId={fieldName}
 				onChange={e => { entry.IsPublic = !e.checked; this.forceUpdate() }} 
