@@ -10,6 +10,9 @@
 	-webkit-box-shadow: none;
 	box-shadow: none;
 	border-width: 0px;
+	position: absolute;
+	top: 0px;
+	right: 0px;
 }
 
 #popup-dialog-close-button:not(:hover) {

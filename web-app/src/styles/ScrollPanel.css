@@ -1,0 +1,15 @@
+.gi-scroll-panel .p-scrollpanel-wrapper {
+    border-right: 9px solid #f4f4f4;
+	
+}
+
+.gi-scroll-panel .p-scrollpanel-bar {
+    background-color: #1976d2;
+    opacity: 1;
+    transition: background-color .3s;
+	
+}
+
+.gi-scroll-panel .p-scrollpanel-bar:hover {
+    background-color: #135ba1;
+}

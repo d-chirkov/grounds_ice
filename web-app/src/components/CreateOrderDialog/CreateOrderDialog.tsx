@@ -54,15 +54,12 @@ class CreateOrderDialog extends React.Component<ICreateOrderDialogProps, ICreate
 		if (!this.props.isDialogVisible) {
 			return null;
 		}
-		let dialogHeight = "40vw";
-		let dialogWidth = "35vw";
-		return (<div>
+		return (<div className="gi-create-order-dialog">
 			<Dialog
 				id="create-order-dialog"
 				visible={true}
-				className="popup-dialog"
-				style={{ height: dialogHeight, width: dialogWidth }}
-				contentStyle={{ border: "0px", paddingLeft:0, paddingRight:0, height:dialogHeight }}
+				className="popup-dialog gi-dialog"
+				contentStyle={{ border: "0px", paddingLeft:0, paddingRight:0, height:"40vw" }}
 				showHeader={false}
 				modal={true}
 				blockScroll={true}
@@ -70,21 +67,20 @@ class CreateOrderDialog extends React.Component<ICreateOrderDialogProps, ICreate
 			>
 				<ScrollLock />
 				<TouchScrollable>
-					<h2 style={{paddingLeft:20, paddingTop:0}} className="w3-opacity"><b>Создать предложение</b></h2>
+					<h3 className="gi-header w3-text-blue-grey">СОЗДАТЬ ПРЕДЛОЖЕНИЕ</h3>
 					<Button
 						id="popup-dialog-close-button"
 						icon="pi pi-times"
 						className="p-button-rounded p-button-secondary"
-						style={{ position: "absolute", top: 0, right: 0 }}
 						onClick={() => this.props.closeDialog()} />
-					<TabView style={{padding:"0px"}} activeIndex={this.state.tabIndex} onTabChange={(e) => this.setState({ tabIndex: e.index })}>
-						<TabPanel contentClassName="create-order-dialog-tab" contentStyle={{marginLeft:10, border:0}} headerStyle={{ paddingLeft:"10px"}} header="Займ">
-							<ScrollPanel className="gi-scroll-panel" style={{width: '100%', height:"31vw", paddingBottom:10}}>
+					<TabView className="gi-tab-view" activeIndex={this.state.tabIndex} onTabChange={(e) => this.setState({ tabIndex: e.index })}>
+						<TabPanel header="Займ" contentClassName="gi-tab-panel-content" headerClassName="gi-tab-panel-header">
+							<ScrollPanel className="gi-scroll-panel gi-tab-scroll">
 								<CreateBorrowOrder />
 							</ScrollPanel>
 						</TabPanel>
 						<TabPanel header="Кредит">
-							Создать кредит
+							В разработке
 						</TabPanel>
 					</TabView> 
 				</TouchScrollable>

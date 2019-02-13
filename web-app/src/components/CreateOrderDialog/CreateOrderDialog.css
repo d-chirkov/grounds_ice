@@ -1,6 +1,44 @@
 .p-tabview-panels {
-	border-bottom: 0 !important;
-	border-left: 0 !important;
-	border-right: 0 !important;
-	padding-bottom: 0 !important;
+	border-bottom: 0px !important;
+	border-left: 0px !important;
+	border-right: 0px !important;
+	padding-bottom: 0px !important;
+	padding-top: 0px !important;
+}
+
+.gi-create-order-dialog .gi-dialog {
+	height: 40vw !important;
+	width: 36vw !important;
+}
+
+.gi-create-order-dialog .gi-dialog .gi-header {
+	padding-left: 10px; 
+	padding-top: 0;
+	padding-bottom: 5px;
+}
+
+.gi-create-order-dialog .gi-dialog-content {
+	border: 0px !important;
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+	height: 40vw !important;
+}
+
+.gi-create-order-dialog .gi-tab-scroll {
+	width: 100%;
+	height: 32vw;
+}
+
+.gi-create-order-dialog .gi-tab-panel-content {
+	margin-left: 10px; 
+	border: 0px; 
+	padding-top: 0px
+}
+
+.gi-create-order-dialog .gi-tab-panel-header {
+	padding-left: 10px !important;
+}
+
+.gi-create-order-dialog .gi-tab-view {
+	padding: 0px
 }

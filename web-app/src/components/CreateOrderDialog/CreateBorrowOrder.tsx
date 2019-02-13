@@ -12,6 +12,7 @@ import { Checkbox } from "primereact/checkbox";
 import { RadioButton } from "primereact/radiobutton";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
 
 interface ICreateBorrowOrderMapProps {
 }
@@ -44,23 +45,22 @@ interface ISurety {
 }
 
 enum CreditType {
+	Auto,
+	Business,
 	Consumer,
 	Hypothec,
-	Business,
-	Micro
+	Micro,
+	Other
 }
 
-interface ICreateBorrowOrderState {
-	amount: number
-	years: number
-	months: number
-	days: number
-	percent: number
-	paymentFreq: IPaymentFreqView | null
-	surety: ISurety
-	creditType: CreditType | null
-	comment: string | null
-}
+let creditTypeLabels = new Map<CreditType, string>();
+creditTypeLabels.set(CreditType.Consumer, "Потребительский");
+creditTypeLabels.set(CreditType.Auto, "Автокредит");
+creditTypeLabels.set(CreditType.Business, "Бизнес");
+creditTypeLabels.set(CreditType.Hypothec, "Ипотека");
+creditTypeLabels.set(CreditType.Micro, "Микро");
+creditTypeLabels.set(CreditType.Other, "Другое");
+
 
 let rowHeight = "40px";
 let rowLineHeight = "32px";
@@ -88,6 +88,19 @@ let initialSurety: ISurety = {
 	others: null
 }
 
+
+interface ICreateBorrowOrderState {
+	amount: number
+	years: number
+	months: number
+	days: number
+	percent: number
+	paymentFreq: IPaymentFreqView | null
+	surety: ISurety
+	creditType: CreditType
+	comment: string | null
+}
+
 class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreateBorrowOrderState> {
 	constructor(props: ICreateBorrowOrderProps) {
 		super(props);
@@ -99,13 +112,14 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 			percent: 0,
 			paymentFreq: null,
 			surety: initialSurety,
-			creditType: null,
+			creditType: CreditType.Consumer,
 			comment: null
 		}
 	}
 	
 	render() {
 		return (<div>
+			<div style={{float: "left", width:totalWidth, height:20}}></div>
 			{this.AmountInput()}
 			{this.LocationInput()}
 			{this.TermInput()}
@@ -120,7 +134,7 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 	}
 	
 	private AmountInput() {
-		return (<div>
+		return (<div className="create-order-input-row">
 			<div className="w3-text-blue-grey" style={{lineHeight:rowLineHeight, width:leftWidth, float:"left", height:rowHeight}}>
 				Сумма (₽):
 			</div>
@@ -136,7 +150,7 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 	}
 	
 	private LocationInput() {
-		return (<div>
+		return (<div className="create-order-input-row">
 			<div className="w3-text-blue-grey" style={{lineHeight:rowLineHeight, width:leftWidth, float:"left", height:rowHeight}}>
 				<span>Местоположение:</span>
 			</div>
@@ -153,7 +167,7 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 	
 	private TermInput() {
 		let tooltipPadding = 6.7;
-		return (<div>
+		return (<div className="create-order-input-row">
 			<div className="w3-text-blue-grey" style={{lineHeight:rowLineHeight, width:leftWidth, float:"left", height:rowHeight}}>
 				<span style={{float:"left"}}>Срок:</span>
 				<span style={{float:"right", paddingRight:10}}>Лет:</span>
@@ -187,7 +201,7 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 	}
 	
 	private PercentInput() {
-		return (<div>
+		return (<div className="create-order-input-row">
 			<div className="w3-text-blue-grey" style={{lineHeight:rowLineHeight, width:leftWidth, float:"left", height:rowHeight}}>
 				Процент (%):
 			</div>
@@ -206,7 +220,7 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 	}
 	
 	private PaymentFrequencyInput() {
-		return (<div>
+		return (<div className="create-order-input-row">
 			<div className="w3-text-blue-grey" style={{lineHeight:"30px", width:leftWidth, float:"left", height:"30px"}}>
 				Частота выплат:
 			</div>
@@ -218,7 +232,7 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 	
 	private SuretyInput() {
 		let {surety} = this.state;
-		return (<div>
+		return (<div className="create-order-input-row">
 			<div className="w3-text-blue-grey" style={{lineHeight:rowLineHeight, width:leftWidth, float:"left", height:rowHeight}}>
 				Поручительство:
 			</div>
@@ -259,56 +273,50 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 	
 	private CreditTypeInput() {
 		let {creditType} = this.state;
-		return (<div>
+		let getRadioButton = (type: CreditType, desc: string) => {
+			return (<div style={{ float: "left", width:rightWidth}}>
+				<RadioButton 
+					inputId="credit_type_consumer_rb" 
+					name="creditType" 
+					onChange={e => this.setState({creditType: type})} 
+					checked={creditType === type} />
+				<label htmlFor="credit_type_consumer_rb" className="p-checkbox-label">{desc}</label>	
+			</div>);
+		}
+		let getAllRadioButtons = (labels: Map<CreditType, string>) => {
+			let nodes:JSX.Element[] = [];
+			labels.forEach((v, k) => {
+				nodes.push(getRadioButton(k, v));
+			})
+			return nodes;
+		}
+		let creditTypes = Array.from(creditTypeLabels.keys()).map((v) => ({name:creditTypeLabels.get(v), value:v}));
+		return (<div className="create-order-input-row">
 			<div className="w3-text-blue-grey" style={{lineHeight:rowLineHeight, width:leftWidth, float:"left", height:rowHeight}}>
 				Тип кредита:
 			</div>
-			<div style={{paddingTop:4, float: "left", height:"auto", width:rightWidth}}>
-				<div style={{ float: "left", width:rightWidth}}>
-					<RadioButton 
-						inputId="credit_type_consumer_rb" 
-						name="creditType" 
-						onChange={e => this.setState({creditType: CreditType.Consumer})} 
-						checked={creditType === CreditType.Consumer} />
-					<label htmlFor="credit_type_consumer_rb" className="p-checkbox-label">Потребительский</label>	
-				</div>
-				<div style={{ float: "left", width:rightWidth}}>
-					<RadioButton 
-						inputId="credit_type_hypothec_rb" 
-						name="creditType" 
-						onChange={e => this.setState({creditType: CreditType.Hypothec})} 
-						checked={creditType === CreditType.Hypothec} />
-					<label htmlFor="credit_type_consumer_rb" className="p-checkbox-label">Ипотека</label>	
-				</div>
-				<div style={{ float: "left", width:rightWidth}}>
-					<RadioButton 
-						inputId="credit_type_bussiness_rb" 
-						name="creditType" 
-						onChange={e => this.setState({creditType: CreditType.Business})} 
-						checked={creditType === CreditType.Business} />
-					<label htmlFor="credit_type_bussiness_rb" className="p-checkbox-label">Бизнес</label>	
-				</div>
-				<div style={{ float: "left", width:rightWidth}}>
-					<RadioButton 
-						inputId="credit_type_micro_rb" 
-						name="creditType" 
-						onChange={e => this.setState({creditType: CreditType.Micro})} 
-						checked={creditType === CreditType.Micro} />
-					<label htmlFor="credit_type_micro_rb" className="p-checkbox-label">Микрозайм</label>	
-				</div>
+			
+			<div style={{paddingTop:4, float:"left", width:rightWidth}}>
+				<Dropdown 
+					optionLabel="name"
+					value={{name:creditTypeLabels.get(creditType), value:creditType}} 
+					options={creditTypes} 
+					style={{width:283}}
+					onChange={e => {this.setState({creditType: e.value.value})}} />
+				{/* {getAllRadioButtons(creditTypeLabels)} */}
 			</div>
 		</div>);
 	}
 	
 	private CommentInput() {
 		let {comment} = this.state;
-		return (<div>
+		return (<div className="create-order-input-row">
 			<div className="w3-text-blue-grey" style={{lineHeight:"40px", width:leftWidth, float:"left", height:rowHeight}}>
 				Комментарий:
 			</div>
 			<div style={{paddingTop:10, float: "left", height:"auto", width:rightWidth, paddingBottom:"14px"}}>
 				<InputTextarea 
-					rows={3} 
+					rows={5} 
 					cols={wideInputWidth} 
 					autoResize={true}
 					onChange={e =>  this.setState({comment: e.currentTarget.value})}

@@ -1,3 +1,8 @@
 .p-selectbutton > div {
 	padding: 1.6px !important;
 }
+
+.create-order-input-row {
+	padding-bottom: 15px;
+	float: left;
+}
