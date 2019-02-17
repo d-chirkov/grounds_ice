@@ -1,3 +1,5 @@
+import "../ProfileEditView.css"
+
 import React from "react";
 import { connect } from "react-redux";
 import { IRootState } from "../../../../store/contexts/model";
@@ -40,7 +42,114 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 			profileInfoInput: profileInfoClone,
 		};
 	}
+
+	render() {
+		let {profileInfoInput} = this.state;
+		return (<div>
+			<h4>Изменить информацию профиля</h4>
+			<div className="w3-container">
+				{this.inputField( 
+					"Фамилия", 
+					this.getFieldByType(Model.ProfileInfoType.LastName, profileInfoInput))}
+				{this.inputField( 
+					"Имя", 
+					this.getFieldByType(Model.ProfileInfoType.FirstName, profileInfoInput))}
+				{this.inputField( 
+					"Отчество", 
+					this.getFieldByType(Model.ProfileInfoType.MiddleName, profileInfoInput))}
+				{this.locationField(
+					this.getFieldByType(Model.ProfileInfoType.City, profileInfoInput),
+					this.getFieldByType(Model.ProfileInfoType.Region, profileInfoInput))}
+				{this.descriptionField(this.getFieldByType(Model.ProfileInfoType.Description, profileInfoInput))}
+				{saveButton(this.state.loading, this.props.isEditable, () => this.updateProfileInfo())}
+			</div>
+		</div>);
+	}
 	
+	private getFieldByType(fieldType: Model.ProfileInfoType, profileInfo: Array<Model.ProfileInfoEntry>): Model.ProfileInfoEntry {
+		let found = profileInfo.find((v) => v.Type == fieldType);
+		if (isUndefined(found)) {
+			found = {Type: fieldType, Value: "", IsPublic: false};
+			profileInfo.push(found);
+		} 
+		return found;
+	}
+	
+	private inputField(fieldName: string, entry: Model.ProfileInfoEntry) {
+		let isPublic: boolean = entry ? entry.IsPublic : false;
+		return (
+		<div className="gi-profile-edit-row">
+			<InputText 
+				className="gi-input-text"
+				onChange={(e) => { entry.Value = filter(e.currentTarget.value, entry.Type); this.forceUpdate() }} 
+				placeholder={fieldName}
+				type="text" 
+				value={entry.Value} />
+			<Checkbox 
+				checked={!isPublic} 
+				className="gi-hide-checkbox"
+				disabled={entry.Value == ""}
+				inputId={fieldName}
+				onChange={e => { if (entry && entry.Value != "") entry.IsPublic = !e.checked; this.forceUpdate() }} />
+			<label htmlFor={fieldName} className="p-checkbox-label w3-text-blue-grey">Скрыть</label>
+		</div>
+		);
+	}
+	
+	private descriptionField(entry: Model.ProfileInfoEntry) {
+		let fieldName = "Описание";
+		return (
+		<div className="gi-profile-edit-row">
+			<InputTextarea rows={5} cols={30} autoResize={true}
+				className="gi-input-text"
+				onChange={(e) => { entry.Value = filter(e.currentTarget.value, entry.Type); this.forceUpdate(); }}
+				placeholder={fieldName}
+				value={entry.Value}/>
+			<Checkbox 
+				checked={!entry.IsPublic} 
+				className="gi-hide-checkbox"
+				disabled={entry.Value == ""}
+				inputId={fieldName}
+				onChange={e => { entry.IsPublic = !e.checked; this.forceUpdate() }} />
+			<label htmlFor={fieldName} className="p-checkbox-label w3-text-blue-grey">Скрыть</label>
+		</div>);
+	}
+	
+	private locationField(cityEntry: Model.ProfileInfoEntry, regionEntry: Model.ProfileInfoEntry) {
+		let fieldName = "Местоположение";
+		let isCityIsPublic: boolean = (cityEntry.Value == "") || cityEntry.IsPublic;
+		let isRegionIsPublic: boolean = (regionEntry.Value == "") || regionEntry.IsPublic;
+		let isPublic = isCityIsPublic && isRegionIsPublic;
+		if (cityEntry.Value == "" && regionEntry.Value == "") {
+			isPublic = false;
+		}
+		let isEmpty = cityEntry.Value == "" && regionEntry.Value == "";
+		let setPublic = (flag: boolean) => {cityEntry.IsPublic = flag; regionEntry.IsPublic = flag;}
+		return (
+		<div className="gi-profile-edit-row">
+			<LocationEdit
+				className="gi-input-text"
+				intialCity={cityEntry.Value}
+				intialRegion={regionEntry.Value}
+				onChangeLocation={this.updateLocation.bind(this)}
+				placeholder={fieldName} />
+			<Checkbox 
+				checked={!isPublic} 
+				className="gi-hide-checkbox"
+				disabled={isEmpty}
+				inputId={fieldName}
+				onChange={e => { if (!isEmpty) setPublic(!e.checked); this.forceUpdate() }}/>
+			<label htmlFor={fieldName} className="p-checkbox-label w3-text-blue-grey">Скрыть</label>
+		</div>
+		);
+	}
+	
+	private updateLocation(city: string | null, region: string | null) {
+		this.getFieldByType(Model.ProfileInfoType.City, this.state.profileInfoInput).Value = city || "";
+		this.getFieldByType(Model.ProfileInfoType.Region, this.state.profileInfoInput).Value = region || "";
+		this.forceUpdate();
+	}
+		
 	updateProfileInfo() {
 		this.setState({loading: true});
 		this.props.setEditable(false);
@@ -74,114 +183,6 @@ class ProfileInfoEditView extends React.Component<IProfileInfoEditViewProps, IPr
 		});
 	}
 	
-	render() {
-		let {profileInfoInput} = this.state;
-		return (<div>
-			<h4>Изменить информацию профиля</h4>
-			<div className="w3-container">
-				{}
-				{this.inputField( 
-					"Фамилия", 
-					this.getFieldByType(Model.ProfileInfoType.LastName, profileInfoInput))}
-				{this.inputField( 
-					"Имя", 
-					this.getFieldByType(Model.ProfileInfoType.FirstName, profileInfoInput))}
-				{this.inputField( 
-					"Отчество", 
-					this.getFieldByType(Model.ProfileInfoType.MiddleName, profileInfoInput))}
-				{this.locationField(
-					this.getFieldByType(Model.ProfileInfoType.City, profileInfoInput),
-					this.getFieldByType(Model.ProfileInfoType.Region, profileInfoInput))}
-				{this.descriptionField(this.getFieldByType(Model.ProfileInfoType.Description, profileInfoInput))}
-				{saveButton(this.state.loading, this.props.isEditable, () => this.updateProfileInfo())}
-			</div>
-		</div>);
-	}
-	
-	private getFieldByType(fieldType: Model.ProfileInfoType, profileInfo: Array<Model.ProfileInfoEntry>): Model.ProfileInfoEntry {
-		let found = profileInfo.find((v) => v.Type == fieldType);
-		if (isUndefined(found)) {
-			found = {Type: fieldType, Value: "", IsPublic: false};
-			profileInfo.push(found);
-		} 
-		return found;
-	}
-	
-	private inputField(fieldName: string, entry: Model.ProfileInfoEntry) {
-		let isPublic: boolean = entry ? entry.IsPublic : false;
-		return (
-		<div style={{paddingBottom:"14px"}}>
-			<InputText 
-				type="text" 
-				size={30} 
-				onChange={(e) => { entry.Value = filter(e.currentTarget.value, entry.Type); this.forceUpdate() }} 
-				placeholder={fieldName}
-				value={entry.Value}
-					/>
-			<Checkbox 
-				inputId={fieldName}
-				onChange={e => { if (entry && entry.Value != "") entry.IsPublic = !e.checked; this.forceUpdate() } } 
-				checked={ !isPublic } 
-				disabled={ entry.Value == ""}
-				style={{marginLeft:"20px"}}/>
-			<label htmlFor={fieldName} className="p-checkbox-label w3-text-blue-grey">Скрыть</label>
-		</div>
-		);
-	}
-	
-	private descriptionField(entry: Model.ProfileInfoEntry) {
-		let fieldName = "Описание";
-		return (
-		<div style={{paddingBottom:"14px"}}>
-			<InputTextarea rows={5} cols={30} autoResize={true}
-				onChange={(e) => { entry.Value = filter(e.currentTarget.value, entry.Type); this.forceUpdate(); }}
-				placeholder={fieldName}
-				value={entry.Value}/>
-			<Checkbox 
-				inputId={fieldName}
-				onChange={e => { entry.IsPublic = !e.checked; this.forceUpdate() }} 
-				checked={ !entry.IsPublic } 
-				disabled={ entry.Value == ""}
-				style={{marginLeft:"20px"}}/>
-			<label htmlFor={fieldName} className="p-checkbox-label w3-text-blue-grey">Скрыть</label>
-		</div>);
-	}
-	
-	private locationField(cityEntry: Model.ProfileInfoEntry, regionEntry: Model.ProfileInfoEntry) {
-		let fieldName = "Местоположение";
-		let isCityIsPublic: boolean = (cityEntry.Value == "") || cityEntry.IsPublic;
-		let isRegionIsPublic: boolean = (regionEntry.Value == "") || regionEntry.IsPublic;
-		let isPublic = isCityIsPublic && isRegionIsPublic;
-		if (cityEntry.Value == "" && regionEntry.Value == "") {
-			isPublic = false;
-		}
-		let isEmpty = cityEntry.Value == "" && regionEntry.Value == "";
-		let setPublic = (flag: boolean) => {cityEntry.IsPublic = flag; regionEntry.IsPublic = flag;}
-		return (
-		<div style={{paddingBottom:"14px"}}>
-			<LocationEdit
-				size={30} 
-				placeholder={fieldName}
-				intialCity={cityEntry.Value}
-				intialRegion={regionEntry.Value}
-				onChangeLocation={this.updateLocation.bind(this)}
-			/>
-			<Checkbox 
-				inputId={fieldName}
-				onChange={e => { if (!isEmpty) setPublic(!e.checked); this.forceUpdate() } } 
-				checked={ !isPublic } 
-				disabled={ isEmpty }
-				style={{marginLeft:"20px"}}/>
-			<label htmlFor={fieldName} className="p-checkbox-label w3-text-blue-grey">Скрыть</label>
-		</div>
-		);
-	}
-	
-	private updateLocation(city: string | null, region: string | null) {
-		this.getFieldByType(Model.ProfileInfoType.City, this.state.profileInfoInput).Value = city || "";
-		this.getFieldByType(Model.ProfileInfoType.Region, this.state.profileInfoInput).Value = region || "";
-		this.forceUpdate();
-	}
 }
 
 let mapStateToProps = (state: IRootState): IProfileInfoEditViewMapProps => ({

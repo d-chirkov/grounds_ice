@@ -6,9 +6,10 @@ import updateRootState from "./contexts/reducers";
 import { initialRootState } from "./contexts/model";
 
 let storeFactory = () => {
+	let state = initialRootState;
+	state.data.account = localStorage["account"] ? JSON.parse(localStorage["account"]) : null;
 	return applyMiddleware(thunk, actionToPlainObject, saver)(createStore)(
-		updateRootState, 
-		localStorage["redux_store"] ? JSON.parse(localStorage["redux_store"]) : initialRootState);
+		updateRootState, state);//, 
 }
 
 export { storeFactory };

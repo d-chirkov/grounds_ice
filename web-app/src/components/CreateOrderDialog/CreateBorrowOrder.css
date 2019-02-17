@@ -2,7 +2,96 @@
 	padding: 1.6px !important;
 }
 
-.create-order-input-row {
+.gi-create-order-delimiter {
+	float: left;
+	width: 100%;
+	height: 20px;
+}
+
+.gi-create-order-input-row {
 	padding-bottom: 15px;
 	float: left;
+}
+
+.gi-create-order-input-row .gi-right-field {
+	float: left;
+	height: auto;
+	width: 290px;
+	word-wrap: break-word;
+}
+
+.gi-create-order-input-row .gi-right-field .gi-input-text {
+	width: 282.75px
+}
+
+.gi-create-order-input-row .gi-right-field .gi-date-spinner {
+	width: 63.25px
+}
+
+.gi-create-order-input-row .gi-right-field .gi-date-spinner-empty {
+	color: rgb(179, 179, 179)
+}
+
+.gi-create-order-input-row .gi-right-field .gi-empty {
+	color: rgb(179, 179, 179)
+}
+
+.gi-create-order-input-row .gi-right-field .gi-date-tooltip {
+	padding: 6.7px
+}
+
+.gi-create-order-input-row .gi-right-field .gi-percent-spinner {
+	width: 80.25px
+}
+
+.gi-create-order-input-row .gi-right-field .gi-surety {
+	float: left;
+	width: 100%
+}
+
+.gi-create-order-input-row .gi-right-field .gi-surety-cb {
+	padding-top: 5px;
+}
+
+.gi-create-order-input-row .gi-right-field .gi-surety-other {
+	padding-top: 8px;
+}
+
+.gi-create-order-input-row .gi-right-field .gi-credit-type-cb {
+	float: left;
+	width: 100%;
+	padding-top: 5px;
+}
+
+.gi-create-order-input-row .gi-right-field .gi-credit-type-cb {
+	float: left;
+	width: 100%;
+	padding-top: 5px;
+}
+
+.gi-create-order-input-row .gi-right-field .gi-credit-type-cb {
+	float: left;
+	width: 100%;
+	padding-top: 5px;
+}
+
+.gi-create-order-input-row .gi-left-field {
+	line-height: 32px;
+	width: 130px;
+	float: left;
+	height: 40px
+}
+
+.gi-save-button-container {
+	padding-top:4; 
+	float: left; 
+	height: auto;
+	width: 420px;
+	padding-bottom: 14px
+}
+
+.gi-save-button-container .gi-save-button {
+	float: right;
+	margin: auto;
+	margin-right: 7px
 }

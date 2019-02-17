@@ -1,3 +1,5 @@
+import "../ProfileEditView.css"
+
 import React from "react";
 import { connect } from "react-redux";
 import { IRootState } from "../../../../store/contexts/model";
@@ -37,7 +39,44 @@ class PasswordEditView extends React.Component<IPasswordEditViewProps, IPassword
 			repeatNewPasswordInput: ""
 		}
 	}
-	
+
+	render() {
+		return (<div>
+			<h4>Изменить пароль</h4>
+			<div className="w3-container gi-profile-edit-row">
+				<Password
+					className={"gi-input-text " + (this.state.isOldPasswordInputIsInvalid ? "p-error" : "")}
+					disabled={!this.props.isEditable}
+					feedback={false}
+					onChange={(e) => this.updateOldPasswordInput(e.currentTarget.value)}
+					placeholder="Старый пароль"
+					type="text"
+					value={this.state.oldPasswordInput} />
+			</div>
+			<div className="w3-container gi-profile-edit-row">
+				<Password
+					className={"gi-input-text " + (this.state.isNewPasswordsInputIsInvalid ? "p-error" : "")}
+					disabled={!this.props.isEditable}
+					feedback={false}
+					onChange={(e) => this.updateNewPasswordInput(e.currentTarget.value) }
+					placeholder="Новый пароль"
+					type="text"
+					value={this.state.newPasswordInput} />
+			</div>
+			<div className="w3-container gi-profile-edit-row">
+				<Password
+					className={"gi-input-text " + (this.state.isNewPasswordsInputIsInvalid ? "p-error" : "")}
+					disabled={!this.props.isEditable}
+					feedback={false}
+					onChange={(e) => this.updateRepeatNewPasswordInput(e.currentTarget.value) }
+					placeholder="Повторите новый пароль"
+					type="text"
+					value={this.state.repeatNewPasswordInput} />
+				{saveButton(this.state.loading, this.props.isEditable, () => this.updatePassword())}
+			</div>
+		</div>);
+	}
+		
 	updatePassword() {
 		let {oldPasswordInput, newPasswordInput, repeatNewPasswordInput} = this.state;
 		let warnings: string[] = [];
@@ -100,46 +139,6 @@ class PasswordEditView extends React.Component<IPasswordEditViewProps, IPassword
 	
 	updateRepeatNewPasswordInput(newValue: string) {
 		this.setState({ isNewPasswordsInputIsInvalid: false, repeatNewPasswordInput: filter(newValue) });
-	}
-
-	render() {
-		return (<div>
-			<h4>Изменить пароль</h4>
-			<div className="w3-container" style={{paddingBottom:"14px"}}>
-				<Password
-					type="text"
-					size={30}
-					className={this.state.isOldPasswordInputIsInvalid ? "p-error" : undefined}
-					feedback={false}
-					disabled={!this.props.isEditable}
-					onChange={(e) => this.updateOldPasswordInput(e.currentTarget.value)}
-					value={this.state.oldPasswordInput}
-					placeholder="Старый пароль" />
-			</div>
-			<div className="w3-container" style={{paddingBottom:"14px"}}>
-				<Password
-					type="text"
-					size={30}
-					className={this.state.isNewPasswordsInputIsInvalid ? "p-error" : undefined}
-					feedback={false}
-					disabled={!this.props.isEditable}
-					onChange={(e) => this.updateNewPasswordInput(e.currentTarget.value) }
-					value={this.state.newPasswordInput}
-					placeholder="Новый пароль" />
-			</div>
-			<div className="w3-container">
-				<Password
-					type="text"
-					size={30}
-					className={this.state.isNewPasswordsInputIsInvalid ? "p-error" : undefined}
-					feedback={false}
-					disabled={!this.props.isEditable}
-					onChange={(e) => this.updateRepeatNewPasswordInput(e.currentTarget.value) }
-					value={this.state.repeatNewPasswordInput}
-					placeholder="Повторите новый пароль" />
-				{saveButton(this.state.loading, this.props.isEditable, () => this.updatePassword())}
-			</div>
-		</div>);
 	}
 }
 

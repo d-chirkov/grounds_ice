@@ -1,3 +1,5 @@
+import "../ProfileEditView.css"
+
 import React from "react";
 import { connect } from "react-redux";
 import { IRootState } from "../../../../store/contexts/model";
@@ -34,6 +36,24 @@ class LoginEditView extends React.Component<ILoginEditViewProps, ILoginEditViewS
 			isLoginInputIsInvalid: false,
 			loginMaxLength: 20
 		}
+	}
+	
+	render() {
+		return (<div>
+			<h4>Изменить логин</h4>
+			<div className="w3-container">
+				<div className="gi-profile-edit-row">
+					<InputText 
+						className={"gi-input-text " + (this.state.isLoginInputIsInvalid ? "p-error" : "")}
+						disabled={!this.props.isEditable}
+						onChange={(e) => this.updateLoginInput(e.currentTarget.value)}
+						placeholder="Новый логин"
+						type="text" 
+						value={this.state.newLoginInput} />
+					{saveButton(this.state.loading, this.props.isEditable, () => this.updateLogin())}
+				</div>
+			</div>
+		</div>);
 	}
 	
 	updateLogin() {
@@ -79,24 +99,6 @@ class LoginEditView extends React.Component<ILoginEditViewProps, ILoginEditViewS
 	
 	updateLoginInput(newValue: string) {
 		this.setState({newLoginInput: filter(newValue), isLoginInputIsInvalid: false})
-	}
-	
-	render() {
-		return (<div>
-			<h4>Изменить логин</h4>
-			<div className="w3-container">
-				<InputText 
-					type="text" 
-					size={30} 
-					placeholder="Новый логин"
-					disabled={!this.props.isEditable}
-					onChange={(e) => this.updateLoginInput(e.currentTarget.value)}
-					value={this.state.newLoginInput}
-					className={this.state.isLoginInputIsInvalid ? "p-error" : undefined}
-					/>
-				{saveButton(this.state.loading, this.props.isEditable, () => this.updateLogin())}
-			</div>
-		</div>);
 	}
 }
 

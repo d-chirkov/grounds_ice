@@ -28,8 +28,7 @@ enum PaymentFreq {
 	Year,
 	Month,
 	Day,
-	AllPeriod,
-	Custom
+	AllPeriod
 }
 
 interface IPaymentFreqView {
@@ -37,10 +36,19 @@ interface IPaymentFreqView {
 	freq: PaymentFreq
 }
 
+enum SuretyType {
+	Voucher,
+	RealState,
+	PTS
+}
+
+let suretyTypeLabels = new Map<SuretyType, string>();
+suretyTypeLabels.set(SuretyType.Voucher, "Расписка");
+suretyTypeLabels.set(SuretyType.RealState, "Недвижимость");
+suretyTypeLabels.set(SuretyType.PTS, "ПТС");
+
 interface ISurety {
-	voucher: boolean
-	realEstate: boolean
-	pts: boolean
+	types: Map<SuretyType, boolean>
 	others: string | null
 }
 
@@ -50,6 +58,7 @@ enum CreditType {
 	Consumer,
 	Hypothec,
 	Micro,
+	Refinancing,
 	Other
 }
 
@@ -59,20 +68,9 @@ creditTypeLabels.set(CreditType.Auto, "Автокредит");
 creditTypeLabels.set(CreditType.Business, "Бизнес");
 creditTypeLabels.set(CreditType.Hypothec, "Ипотека");
 creditTypeLabels.set(CreditType.Micro, "Микро");
+creditTypeLabels.set(CreditType.Refinancing, "Рефинансирование");
 creditTypeLabels.set(CreditType.Other, "Другое");
 
-
-let rowHeight = "40px";
-let rowLineHeight = "32px";
-let leftWidth = 130;
-let rightWidth = 290;
-let totalWidth = leftWidth + rightWidth;
-let wideInputWidth = 31;
-let spinnersSize = 1;
-
-let paymentsFreqPadding = 1.7;
-
-//<span key="Год" style={{padding:paymentsFreqPadding}}>Год</span>
 
 let paymentsFreq: IPaymentFreqView[] = [
 	{name:"Год", freq: PaymentFreq.Year},
@@ -82,12 +80,13 @@ let paymentsFreq: IPaymentFreqView[] = [
 ]
 
 let initialSurety: ISurety = {
-	voucher: false,
-	realEstate: false,
-	pts: false,
+	types: new Map<SuretyType, boolean>(),
 	others: null
 }
 
+initialSurety.types.set(SuretyType.Voucher, false);
+initialSurety.types.set(SuretyType.RealState, false);
+initialSurety.types.set(SuretyType.PTS, false);
 
 interface ICreateBorrowOrderState {
 	amount: number
@@ -119,7 +118,7 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 	
 	render() {
 		return (<div>
-			<div style={{float: "left", width:totalWidth, height:20}}></div>
+			<div className="gi-create-order-delimiter"></div>
 			{this.AmountInput()}
 			{this.LocationInput()}
 			{this.TermInput()}
@@ -129,143 +128,154 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 			{this.CreditTypeInput()}
 			{this.CommentInput()}
 			{this.SaveButton()}
-			<div style={{float: "left", width:totalWidth, height:20}}></div>
+			<div className="gi-create-order-delimiter"></div>
 		</div>);
 	}
 	
 	private AmountInput() {
-		return (<div className="create-order-input-row">
-			<div className="w3-text-blue-grey" style={{lineHeight:rowLineHeight, width:leftWidth, float:"left", height:rowHeight}}>
-				Сумма (₽):
-			</div>
-			<div style={{float: "left", height:rowHeight, width:rightWidth, wordWrap:"break-word"}}>
+		return (<div className="gi-create-order-input-row">
+			{this.getLeftField("Сумма (₽)")}
+			<div className="gi-right-field">
 				<InputText 
+					className="gi-input-text"
 					keyfilter="pint" 
-					size={wideInputWidth} 
-					placeholder="₽"
 					onChange={(e) => this.setState({amount: parseInt(e.currentTarget.value)})}
+					placeholder="₽"
 					/>
 			</div>
 		</div>);
 	}
 	
 	private LocationInput() {
-		return (<div className="create-order-input-row">
-			<div className="w3-text-blue-grey" style={{lineHeight:rowLineHeight, width:leftWidth, float:"left", height:rowHeight}}>
-				<span>Местоположение:</span>
-			</div>
-			<div style={{float: "left", height:rowHeight, width:rightWidth, wordWrap:"break-word"}}>
+		return (<div className="gi-create-order-input-row">
+			{this.getLeftField("Местоположение")}
+			<div className="gi-right-field">
 				<LocationEdit 
+					className="gi-input-text"
 					intialCity="" 
 					intialRegion="" 
-					placeholder="Местоположение" 
-					size={wideInputWidth} 
-					onChangeLocation={(c,r) => {}}/>
+					onChangeLocation={(c,r) => {}}
+					placeholder="Местоположение" />
 			</div>
 		</div>);
 	}
 	
 	private TermInput() {
-		let tooltipPadding = 6.7;
-		return (<div className="create-order-input-row">
-			<div className="w3-text-blue-grey" style={{lineHeight:rowLineHeight, width:leftWidth, float:"left", height:rowHeight}}>
+		return (<div className="gi-create-order-input-row">
+			<div className="w3-text-blue-grey gi-left-field">
 				<span style={{float:"left"}}>Срок:</span>
 				<span style={{float:"right", paddingRight:10}}>Лет:</span>
 			</div>
-			<div style={{float: "left", height:rowHeight, width:rightWidth, wordWrap:"break-word"}}>
+			<div className="gi-right-field">
 				<Spinner 
-					inputStyle={this.state.years == 0 ? {color:"rgb(179, 179, 179)"} : undefined}
-					size={spinnersSize} 
-					value={this.state.years} 
-					onChange={(e) => this.setState({years: e.value})}
-					max={99}
-					min={0} />
-				<span className="w3-text-blue-grey" style={{padding:tooltipPadding}}>Мес:</span>
+					inputClassName={"gi-date-spinner " + (this.state.years == 0 ? "gi-empty" : "")}
+					max={80}
+					min={0} 
+					onChange={e => this.updateTermByYears(e.value)}
+					value={this.state.years} />
+				<span className="w3-text-blue-grey gi-date-tooltip" style={{width:"29.7333"}}>Мес:</span>
 				<Spinner 
-					inputStyle={this.state.months == 0 ? {color:"rgb(179, 179, 179)"} : undefined}
-					size={spinnersSize} 
+					inputClassName={"gi-date-spinner " + (this.state.months == 0 ? "gi-empty" : "")}
+					max={80 * 12}
+					min={0}
 					value={this.state.months} 
-					onChange={(e) => this.setState({months: e.value})}
-					max={11}
-					min={0} />
-				<span className="w3-text-blue-grey" style={{padding:tooltipPadding}}>Дней:</span>
+					onChange={e => this.updateTermByMonths(e.value)} />
+				<span className="w3-text-blue-grey gi-date-tooltip" style={{width:"36.7333"}}>Дней:</span>
 				<Spinner 
-					inputStyle={this.state.days == 0 ? {color:"rgb(179, 179, 179)"} : undefined}
-					size={spinnersSize} 
-					value={this.state.days}
-					onChange={(e) => this.setState({days: e.value})} 
-					max={30}
-					min={0} />
+					inputClassName={"gi-date-spinner " + (this.state.days == 0 ? "gi-empty" : "")}
+					onChange={e => this.updateTermByDays(e.value)} 
+					max={80 * 365}
+					min={0}
+					value={this.state.days} />
 			</div>
 		</div>);
 	}
 	
+	private updateTermByYears(value: number) {
+		this.setState({years: Math.min(value, 80)});
+	}
+	
+	private updateTermByMonths(value: number) {
+		let years = this.state.years;
+		years += Math.floor(value / 12);
+		value %= 12;
+		years = Math.min(years, 80);
+		this.setState({years, months: value});
+	}
+	
+	private updateTermByDays(value: number) {
+		let years = this.state.years;
+		let months = this.state.months;
+		years += Math.floor(value / 365);
+		value = value % 365;
+		months += Math.floor(value / 30);
+		years += Math.floor(months / 12);
+		months %= 12;
+		value %= 30;
+		years = Math.min(years, 80);
+		this.setState({years, months, days: value});
+	}
+	
 	private PercentInput() {
-		return (<div className="create-order-input-row">
-			<div className="w3-text-blue-grey" style={{lineHeight:rowLineHeight, width:leftWidth, float:"left", height:rowHeight}}>
-				Процент (%):
-			</div>
-			<div style={{float: "left", height:"auto", width:rightWidth, wordWrap:"break-word"}}>
-				<div style={{float: "left", height:rowHeight, width:rightWidth, wordWrap:"break-word"}}>
-					<Spinner 
-						size={spinnersSize} 
-						value={this.state.percent} 
-						onChange={(e) => this.setState({percent: e.value})}
-						max={100}
-						min={0} 
-						step={0.1}/>
-				</div>
+		return (<div className="gi-create-order-input-row">
+			{this.getLeftField("Процент (%)")}
+			<div className="gi-right-field">
+				<Spinner 
+					inputClassName={"gi-percent-spinner " + (this.state.percent == 0 ? "gi-empty" : "")}
+					max={365}
+					min={0} 
+					onChange={e => this.setState({percent: e.value})}
+					step={0.1}
+					value={this.state.percent} />
 			</div>
 		</div>);
 	}
 	
 	private PaymentFrequencyInput() {
-		return (<div className="create-order-input-row">
-			<div className="w3-text-blue-grey" style={{lineHeight:"30px", width:leftWidth, float:"left", height:"30px"}}>
-				Частота выплат:
-			</div>
-			<div style={{float: "left", height:"auto", width:rightWidth, wordWrap:"break-word"}}>
-				<SelectButton optionLabel="name" value={this.state.paymentFreq} options={paymentsFreq} onChange={e => this.setState({paymentFreq: e.value})} />
+		return (<div className="gi-create-order-input-row">
+			{this.getLeftField("Частота выплат")}
+			<div className="gi-right-field">
+				<SelectButton 
+					onChange={e => this.setState({paymentFreq: e.value})}
+					optionLabel="name" 
+					options={paymentsFreq}
+					value={this.state.paymentFreq} />
 			</div>
 		</div>)
 	}
 	
 	private SuretyInput() {
 		let {surety} = this.state;
-		return (<div className="create-order-input-row">
-			<div className="w3-text-blue-grey" style={{lineHeight:rowLineHeight, width:leftWidth, float:"left", height:rowHeight}}>
-				Поручительство:
-			</div>
-			<div style={{paddingTop:4, float: "left", height:"auto", width:rightWidth}}>
-				<div style={{ float: "left", width:rightWidth}}>
-					<Checkbox 
-						inputId="surety_vaucher_cb" 
-						checked={surety.voucher}
-						onChange={e => this.setState({surety: {...surety, voucher: e.checked}})} />
-					<label htmlFor="surety_vaucher_cb" className="p-checkbox-label">Расписка</label>
-				</div>
-				<div style={{paddingTop:5, float: "left", width:rightWidth}}>
-					<Checkbox 
-						inputId="surety_real_estate_cb" 
-						checked={surety.realEstate}
-						onChange={e => this.setState({surety: {...surety, realEstate: e.checked}})} />
-					<label htmlFor="surety_real_estate_cb" className="p-checkbox-label">Недвижимость</label>
-				</div>
-				<div style={{paddingTop:5, float: "left", width:rightWidth}}>
-					<Checkbox 
-						inputId="surety_pts_cb" 
-						checked={surety.pts}
-						onChange={e => this.setState({surety: {...surety, pts: e.checked}})} />
-					<label htmlFor="surety_pts_cb" className="p-checkbox-label">ПТС</label>
-				</div>
-				<div style={{paddingTop:7, float: "left", width:rightWidth}}>
+		let keyIndex = 0;
+		let getCheckBox = (type: SuretyType, desc: string) => {
+			let checked = surety.types.get(type);
+			let result = (<div key={type} className="gi-surety gi-surety-cb">
+				<Checkbox 
+					inputId={"surety_" + type} 
+					checked={checked}
+					onChange={e => {surety.types.set(type, e.checked); this.forceUpdate();}} />
+				<label htmlFor={"surety_" + type} className="p-checkbox-label">{desc}</label>
+			</div>);
+			return result;
+		}
+		let getAllCheckBoxesButtons = (labels: Map<SuretyType, string>) => {
+			let nodes:JSX.Element[] = [];
+			labels.forEach((v, k) => {
+				nodes.push(getCheckBox(k, v));
+			})
+			return nodes;
+		}
+		return (<div className="gi-create-order-input-row">
+			{this.getLeftField("Поручительство")}
+			<div className="gi-right-field">
+				{getAllCheckBoxesButtons(suretyTypeLabels)}
+				<div className="gi-surety gi-surety-other">
 					<InputText 
-						size={wideInputWidth} 
-						value={surety.others != null ? surety.others : undefined}
-						placeholder="Другое"
+						className="gi-input-text"
 						maxLength={30}
 						onChange={(e) => this.setState({surety: {...surety, others: e.currentTarget.value}})}
-						/>
+						placeholder="Другое"
+						value={surety.others != null ? surety.others : undefined} />
 				</div>
 			</div>
 		</div>)
@@ -274,13 +284,13 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 	private CreditTypeInput() {
 		let {creditType} = this.state;
 		let getRadioButton = (type: CreditType, desc: string) => {
-			return (<div style={{ float: "left", width:rightWidth}}>
+			return (<div key={type}  className="gi-credit-type-cb">
 				<RadioButton 
-					inputId="credit_type_consumer_rb" 
+					inputId={"credit_type_" + type}
 					name="creditType" 
 					onChange={e => this.setState({creditType: type})} 
 					checked={creditType === type} />
-				<label htmlFor="credit_type_consumer_rb" className="p-checkbox-label">{desc}</label>	
+				<label htmlFor={"credit_type_" + type} className="p-checkbox-label">{desc}</label>	
 			</div>);
 		}
 		let getAllRadioButtons = (labels: Map<CreditType, string>) => {
@@ -290,46 +300,40 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 			})
 			return nodes;
 		}
-		let creditTypes = Array.from(creditTypeLabels.keys()).map((v) => ({name:creditTypeLabels.get(v), value:v}));
-		return (<div className="create-order-input-row">
-			<div className="w3-text-blue-grey" style={{lineHeight:rowLineHeight, width:leftWidth, float:"left", height:rowHeight}}>
-				Тип кредита:
-			</div>
-			
-			<div style={{paddingTop:4, float:"left", width:rightWidth}}>
-				<Dropdown 
-					optionLabel="name"
-					value={{name:creditTypeLabels.get(creditType), value:creditType}} 
-					options={creditTypes} 
-					style={{width:283}}
-					onChange={e => {this.setState({creditType: e.value.value})}} />
-				{/* {getAllRadioButtons(creditTypeLabels)} */}
+		return (<div className="gi-create-order-input-row">
+			{this.getLeftField("Тип кредита")}
+			<div className="gi-right-field">
+				{getAllRadioButtons(creditTypeLabels)}
 			</div>
 		</div>);
 	}
 	
 	private CommentInput() {
 		let {comment} = this.state;
-		return (<div className="create-order-input-row">
-			<div className="w3-text-blue-grey" style={{lineHeight:"40px", width:leftWidth, float:"left", height:rowHeight}}>
-				Комментарий:
-			</div>
-			<div style={{paddingTop:10, float: "left", height:"auto", width:rightWidth, paddingBottom:"14px"}}>
+		return (<div className="gi-create-order-input-row">
+			{this.getLeftField("Комментарий")}
+			<div className="gi-right-field">
 				<InputTextarea 
-					rows={5} 
-					cols={wideInputWidth} 
 					autoResize={true}
+					className="gi-input-text"
 					onChange={e =>  this.setState({comment: e.currentTarget.value})}
 					placeholder={"Комментарий"}
+					rows={3} 
 					value={comment || undefined}/>
 			</div>
 		</div>);
 	}
 	
+	private getLeftField(name: string) {
+		return (<div className="w3-text-blue-grey gi-left-field">
+			{name + ":"}
+		</div>)
+	}
+	
 	private SaveButton() {
-		return (<div style={{paddingTop:4, float: "left", height:"auto", width:totalWidth, paddingBottom:"14px"}}>
+		return (<div className="gi-save-button-container">
 			<Button 
-				style={{margin:"auto", float: "right", marginRight:6}} 
+				className="gi-save-button"
 				label="Создать"
 				iconPos="left" 
 				disabled={false}
