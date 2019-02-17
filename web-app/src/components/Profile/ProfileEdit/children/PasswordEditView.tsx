@@ -99,7 +99,7 @@ class PasswordEditView extends React.Component<IPasswordEditViewProps, IPassword
 			isNewPasswordsInputIsInvalid = true;
 		}
 		if (isOldPasswordInputIsInvalid || isNewPasswordsInputIsInvalid) {
-			Messager.showManyErrors(warnings.map(v => ({message: v})))
+			Messager.showManyErrors(warnings)
 			this.setState({isOldPasswordInputIsInvalid, isNewPasswordsInputIsInvalid});
 		} else {
 			this.setState({loading: true});

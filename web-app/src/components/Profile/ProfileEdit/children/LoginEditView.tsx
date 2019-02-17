@@ -65,7 +65,7 @@ class LoginEditView extends React.Component<ILoginEditViewProps, ILoginEditViewS
 			isInvalidInput = true;
 		}
 		if (isInvalidInput) {
-			Messager.showManyErrors(warnings.map(v => ({message: v})))
+			Messager.showManyErrors(warnings);
 			this.setState({isLoginInputIsInvalid: true});
 			
 		} else {

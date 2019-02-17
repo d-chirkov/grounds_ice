@@ -38,6 +38,7 @@ export function getLocations(query: string, callback: (locations: Location[]) =>
 			callback(result);
 		}
 		let items = response["items"];
+		console.log(items);
 		items.forEach((e:any) => {
 			let location: Location = {City: null, Region: null};
 			if (e.hasOwnProperty("title")) {
@@ -61,7 +62,6 @@ export function getLocations(query: string, callback: (locations: Location[]) =>
 				let location: Location = {City: null, Region: null};
 				if (e.hasOwnProperty("title")) {
 					location.Region = e["title"];
-					console.log(e["title"]);
 					result.push(location);
 				}
 			});

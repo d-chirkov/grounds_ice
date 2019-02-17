@@ -9,23 +9,23 @@ export class Messager {
 		Messager.growl_ = growl;
 	}
 	
-	static showManyErrors(messages: IMessage[]) {
+	static showManyErrors(messages: string[]) {
 		if (Messager.growl_ != undefined) {
-			Messager.growl_.show(messages.map(v => ({severity: 'error', summary: v.message})));
+			Messager.growl_.show(messages.map(v => ({severity: 'error', summary: v})));
 		}
 	}
 	
 	static showError(message: string) {
-		this.showManyErrors([{message}]);
+		this.showManyErrors([message]);
 	}
 	
-	static showManySuccess(messages: IMessage[]) {
+	static showManySuccess(messages: string[]) {
 		if (Messager.growl_ != undefined) {
-			Messager.growl_.show(messages.map(v => ({severity: 'success', summary: v.message})));
+			Messager.growl_.show(messages.map(v => ({severity: 'success', summary: v})));
 		}
 	}
 	
 	static showSuccess(message: string) {
-		this.showManySuccess([{message}]);
+		this.showManySuccess([message]);
 	}
 }

@@ -63,7 +63,6 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 	
 	signIn() {
 		let {login, password: password} = this.state;
-		let errorMessageHeader = "Ошибка авторизации";
 		let warnings: string[] = [];
 		let isUsernameError = false;
 		let isPasswordError = false;
@@ -76,7 +75,7 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 			isPasswordError = true;
 		}
 		if (isUsernameError || isPasswordError) {
-			Messager.showManyErrors(warnings.map(v => ({header: errorMessageHeader, message: v})))
+			Messager.showManyErrors(warnings)
 			this.setState({isLoginIsInvalid: isUsernameError, isPasswordIsInvalid: isPasswordError});
 		} else {
 			this.setState({loading: true});
@@ -103,7 +102,6 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 	
 	signUp() {
 		let {login, password, passwordRepeat} = this.state;
-		let errorMessageHeader = "Ошибка регистрации";
 		let warnings: string[] = [];
 		let isUsernameError = false;
 		let isPasswordError = false;
@@ -120,7 +118,7 @@ class LogInDialog extends React.Component<ILogInDialogProps, ILogInDialogState> 
 			isPasswordError = true;
 		}
 		if (isUsernameError || isPasswordError) {
-			Messager.showManyErrors(warnings.map(v => ({header: errorMessageHeader, message: v})))
+			Messager.showManyErrors(warnings);
 			this.setState({isLoginIsInvalid: isUsernameError, isPasswordIsInvalid: isPasswordError});
 		} else {
 			this.setState({loading: true});

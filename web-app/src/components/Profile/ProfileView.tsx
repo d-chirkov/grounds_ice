@@ -1,3 +1,5 @@
+import "./ProfileView.css"
+
 import React from "react";
 import { connect } from "react-redux";
 import { Route, Switch, RouteComponentProps } from "react-router-dom";
@@ -11,7 +13,7 @@ import { Card } from "primereact/card";
 import * as Model from "../../api/Profile/Model";
 import * as GetProfile from "../../api/Profile/interface/getProfile";
 import { Messager } from "../../Messager";
-import {ProgressSpinner} from 'primereact/progressspinner';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 interface IProfileViewRouteProps {
 	userId: string
@@ -82,14 +84,14 @@ class ProfileView extends React.Component<IProfileViewProps, IProfileViewState> 
 	}
 	
 	private getSpinner() {
-		return (<ProgressSpinner style={{position:"absolute", top:"50%", left:"50%", transform:"translate(-50%, -50%)"}}/>)
+		return (<ProgressSpinner strokeWidth="3" style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%, -50%)"}}/>)
 	}
 	
 	render() {
 		let { profile } = this.state;
 		let { userId } = this.props;
 		return (<div style={{margin: "auto", width:"850px", bottom:0, top:0}}>{
-			this.state.loading ? this.getSpinner() :
+			this.state.loading ? this.getSpinner() : 
 			profile == null ? <h3 
 				className="w3-text-grey" 
 				style={{textAlign:"center", position:"absolute", top:"50%", left:"50%", transform:"translate(-50%, -50%)"}}> 

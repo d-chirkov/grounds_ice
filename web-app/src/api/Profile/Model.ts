@@ -1,5 +1,4 @@
-export enum ProfileInfoType
-{
+export enum ProfileInfoType {
 	FirstName = "FirstName",
 	LastName = "LastName",
 	MiddleName = "MiddleName",

@@ -12,7 +12,8 @@ import { Checkbox } from "primereact/checkbox";
 import { RadioButton } from "primereact/radiobutton";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
-import { Dropdown } from "primereact/dropdown";
+import { Messager } from "../../Messager";
+import { string } from "prop-types";
 
 interface ICreateBorrowOrderMapProps {
 }
@@ -88,8 +89,20 @@ initialSurety.types.set(SuretyType.Voucher, false);
 initialSurety.types.set(SuretyType.RealState, false);
 initialSurety.types.set(SuretyType.PTS, false);
 
+interface IErrorFlags {
+	isAmmountError: boolean
+	isLocationError: boolean	
+}
+
+let initialErrorFlags: IErrorFlags = {
+	isAmmountError: false,
+	isLocationError: false,
+}
+
 interface ICreateBorrowOrderState {
 	amount: number
+	region: string | null
+	city: string | null
 	years: number
 	months: number
 	days: number
@@ -98,6 +111,8 @@ interface ICreateBorrowOrderState {
 	surety: ISurety
 	creditType: CreditType
 	comment: string | null
+	errors: IErrorFlags
+	sending: boolean
 }
 
 class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreateBorrowOrderState> {
@@ -105,6 +120,8 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 		super(props);
 		this.state = {
 			amount: 0,
+			region: null,
+			city: null,
 			years: 0,
 			months: 0,
 			days: 0,
@@ -112,55 +129,97 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 			paymentFreq: null,
 			surety: initialSurety,
 			creditType: CreditType.Consumer,
-			comment: null
+			comment: null,
+			errors: initialErrorFlags,
+			sending: false
 		}
 	}
 	
 	render() {
 		return (<div>
 			<div className="gi-create-order-delimiter"></div>
-			{this.AmountInput()}
-			{this.LocationInput()}
-			{this.TermInput()}
-			{this.PercentInput()}
-			{this.PaymentFrequencyInput()}
-			{this.SuretyInput()}
-			{this.CreditTypeInput()}
-			{this.CommentInput()}
-			{this.SaveButton()}
+			{this.amountInput()}
+			{this.locationInput()}
+			{this.termInput()}
+			{this.percentInput()}
+			{this.paymentFrequencyInput()}
+			{this.suretyInput()}
+			{this.creditTypeInput()}
+			{this.commentInput()}
+			{this.saveButton()}
 			<div className="gi-create-order-delimiter"></div>
 		</div>);
 	}
 	
-	private AmountInput() {
+	private send() {
+		if (!this.validateOrder()) {
+			return;
+		}
+		this.setState({sending: true});
+		//TODO: send 
+	}
+	
+	private validateOrder(): boolean {
+		let {amount, city, region} = this.state;
+		let errors: string[] = [];
+		let errorFlags: IErrorFlags = initialErrorFlags;
+		if (amount < 1000) {
+			errors.push("Сумма должна быть больше 1000₽");
+			errorFlags.isAmmountError = true;
+		}
+		if (amount > 50000000) {
+			errors.push("Сумма должна быть меньше 50.000.000₽");
+			errorFlags.isAmmountError = true;
+		}
+		if (city == null && region == null) {
+			errors.push("Укажите местоположение");
+			errorFlags.isLocationError = true;
+		}
+		if (errors.length > 0) {
+			this.setState({errors: errorFlags});
+			Messager.showManyErrors(errors);
+			return false;
+		}
+		return true;
+	}
+	
+	private amountInput() {
+		let {errors, sending} = this.state;
 		return (<div className="gi-create-order-input-row">
 			{this.getLeftField("Сумма (₽)")}
 			<div className="gi-right-field">
 				<InputText 
-					className="gi-input-text"
+					className={"gi-input-text " + (errors.isAmmountError ? "p-error" : "")}
+					disabled={sending}
 					keyfilter="pint" 
-					onChange={(e) => this.setState({amount: parseInt(e.currentTarget.value)})}
+					onChange={(e) => this.setState({
+						errors: {...errors, isAmmountError: false}, 
+						amount: parseInt(e.currentTarget.value)})}
 					placeholder="₽"
 					/>
 			</div>
 		</div>);
 	}
 	
-	private LocationInput() {
+	private locationInput() {
+		let {errors, sending} = this.state;
 		return (<div className="gi-create-order-input-row">
 			{this.getLeftField("Местоположение")}
 			<div className="gi-right-field">
 				<LocationEdit 
-					className="gi-input-text"
+					className={"gi-input-text " + (errors.isLocationError ? "p-error" : "")}
+					disabled={sending}
 					intialCity="" 
 					intialRegion="" 
-					onChangeLocation={(c,r) => {}}
+					onChangeLocation={(city, region) => this.setState({region, city})}
+					onChange={() => this.setState({errors: {...errors, isLocationError: false}})}
 					placeholder="Местоположение" />
 			</div>
 		</div>);
 	}
 	
-	private TermInput() {
+	private termInput() {
+		let {years, months, days, sending} = this.state;
 		return (<div className="gi-create-order-input-row">
 			<div className="w3-text-blue-grey gi-left-field">
 				<span style={{float:"left"}}>Срок:</span>
@@ -168,25 +227,28 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 			</div>
 			<div className="gi-right-field">
 				<Spinner 
-					inputClassName={"gi-date-spinner " + (this.state.years == 0 ? "gi-empty" : "")}
+					disabled={sending}
+					inputClassName={"gi-date-spinner " + (years == 0 ? "gi-empty" : "")}
 					max={80}
 					min={0} 
 					onChange={e => this.updateTermByYears(e.value)}
-					value={this.state.years} />
+					value={years} />
 				<span className="w3-text-blue-grey gi-date-tooltip" style={{width:"29.7333"}}>Мес:</span>
 				<Spinner 
-					inputClassName={"gi-date-spinner " + (this.state.months == 0 ? "gi-empty" : "")}
+					disabled={sending}
+					inputClassName={"gi-date-spinner " + (months == 0 ? "gi-empty" : "")}
 					max={80 * 12}
 					min={0}
-					value={this.state.months} 
+					value={months} 
 					onChange={e => this.updateTermByMonths(e.value)} />
 				<span className="w3-text-blue-grey gi-date-tooltip" style={{width:"36.7333"}}>Дней:</span>
 				<Spinner 
-					inputClassName={"gi-date-spinner " + (this.state.days == 0 ? "gi-empty" : "")}
+					disabled={sending}
+					inputClassName={"gi-date-spinner " + (days == 0 ? "gi-empty" : "")}
 					onChange={e => this.updateTermByDays(e.value)} 
 					max={80 * 365}
 					min={0}
-					value={this.state.days} />
+					value={days} />
 			</div>
 		</div>);
 	}
@@ -216,43 +278,47 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 		this.setState({years, months, days: value});
 	}
 	
-	private PercentInput() {
+	private percentInput() {
+		let {percent, sending} = this.state;
 		return (<div className="gi-create-order-input-row">
 			{this.getLeftField("Процент (%)")}
 			<div className="gi-right-field">
 				<Spinner 
-					inputClassName={"gi-percent-spinner " + (this.state.percent == 0 ? "gi-empty" : "")}
+					disabled={sending}
+					inputClassName={"gi-percent-spinner " + (percent == 0 ? "gi-empty" : "")}
 					max={365}
 					min={0} 
 					onChange={e => this.setState({percent: e.value})}
 					step={0.1}
-					value={this.state.percent} />
+					value={percent} />
 			</div>
 		</div>);
 	}
 	
-	private PaymentFrequencyInput() {
+	private paymentFrequencyInput() {
+		let {paymentFreq, sending} = this.state;
 		return (<div className="gi-create-order-input-row">
 			{this.getLeftField("Частота выплат")}
 			<div className="gi-right-field">
 				<SelectButton 
+					disabled={sending}
 					onChange={e => this.setState({paymentFreq: e.value})}
 					optionLabel="name" 
 					options={paymentsFreq}
-					value={this.state.paymentFreq} />
+					value={paymentFreq} />
 			</div>
 		</div>)
 	}
 	
-	private SuretyInput() {
-		let {surety} = this.state;
-		let keyIndex = 0;
+	private suretyInput() {
+		let {surety, sending} = this.state;
 		let getCheckBox = (type: SuretyType, desc: string) => {
 			let checked = surety.types.get(type);
 			let result = (<div key={type} className="gi-surety gi-surety-cb">
 				<Checkbox 
-					inputId={"surety_" + type} 
 					checked={checked}
+					disabled={sending}
+					inputId={"surety_" + type} 
 					onChange={e => {surety.types.set(type, e.checked); this.forceUpdate();}} />
 				<label htmlFor={"surety_" + type} className="p-checkbox-label">{desc}</label>
 			</div>);
@@ -272,6 +338,7 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 				<div className="gi-surety gi-surety-other">
 					<InputText 
 						className="gi-input-text"
+						disabled={sending}
 						maxLength={30}
 						onChange={(e) => this.setState({surety: {...surety, others: e.currentTarget.value}})}
 						placeholder="Другое"
@@ -281,15 +348,16 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 		</div>)
 	}
 	
-	private CreditTypeInput() {
-		let {creditType} = this.state;
+	private creditTypeInput() {
+		let {creditType, sending} = this.state;
 		let getRadioButton = (type: CreditType, desc: string) => {
 			return (<div key={type}  className="gi-credit-type-cb">
 				<RadioButton 
+					checked={creditType === type} 
+					disabled={sending}
 					inputId={"credit_type_" + type}
 					name="creditType" 
-					onChange={e => this.setState({creditType: type})} 
-					checked={creditType === type} />
+					onChange={e => this.setState({creditType: type})} />
 				<label htmlFor={"credit_type_" + type} className="p-checkbox-label">{desc}</label>	
 			</div>);
 		}
@@ -308,17 +376,19 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 		</div>);
 	}
 	
-	private CommentInput() {
-		let {comment} = this.state;
+	private commentInput() {
+		let {comment, sending} = this.state;
 		return (<div className="gi-create-order-input-row">
 			{this.getLeftField("Комментарий")}
 			<div className="gi-right-field">
 				<InputTextarea 
 					autoResize={true}
 					className="gi-input-text"
+					disabled={sending}
 					onChange={e =>  this.setState({comment: e.currentTarget.value})}
 					placeholder={"Комментарий"}
 					rows={3} 
+					maxLength={300}
 					value={comment || undefined}/>
 			</div>
 		</div>);
@@ -330,14 +400,16 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 		</div>)
 	}
 	
-	private SaveButton() {
+	private saveButton() {
+		let {sending} = this.state;
 		return (<div className="gi-save-button-container">
 			<Button 
 				className="gi-save-button"
+				disabled={sending}
 				label="Создать"
+				icon={sending ? "pi pi-spin pi-spinner" : "pi pi-save"}
 				iconPos="left" 
-				disabled={false}
-				onClick={() => {}}/>
+				onClick={() => {this.send()}}/>
 		</div>);
 	}
 }

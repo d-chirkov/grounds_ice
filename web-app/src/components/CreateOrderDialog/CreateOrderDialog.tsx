@@ -73,7 +73,7 @@ class CreateOrderDialog extends React.Component<ICreateOrderDialogProps, ICreate
 						icon="pi pi-times"
 						className="p-button-rounded p-button-secondary"
 						onClick={() => this.props.closeDialog()} />
-					<TabView className="gi-tab-view" activeIndex={this.state.tabIndex} onTabChange={(e) => this.setState({ tabIndex: e.index })}>
+					<TabView renderActiveOnly={false} className="gi-tab-view" activeIndex={this.state.tabIndex} onTabChange={(e) => this.setState({ tabIndex: e.index })}>
 						<TabPanel header="Займ" contentClassName="gi-tab-panel-content" headerClassName="gi-tab-panel-header">
 							<ScrollPanel className="gi-scroll-panel gi-tab-scroll">
 								<CreateBorrowOrder />

@@ -10,6 +10,8 @@ interface ILocationEditProps {
 	size?: number
 	placeholder? :string
 	className?: string
+	disabled?: boolean
+	onChange?:() => void
 	onChangeLocation: (city: string | null, region: string | null) => void
 }
 
@@ -34,13 +36,16 @@ class LocationEdit extends React.Component<ILocationEditProps, ILocationEditStat
 	render() {
 		return (
 			<AutoComplete 
+				disabled={this.props.disabled}
 				itemTemplate={this.locationTemplate.bind(this)} 
 				value={this.state.locationValue} 
 				size={this.props.size}
 				inputClassName={this.props.className}
 				placeholder={this.props.placeholder}
 				onChange={e => {
-					console.log(e);
+					if (this.props.onChange) {
+						this.props.onChange();
+					}
 					let value = "";
 					if (typeof e.value == "string") {
 						value = e.value;
