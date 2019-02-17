@@ -1,44 +1,44 @@
-﻿using System;
-using System.Linq;
-using NUnit.Framework;
-
-namespace GroundsIce.Model.Entities.Tests
+﻿namespace GroundsIce.Model.Entities.Tests
 {
+    using System;
+    using NUnit.Framework;
+
     [TestFixture]
-    class AccountTests
+    public class AccountTests
     {
-        private long _userId;
+        private long userId;
+
         [SetUp]
         public void SetUp()
         {
-            _userId = 0;
+            this.userId = 0;
         }
 
         [Test]
         public void Ctor_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Account(-1, ""));
-			Assert.Throws<ArgumentOutOfRangeException>(() => new Account(-1, null));
-		}
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Account(-1, string.Empty));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Account(-1, null));
+        }
 
         [Test]
         public void Ctor_ThrowArgumentNullException_When_LoginIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new Account(_userId, null));
+            Assert.Throws<ArgumentNullException>(() => new Account(this.userId, null));
         }
-		
+
         [Test]
         public void Ctor_Create_When_LoginIsNotNullAndUserIdIsGreaterThenZero()
         {
-            Assert.DoesNotThrow(() => new Account(_userId, "a"));
+            Assert.DoesNotThrow(() => new Account(this.userId, "a"));
         }
 
         [Test]
         public void Ctor_SaveUserAndLoginAsProperties_When_LoginIsNotNullAndUserIdIsGreaterThenZero()
         {
             string login = "a";
-            var account = new Account(_userId, login);
-            Assert.AreEqual(_userId, account.UserId);
+            var account = new Account(this.userId, login);
+            Assert.AreEqual(this.userId, account.UserId);
             Assert.AreEqual(login, account.Login);
         }
     }

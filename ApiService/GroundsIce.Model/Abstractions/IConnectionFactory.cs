@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GroundsIce.Model.Abstractions
+﻿namespace GroundsIce.Model.Abstractions
 {
-	public interface IConnectionFactory
-	{
-		Task<IDbConnection> GetConnectionAsync();
-	}
+    using System.Data;
+    using System.Threading.Tasks;
+
+    public interface IConnectionFactory
+    {
+        Task<IDbConnection> GetConnectionAsync();
+    }
 }

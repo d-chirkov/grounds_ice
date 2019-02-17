@@ -1,11 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using NUnit.Framework;
-
-namespace GroundsIce.Model.Validators.Common.Tests
+﻿namespace GroundsIce.Model.Validators.Common.Tests
 {
+    using System;
+    using System.Threading.Tasks;
+    using NUnit.Framework;
+
     [TestFixture]
-    class LengthValidatorTests
+    public class LengthValidatorTests
     {
         [Test]
         public void Ctor_ThrowArgumentOutOfRangeException_When_MinLengthIsLessOrEqualsZero()
@@ -92,7 +92,7 @@ namespace GroundsIce.Model.Validators.Common.Tests
         public async Task Validate_ReturnsFalse_When_ValueIsEmpty()
         {
             var validator = new LengthValidator(1, 2);
-            Assert.IsFalse(await validator.ValidateAsync(""));
+            Assert.IsFalse(await validator.ValidateAsync(string.Empty));
         }
     }
 }

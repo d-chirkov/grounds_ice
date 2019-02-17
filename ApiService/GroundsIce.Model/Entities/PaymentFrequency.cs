@@ -4,13 +4,11 @@
     using Newtonsoft.Json.Converters;
 
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum ProfileInfoType
+    public enum PaymentFrequency
     {
-        FirstName,
-        LastName,
-        MiddleName,
-        Description,
-        City,
-        Region
+        Year,
+        Month,
+        Day,
+        AllPeriod
     }
 }

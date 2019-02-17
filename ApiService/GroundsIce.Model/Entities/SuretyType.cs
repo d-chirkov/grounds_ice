@@ -4,13 +4,10 @@
     using Newtonsoft.Json.Converters;
 
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum ProfileInfoType
+    public enum SuretyType
     {
-        FirstName,
-        LastName,
-        MiddleName,
-        Description,
-        City,
-        Region
+        Voucher,
+        RealState,
+        PTS
     }
 }

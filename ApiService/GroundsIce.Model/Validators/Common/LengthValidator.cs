@@ -1,23 +1,23 @@
-﻿using System;
-using System.Threading.Tasks;
-using GroundsIce.Model.Abstractions.Validators;
-
-namespace GroundsIce.Model.Validators.Common
+﻿namespace GroundsIce.Model.Validators.Common
 {
+    using System;
+    using System.Threading.Tasks;
+    using GroundsIce.Model.Abstractions.Validators;
+
     public class LengthValidator : IStringValidator
     {
-        private int _minLength;
-        private int _maxLength;
+        private readonly int minLength;
+        private readonly int maxLength;
 
         public LengthValidator(int minLength, int maxLength)
         {
-            _minLength = (minLength > 0) ? minLength : throw new ArgumentOutOfRangeException("minLength");
-            _maxLength = (maxLength >= minLength) ? maxLength : throw new ArgumentOutOfRangeException("maxLength");
+            this.minLength = (minLength > 0) ? minLength : throw new ArgumentOutOfRangeException("minLength");
+            this.maxLength = (maxLength >= minLength) ? maxLength : throw new ArgumentOutOfRangeException("maxLength");
         }
 
         public Task<bool> ValidateAsync(string value)
         {
-            return Task.FromResult(value != null && _minLength <= value.Length && value.Length <= _maxLength);
+            return Task.FromResult(value != null && this.minLength <= value.Length && value.Length <= this.maxLength);
         }
     }
 }

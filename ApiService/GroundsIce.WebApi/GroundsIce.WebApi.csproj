@@ -127,10 +127,13 @@
     <Compile Include="Controllers\Account\DTO\LoginAndPassword.cs" />
     <Compile Include="Controllers\Account\DTO\NewLogin.cs" />
     <Compile Include="Controllers\Account\DTO\OldAndNewPasswords.cs" />
+    <Compile Include="Controllers\BorrowOrder\BorrowOrderController.cs" />
     <Compile Include="Controllers\Profile\DTO\ProfileInfoModel.cs" />
     <Compile Include="Controllers\Profile\DTO\ProfileRequest.cs" />
     <Compile Include="Controllers\Profile\ProfileController.cs" />
     <Compile Include="DTO\Value.cs" />
+    <Compile Include="DTO\Value{T}.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Providers\OAuthProvider.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
@@ -156,6 +159,10 @@
       <Project>{1e6583c8-c225-4ce2-a9fe-5575bfa47879}</Project>
       <Name>GroundsIce.Model</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

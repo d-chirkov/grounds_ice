@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GroundsIce.Model.Entities
+﻿namespace GroundsIce.Model.Entities
 {
-	public class Profile
-	{
-		public string Login { get; set; }
-		public string Avatar { get; set; }
-		public List<ProfileInfoEntry> ProfileInfo { get; set; }
-	}
+    using System.Collections.Generic;
+
+    public class Profile
+    {
+        public string Login { get; set; }
+
+        public string Avatar { get; set; }
+
+        public List<ProfileInfoEntry> ProfileInfo { get; set; }
+    }
 }

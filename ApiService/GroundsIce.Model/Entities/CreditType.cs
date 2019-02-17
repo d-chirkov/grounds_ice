@@ -4,13 +4,14 @@
     using Newtonsoft.Json.Converters;
 
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum ProfileInfoType
+    public enum CreditType
     {
-        FirstName,
-        LastName,
-        MiddleName,
-        Description,
-        City,
-        Region
+        Auto,
+        Business,
+        Consumer,
+        Hypothec,
+        Micro,
+        Refinancing,
+        Other
     }
 }

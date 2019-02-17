@@ -1,34 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Owin.Security;
-using Microsoft.Owin.Security.OAuth;
-using GroundsIce.Model.Abstractions.Repositories;
-using System.Threading.Tasks;
-using System.Security.Claims;
-using GroundsIce.Model.Entities;
-
-namespace GroundsIce.WebApi.Providers
+﻿namespace GroundsIce.WebApi.Providers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Security.Claims;
+    using System.Threading.Tasks;
+    using GroundsIce.Model.Abstractions.Repositories;
+    using GroundsIce.Model.Entities;
+    using Microsoft.Owin.Security;
+    using Microsoft.Owin.Security.OAuth;
+
     public class OAuthProvider : OAuthAuthorizationServerProvider
     {
-        private readonly string _publicClientId;
-        private IAccountRepository _accountRepository;
+        private readonly string publicClientId;
+        private readonly IAccountRepository accountRepository;
 
         public OAuthProvider(string publicClientId, IAccountRepository accountRepository)
         {
-            _publicClientId = publicClientId ?? throw new ArgumentNullException("publicClientId");
-            _accountRepository = accountRepository ?? throw new ArgumentNullException("accountRepository");
+            this.publicClientId = publicClientId ?? throw new ArgumentNullException("publicClientId");
+            this.accountRepository = accountRepository ?? throw new ArgumentNullException("accountRepository");
+        }
+
+        public static AuthenticationProperties CreateProperties(long userId)
+        {
+            IDictionary<string, string> data = new Dictionary<string, string>
+            {
+                { "USER_ID", userId.ToString() }
+            };
+            return new AuthenticationProperties(data);
         }
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
-			context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
-            Account account = await _accountRepository.GetAccountAsync(context.UserName, context.Password);
+            context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
+            Account account = await this.accountRepository.GetAccountAsync(context.UserName, context.Password);
             if (account == null)
             {
                 context.SetError("invalid_grant", "The user name or password is incorrect.");
                 return;
             }
+
             var userId = account.UserId;
             var claims = new List<Claim>()
             {
@@ -47,6 +57,7 @@ namespace GroundsIce.WebApi.Providers
             {
                 context.AdditionalResponseParameters.Add(property.Key, property.Value);
             }
+
             return Task.FromResult<object>(null);
         }
 
@@ -63,7 +74,7 @@ namespace GroundsIce.WebApi.Providers
 
         public override Task ValidateClientRedirectUri(OAuthValidateClientRedirectUriContext context)
         {
-            if (context.ClientId == _publicClientId)
+            if (context.ClientId == this.publicClientId)
             {
                 Uri expectedRootUri = new Uri(context.Request.Uri, "/");
 
@@ -74,15 +85,6 @@ namespace GroundsIce.WebApi.Providers
             }
 
             return Task.FromResult<object>(null);
-        }
-
-        public static AuthenticationProperties CreateProperties(long userId)
-        {
-            IDictionary<string, string> data = new Dictionary<string, string>
-            {
-                { "USER_ID", userId.ToString() }
-            };
-            return new AuthenticationProperties(data);
         }
     }
 }

@@ -5,7 +5,7 @@ export enum PaymentFrequency {
 	AllPeriod = "AllPeriod"
 }
 
-enum SuretyType {
+export enum SuretyType {
 	Voucher = "Voucher",
 	RealState = "RealState",
 	PTS = "PTS"
@@ -16,7 +16,7 @@ export interface Surety {
 	Others: string | null
 }
 
-enum CreditType {
+export enum CreditType {
 	Auto = "Auto",
 	Business = "Business",
 	Consumer = "Consumer",
@@ -26,13 +26,12 @@ enum CreditType {
 	Other = "Other"
 }
 
-export interface NewBorrowOrder {
+export interface BorrowOrder {
+	CreationTime: Date | null
 	Amount: number
 	Region: string | null
 	City: string | null
-	Years: number
-	Months: number
-	Days: number
+	TermInDays: number
 	Percent: number
 	PaymentFrequency: PaymentFrequency
 	Surety: Surety
