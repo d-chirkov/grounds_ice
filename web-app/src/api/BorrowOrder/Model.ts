@@ -1,10 +1,3 @@
-export enum PaymentFrequency {
-	Year = "Year",
-	Month = "Month",
-	Day = "Day",
-	AllPeriod = "AllPeriod"
-}
-
 export enum SuretyType {
 	Voucher = "Voucher",
 	RealState = "RealState",
@@ -33,7 +26,6 @@ export interface BorrowOrder {
 	City: string | null
 	TermInDays: number
 	Percent: number
-	PaymentFrequency: PaymentFrequency
 	Surety: Surety
 	CreditType: CreditType
 	Comment: string | null

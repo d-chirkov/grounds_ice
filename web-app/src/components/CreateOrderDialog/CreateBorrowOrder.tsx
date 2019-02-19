@@ -24,19 +24,6 @@ interface ICreateBorrowOrderMapDispatch {
 interface ICreateBorrowOrderProps extends ICreateBorrowOrderMapProps, ICreateBorrowOrderMapDispatch {
 }
 
-// TODO: must be part of model
-enum PaymentFreq {
-	Year,
-	Month,
-	Day,
-	AllPeriod
-}
-
-interface IPaymentFreqView {
-	name: string
-	freq: PaymentFreq
-}
-
 enum SuretyType {
 	Voucher,
 	RealState,
@@ -72,14 +59,6 @@ creditTypeLabels.set(CreditType.Micro, "Микро");
 creditTypeLabels.set(CreditType.Refinancing, "Рефинансирование");
 creditTypeLabels.set(CreditType.Other, "Другое");
 
-
-let paymentsFreq: IPaymentFreqView[] = [
-	{name:"Год", freq: PaymentFreq.Year},
-	{name:"Месяц", freq: PaymentFreq.Month},
-	{name:"День", freq: PaymentFreq.Day},
-	{name:"В конце", freq: PaymentFreq.AllPeriod}
-]
-
 let initialSurety: ISurety = {
 	types: new Map<SuretyType, boolean>(),
 	others: null
@@ -107,7 +86,6 @@ interface ICreateBorrowOrderState {
 	months: number
 	days: number
 	percent: number
-	paymentFreq: IPaymentFreqView | null
 	surety: ISurety
 	creditType: CreditType
 	comment: string | null
@@ -126,7 +104,6 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 			months: 0,
 			days: 0,
 			percent: 0,
-			paymentFreq: null,
 			surety: initialSurety,
 			creditType: CreditType.Consumer,
 			comment: null,
@@ -142,7 +119,6 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 			{this.locationInput()}
 			{this.termInput()}
 			{this.percentInput()}
-			{this.paymentFrequencyInput()}
 			{this.suretyInput()}
 			{this.creditTypeInput()}
 			{this.commentInput()}
@@ -293,21 +269,6 @@ class CreateBorrowOrder extends React.Component<ICreateBorrowOrderProps, ICreate
 					value={percent} />
 			</div>
 		</div>);
-	}
-	
-	private paymentFrequencyInput() {
-		let {paymentFreq, sending} = this.state;
-		return (<div className="gi-create-order-input-row">
-			{this.getLeftField("Частота выплат")}
-			<div className="gi-right-field">
-				<SelectButton 
-					disabled={sending}
-					onChange={e => this.setState({paymentFreq: e.value})}
-					optionLabel="name" 
-					options={paymentsFreq}
-					value={paymentFreq} />
-			</div>
-		</div>)
 	}
 	
 	private suretyInput() {
