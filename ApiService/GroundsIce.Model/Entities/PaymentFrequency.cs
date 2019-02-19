@@ -6,9 +6,7 @@
     [JsonConverter(typeof(StringEnumConverter))]
     public enum PaymentFrequency
     {
-        Year,
         Month,
-        Day,
         AllPeriod
     }
 }

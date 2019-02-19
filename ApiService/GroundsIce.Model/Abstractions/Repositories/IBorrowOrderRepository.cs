@@ -12,6 +12,8 @@
 
         Task<IList<BorrowOrder>> GetBorrowOrders(long userId);
 
+        Task<BorrowOrder> GetDetailedBorrowOrder(long borrowOrderId);
+
         // TODO: add methods for filtering by fields (may be it's necessary to create special struct with filtering fields)
     }
 }

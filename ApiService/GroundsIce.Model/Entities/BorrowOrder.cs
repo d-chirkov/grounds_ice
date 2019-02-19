@@ -18,7 +18,7 @@
 
         public float Percent { get; set; }
 
-        public PaymentFrequency PaymentFrequency { get; set; }
+        public PaymentFrequency? PaymentFrequency { get; set; }
 
         public Surety Surety { get; set; }
 

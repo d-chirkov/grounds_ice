@@ -56,6 +56,7 @@
     <Compile Include="Abstractions\Repositories\IAccountRepository.cs" />
     <Compile Include="Abstractions\Repositories\IBorrowOrderRepository.cs" />
     <Compile Include="Abstractions\Repositories\IProfileRepository.cs" />
+    <Compile Include="Abstractions\Validators\IBorrowOrderValidator.cs" />
     <Compile Include="Abstractions\Validators\IProfileInfoValidator.cs" />
     <Compile Include="Abstractions\Validators\IStringValidator.cs" />
     <Compile Include="ConnectionFactories\SqlConnectionFactory.cs" />
