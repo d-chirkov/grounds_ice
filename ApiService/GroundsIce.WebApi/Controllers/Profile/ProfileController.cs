@@ -57,7 +57,7 @@
             long? ownUserId = this.GetUserIdFromRequest();
             if (!ownUserId.HasValue || (ownUserId.HasValue && ownUserId.Value != requestedUserId))
             {
-                profile.ProfileInfo = profile.ProfileInfo.Where(v => v.IsPublic).ToList();
+                RemovePrivateFieldsFrom(profile);
             }
 
             return new Value<Profile>((int)ValueType.Success) { Payload = profile };
@@ -90,9 +90,9 @@
             return updated ? new Value((int)ValueType.Success) : new Value((int)ValueType.BadData);
         }
 
-        private bool NeedToCutdownEntry(ProfileInfoEntry entry)
+        private static void RemovePrivateFieldsFrom(Profile profile)
         {
-            return entry != null && !entry.IsPublic;
+            profile.ProfileInfo = profile.ProfileInfo.Where(v => v.IsPublic).ToList();
         }
 
         private long? GetUserIdFromRequest()
