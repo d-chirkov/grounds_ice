@@ -26,36 +26,67 @@
         public enum ValueType
         {
             Success = 1000,
-            BadData = 2000,
-            BorrowOrderDoesNotExist = 3000
+            BadData = 2000
         }
 
         [Route("create")]
         [HttpPost]
-        public Task<Value> CreateBorrowOrder(BorrowOrder borrowOrder)
+        public async Task<Value> CreateBorrowOrder(BorrowOrder borrowOrder)
         {
-            throw new NotImplementedException();
+            if (borrowOrder == null)
+            {
+                throw new ArgumentNullException("borrowOrder");
+            }
+
+            long userId = this.GetUserIdFromRequest();
+            return
+                (await this.borrowOrderValidator.ValidateAsync(borrowOrder) &&
+                await this.borrowOrderRepository.CreateBorrowOrder(userId, borrowOrder)) ?
+                new Value((int)ValueType.Success) :
+                new Value((int)ValueType.BadData);
         }
 
         [Route("delete")]
         [HttpPost]
-        public Task<Value> DeleteBorrowOrder(long borrowOrderId)
+        public async Task<Value> DeleteBorrowOrder(long borrowOrderId)
         {
-            throw new NotImplementedException();
+            if (borrowOrderId < 0)
+            {
+                throw new ArgumentOutOfRangeException("borrowOrderId");
+            }
+
+            long userId = this.GetUserIdFromRequest();
+            return await this.borrowOrderRepository.DeleteBorrowOrder(userId, borrowOrderId) ?
+                new Value((int)ValueType.Success) :
+                new Value((int)ValueType.BadData);
         }
 
-        [Route("get_all_by_user_id")]
+        [Route("get_all_for_user")]
         [HttpPost]
-        public Task<Value<IList<BorrowOrder>>> GetBorrowOrders(long userId)
+        public async Task<Value<IList<BorrowOrder>>> GetBorrowOrders(long userId)
         {
-            throw new NotImplementedException();
+            if (userId < 0)
+            {
+                throw new ArgumentOutOfRangeException("userId");
+            }
+
+            IList<BorrowOrder> borrowOrders = await this.borrowOrderRepository.GetBorrowOrders(userId);
+            ValueType resultType = borrowOrders != null ? ValueType.Success : ValueType.BadData;
+            return new Value<IList<BorrowOrder>>((int)resultType) { Payload = borrowOrders };
         }
 
-        [Route("get_by_user_id")]
+        [Route("get_detailed")]
         [HttpPost]
         public Task<Value<BorrowOrder>> GetDetailedBorrowOrder(long borrowOrderId)
         {
             throw new NotImplementedException();
+        }
+
+        private long GetUserIdFromRequest()
+        {
+            return this.Request != null && this.Request.Properties.ContainsKey("USER_ID") ?
+                (long)this.Request?.Properties["USER_ID"] :
+                throw new ArgumentNullException("USER_ID");
         }
     }
 }

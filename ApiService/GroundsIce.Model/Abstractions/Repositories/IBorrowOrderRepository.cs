@@ -6,9 +6,9 @@
 
     public interface IBorrowOrderRepository
     {
-        Task CreateBorrowOrder(long userId, BorrowOrder borrowOrder);
+        Task<bool> CreateBorrowOrder(long userId, BorrowOrder borrowOrder);
 
-        Task<bool> DeleteBorrowOrder(long borrowOrderId);
+        Task<bool> DeleteBorrowOrder(long userId, long borrowOrderId);
 
         Task<IList<BorrowOrder>> GetBorrowOrders(long userId);
 
