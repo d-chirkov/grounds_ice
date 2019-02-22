@@ -22,7 +22,8 @@
         private string validNewLogin;
         private string alreadyExistingLogin;
         private AccountController accountController;
-        private Mock<IStringValidator> validatorMock;
+        private Mock<ILoginValidator> loginValidatorMock;
+        private Mock<IPasswordValidator> passwordValidatorMock;
         private string invalidString;
 
         [SetUp]
@@ -73,18 +74,26 @@
                 .Setup(e => e.ChangePasswordAsync(this.validUserId, this.validPassword, It.IsAny<string>()))
                 .ReturnsAsync(true);
 
-            this.accountController = new AccountController(this.accountRepositoryMock.Object);
-
             this.invalidString = "invalid";
-            this.validatorMock = new Mock<IStringValidator>();
-            this.validatorMock.Setup(e => e.ValidateAsync(this.invalidString)).ReturnsAsync(false);
-            this.validatorMock.Setup(e => e.ValidateAsync(It.Is<string>(v => v != this.invalidString))).ReturnsAsync(true);
+            this.loginValidatorMock = new Mock<ILoginValidator>();
+            this.loginValidatorMock.Setup(e => e.ValidateAsync(this.invalidString)).ReturnsAsync(false);
+            this.loginValidatorMock.Setup(e => e.ValidateAsync(It.Is<string>(v => v != this.invalidString))).ReturnsAsync(true);
+            this.passwordValidatorMock = new Mock<IPasswordValidator>();
+            this.passwordValidatorMock.Setup(e => e.ValidateAsync(this.invalidString)).ReturnsAsync(false);
+            this.passwordValidatorMock.Setup(e => e.ValidateAsync(It.Is<string>(v => v != this.invalidString))).ReturnsAsync(true);
+
+            this.accountController = new AccountController(this.accountRepositoryMock.Object);
         }
 
-        public void SetUserIdToRequest(long userId)
+        public void SetUserIdToRequest(long userId, AccountController accountController = null)
         {
-            this.accountController.Request = new HttpRequestMessage();
-            this.accountController.Request.Properties["USER_ID"] = userId;
+            if (accountController == null)
+            {
+                accountController = this.accountController;
+            }
+
+            accountController.Request = new HttpRequestMessage();
+            accountController.Request.Properties["USER_ID"] = userId;
         }
 
         [Test]
@@ -93,55 +102,16 @@
             Assert.Throws<ArgumentNullException>(() => new AccountController(null));
         }
 
-        public void ThrowsArgumentNullException_When_PassingNullArrayOfValidators(Action<IEnumerable<IStringValidator>> func)
+        [Test]
+        public void Ctor_DoesNotThrow_When_PassingNotNullLoginValidator()
         {
-            Assert.Throws<ArgumentNullException>(() => func(null));
+            Assert.DoesNotThrow(() => new AccountController(this.accountRepositoryMock.Object, this.loginValidatorMock.Object));
         }
 
         [Test]
-        public void AddLoginValidatorRange_ThrowsArgumentNullException_When_PassingNullArrayOfValidators()
+        public void Ctor_DoesNotThrow_When_PassingNotNullPasswordValidator()
         {
-            this.ThrowsArgumentNullException_When_PassingNullArrayOfValidators(this.accountController.SetLoginValidators);
-        }
-
-        [Test]
-        public void AddPasswordValidatorRange_ThrowsArgumentNullException_When_PassingNullArrayOfValidators()
-        {
-            this.ThrowsArgumentNullException_When_PassingNullArrayOfValidators(this.accountController.SetPasswordValidators);
-        }
-
-        public void ThrowsArgumentNullException_When_PassingNullValidatorInArray(Action<IEnumerable<IStringValidator>> func)
-        {
-            Assert.Throws<ArgumentNullException>(() => func(new IStringValidator[] { null }));
-        }
-
-        [Test]
-        public void AddLoginValidatorRange_ThrowsArgumentNullException_When_PassingNullValidatorInArray()
-        {
-            this.ThrowsArgumentNullException_When_PassingNullValidatorInArray(this.accountController.SetLoginValidators);
-        }
-
-        [Test]
-        public void AddPasswordValidatorRange_ThrowsArgumentNullException_When_PassingNullValidatorInArray()
-        {
-            this.ThrowsArgumentNullException_When_PassingNullValidatorInArray(this.accountController.SetPasswordValidators);
-        }
-
-        public void DoesNotThrow_When_PassingNotNullValidatorInArray(Action<IEnumerable<IStringValidator>> func)
-        {
-            Assert.DoesNotThrow(() => func(new IStringValidator[] { this.validatorMock.Object }));
-        }
-
-        [Test]
-        public void AddLoginValidatorRange_DoesNotThrow_When_PassingNotNullValidatorInArray()
-        {
-            this.DoesNotThrow_When_PassingNotNullValidatorInArray(this.accountController.SetLoginValidators);
-        }
-
-        [Test]
-        public void AddPasswordValidatorRange_DoesNotThrow_When_PassingNotNullValidatorInArray()
-        {
-            this.DoesNotThrow_When_PassingNotNullValidatorInArray(this.accountController.SetPasswordValidators);
+            Assert.DoesNotThrow(() => new AccountController(this.accountRepositoryMock.Object, null, this.passwordValidatorMock.Object));
         }
 
         [Test]
@@ -168,58 +138,75 @@
         [Test]
         public async Task Register_ReturnsSuccess_When_PassingValidLoginAndPasswordThroughLoginValidator()
         {
-            this.accountController.SetLoginValidators(new[] { this.validatorMock.Object });
-            Value value = await this.accountController.Register(new DTO.LoginAndPassword(this.validLogin, this.validPassword));
+            var subject = new AccountController(
+                this.accountRepositoryMock.Object,
+                this.loginValidatorMock.Object);
+            Value value = await subject.Register(new DTO.LoginAndPassword(this.validLogin, this.validPassword));
             Assert.AreEqual(value.Type, (int)AccountController.ValueType.Success);
-            this.validatorMock.Verify(v => v.ValidateAsync(this.validLogin));
+            this.loginValidatorMock.Verify(v => v.ValidateAsync(this.validLogin));
         }
 
         public async Task ReturnsLoginNotValid_When_PassingInvalidLoginThroughValidator(Func<Task<Value>> func)
         {
-            this.accountController.SetLoginValidators(new[] { this.validatorMock.Object });
+            var subject = new AccountController(
+                this.accountRepositoryMock.Object,
+                this.loginValidatorMock.Object);
             Value value = await func();
             Assert.AreEqual(value.Type, (int)AccountController.ValueType.LoginNotValid);
-            this.validatorMock.Verify(v => v.ValidateAsync(this.invalidString));
+            this.loginValidatorMock.Verify(v => v.ValidateAsync(this.invalidString));
             this.accountRepositoryMock.VerifyNoOtherCalls();
         }
 
         [Test]
         public async Task Register_ReturnsLoginNotValid_When_PassingInvalidLoginThroughValidator()
         {
+            var subject = new AccountController(
+                this.accountRepositoryMock.Object,
+                this.loginValidatorMock.Object);
             await this.ReturnsLoginNotValid_When_PassingInvalidLoginThroughValidator(
-                () => this.accountController.Register(new DTO.LoginAndPassword(this.invalidString, this.validPassword)));
+                () => subject.Register(new DTO.LoginAndPassword(this.invalidString, this.validPassword)));
         }
 
         [Test]
         public async Task ChangeLogin_ReturnsLoginNotValid_When_PassingInvalidLoginThroughValidator()
         {
-            this.SetUserIdToRequest(this.validUserId);
+            var subject = new AccountController(
+                this.accountRepositoryMock.Object,
+                this.loginValidatorMock.Object);
+            this.SetUserIdToRequest(this.validUserId, subject);
             await this.ReturnsLoginNotValid_When_PassingInvalidLoginThroughValidator(
-                () => this.accountController.ChangeLogin(new DTO.NewLogin(this.invalidString)));
+                () => subject.ChangeLogin(new DTO.NewLogin(this.invalidString)));
         }
 
         public async Task ReturnsPasswordNotValid_When_PassingInvalidPasswordThroughValidator(Func<Task<Value>> func)
         {
-            this.accountController.SetPasswordValidators(new[] { this.validatorMock.Object });
             Value value = await func();
             Assert.AreEqual(value.Type, (int)AccountController.ValueType.PasswordNotValid);
-            this.validatorMock.Verify(v => v.ValidateAsync(this.invalidString));
+            this.passwordValidatorMock.Verify(v => v.ValidateAsync(this.invalidString));
             this.accountRepositoryMock.VerifyNoOtherCalls();
         }
 
         [Test]
         public async Task Register_ReturnsPasswordNotValid_When_PassingInvalidPasswordThroughLoginValidator()
         {
+            var subject = new AccountController(
+                this.accountRepositoryMock.Object,
+                null,
+                this.passwordValidatorMock.Object);
             await this.ReturnsPasswordNotValid_When_PassingInvalidPasswordThroughValidator(
-                () => this.accountController.Register(new DTO.LoginAndPassword(this.validLogin, this.invalidString)));
+                () => subject.Register(new DTO.LoginAndPassword(this.validLogin, this.invalidString)));
         }
 
         [Test]
         public async Task ChangePassword_ReturnsPasswordNotValid_When_PassingInvalidNewPasswordThroughValidator()
         {
-            this.SetUserIdToRequest(this.validUserId);
+            var subject = new AccountController(
+                this.accountRepositoryMock.Object,
+                null,
+                this.passwordValidatorMock.Object);
+            this.SetUserIdToRequest(this.validUserId, subject);
             await this.ReturnsPasswordNotValid_When_PassingInvalidPasswordThroughValidator(
-                () => this.accountController.ChangePassword(new DTO.OldAndNewPasswords(string.Empty, this.invalidString)));
+                () => subject.ChangePassword(new DTO.OldAndNewPasswords(string.Empty, this.invalidString)));
         }
 
         public async Task ReturnsLoginAlreadyExists_When_PassingAlreadyExistingLogin(Func<Task<Value>> func)

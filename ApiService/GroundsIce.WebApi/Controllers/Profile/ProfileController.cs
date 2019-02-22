@@ -16,12 +16,12 @@
     [RoutePrefix("api/profile")]
     public class ProfileController : ApiController
     {
-        private readonly IEnumerable<IProfileInfoValidator> profileInfoValidators;
+        private readonly IProfileInfoValidator profileInfoValidator;
         private readonly IProfileRepository profileRepository;
 
-        public ProfileController(IEnumerable<IProfileInfoValidator> profileInfoValidators, IProfileRepository profileRepository)
+        public ProfileController(IProfileInfoValidator profileInfoValidator, IProfileRepository profileRepository)
         {
-            this.profileInfoValidators = profileInfoValidators ?? throw new ArgumentNullException("profileInfoValidator");
+            this.profileInfoValidator = profileInfoValidator ?? throw new ArgumentNullException("profileInfoValidator");
             this.profileRepository = profileRepository ?? throw new ArgumentNullException("profileRepository");
         }
 
@@ -78,16 +78,11 @@
             }
 
             long userId = this.GetUserIdFromRequest() ?? throw new ArgumentNullException("userId");
-            foreach (var validator in this.profileInfoValidators)
-            {
-                if (!await validator.ValidateAsync(dto.ProfileInfo))
-                {
-                    return new Value((int)ValueType.BadData);
-                }
-            }
-
-            bool updated = await this.profileRepository.SetProfileInfoAsync(userId, dto.ProfileInfo);
-            return updated ? new Value((int)ValueType.Success) : new Value((int)ValueType.BadData);
+            return
+                await this.profileInfoValidator.ValidateAsync(dto.ProfileInfo) &&
+                await this.profileRepository.SetProfileInfoAsync(userId, dto.ProfileInfo) ?
+                new Value((int)ValueType.Success) :
+                new Value((int)ValueType.BadData);
         }
 
         private static void RemovePrivateFieldsFrom(Profile profile)

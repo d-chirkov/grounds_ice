@@ -16,12 +16,17 @@
     public class AccountController : ApiController
     {
         private readonly IAccountRepository accountRepository;
-        private IEnumerable<IStringValidator> loginValidators;
-        private IEnumerable<IStringValidator> passwordValidators;
+        private readonly ILoginValidator loginValidator;
+        private readonly IPasswordValidator passwordValidator;
 
-        public AccountController(IAccountRepository accountRepository)
+        public AccountController(
+            IAccountRepository accountRepository,
+            ILoginValidator loginValidator = null,
+            IPasswordValidator passwordValidator = null)
         {
             this.accountRepository = accountRepository ?? throw new ArgumentNullException("accountRepository");
+            this.loginValidator = loginValidator;
+            this.passwordValidator = passwordValidator;
         }
 
         public enum ValueType
@@ -34,18 +39,6 @@
             OldPasswordNotValid = 6000,
         }
 
-        public void SetLoginValidators(IEnumerable<IStringValidator> validators)
-        {
-            this.CheckValidators(validators);
-            this.loginValidators = validators;
-        }
-
-        public void SetPasswordValidators(IEnumerable<IStringValidator> validators)
-        {
-            this.CheckValidators(validators);
-            this.passwordValidators = validators;
-        }
-
         [Route("register")]
         [AllowAnonymous]
         [HttpPost]
@@ -54,8 +47,8 @@
             string login = dto?.Login ?? throw new ArgumentNullException("Login");
             string password = dto?.Password ?? throw new ArgumentNullException("Password");
             ValueType result =
-                !await this.IsValueValidated(login, this.loginValidators) ? ValueType.LoginNotValid :
-                !await this.IsValueValidated(password, this.passwordValidators) ? ValueType.PasswordNotValid :
+                this.loginValidator != null && !await this.loginValidator.ValidateAsync(login) ? ValueType.LoginNotValid :
+                this.passwordValidator != null && !await this.passwordValidator.ValidateAsync(password) ? ValueType.PasswordNotValid :
                 (await this.accountRepository.CreateAccountAsync(login, password) == null) ? ValueType.LoginAlreadyExists :
                 ValueType.Success;
             return new Value((int)result);
@@ -80,7 +73,7 @@
             ValueType result;
             long userId = this.GetUserIdFromRequest();
             result =
-                !await this.IsValueValidated(newLogin, this.loginValidators) ? ValueType.LoginNotValid :
+                this.loginValidator != null && !await this.loginValidator.ValidateAsync(newLogin) ? ValueType.LoginNotValid :
                 !await this.accountRepository.ChangeLoginAsync(userId, newLogin) ? ValueType.LoginAlreadyExists :
                 ValueType.Success;
             return new Value((int)result);
@@ -95,39 +88,15 @@
             ValueType result;
             long userId = this.GetUserIdFromRequest();
             result =
-                !await this.IsValueValidated(newPassword, this.passwordValidators) ? ValueType.PasswordNotValid :
+                this.passwordValidator != null && !await this.passwordValidator.ValidateAsync(newPassword) ? ValueType.PasswordNotValid :
                 !await this.accountRepository.ChangePasswordAsync(userId, oldPassword, newPassword) ? ValueType.OldPasswordNotValid :
                 ValueType.Success;
             return new Value((int)result);
         }
 
-        private void CheckValidators(IEnumerable<IStringValidator> validators)
-        {
-            if (validators == null || validators.Any(v => v == null))
-            {
-                throw new ArgumentNullException("validators");
-            }
-        }
-
         private long GetUserIdFromRequest()
         {
             return (long)(this.Request?.Properties["USER_ID"] ?? throw new ArgumentNullException("USER_ID"));
-        }
-
-        private async Task<bool> IsValueValidated(string value, IEnumerable<IStringValidator> validators)
-        {
-            if (validators != null)
-            {
-                foreach (IStringValidator validator in validators)
-                {
-                    if (!await validator.ValidateAsync(value))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
         }
     }
 }

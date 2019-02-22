@@ -51,7 +51,7 @@
             this.mockProfileRepository.Setup(c => c.SetProfileInfoAsync(this.validUserId, this.validProfileInfo)).ReturnsAsync(true);
             this.mockProfileRepository.Setup(c => c.SetProfileInfoAsync(this.invalidUserId, this.validProfileInfo)).ReturnsAsync(false);
 
-            this.subject = new ProfileController(new[] { this.mockProfileInfoValidator.Object }, this.mockProfileRepository.Object);
+            this.subject = new ProfileController(this.mockProfileInfoValidator.Object, this.mockProfileRepository.Object);
         }
 
         [Test]
@@ -59,13 +59,13 @@
         {
             Assert.Throws<ArgumentNullException>(() => new ProfileController(null, null));
             Assert.Throws<ArgumentNullException>(() => new ProfileController(null, this.mockProfileRepository.Object));
-            Assert.Throws<ArgumentNullException>(() => new ProfileController(new[] { this.mockProfileInfoValidator.Object }, null));
+            Assert.Throws<ArgumentNullException>(() => new ProfileController(this.mockProfileInfoValidator.Object, null));
         }
 
         [Test]
         public void Ctor_DoesNotThrow_When_PassingNotNull()
         {
-            Assert.DoesNotThrow(() => new ProfileController(new[] { this.mockProfileInfoValidator.Object }, this.mockProfileRepository.Object));
+            Assert.DoesNotThrow(() => new ProfileController(this.mockProfileInfoValidator.Object, this.mockProfileRepository.Object));
         }
 
         [Test]
