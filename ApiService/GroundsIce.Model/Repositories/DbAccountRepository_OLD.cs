@@ -10,18 +10,18 @@
     using GroundsIce.Model.Abstractions.Repositories;
     using GroundsIce.Model.Entities;
 
-    public class DbAccountRepository : IAccountRepository
+    public class DbAccountRepository_OLD : IAccountRepository_OLD
     {
         private const string AccountsTableName = "Accounts";
         private const string ProfileInfoTableName = "ProfileInfo";
         private readonly IConnectionFactory connectionFactory;
 
-        public DbAccountRepository(IConnectionFactory connectionFactory)
+        public DbAccountRepository_OLD(IConnectionFactory connectionFactory)
         {
             this.connectionFactory = connectionFactory ?? throw new ArgumentNullException("connectionFactory");
         }
 
-        public async Task<Account> CreateAccountAsync(string login, string password)
+        public async Task<Account_OLD> CreateAccountAsync(string login, string password)
         {
             if (login == null)
             {
@@ -38,7 +38,7 @@
                 try
                 {
                     long userId = connection.Insert(new DbAccount { Login = login, Password = password });
-                    return new Account(userId, login);
+                    return new Account_OLD(userId, login);
                 }
                 catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
                 {
@@ -47,7 +47,7 @@
             }
         }
 
-        public async Task<Account> GetAccountAsync(string login, string password)
+        public async Task<Account_OLD> GetAccountAsync(string login, string password)
         {
             if (login == null)
             {
@@ -63,7 +63,7 @@
             return await this.GetAccountBySqlParamsAsync(sqlQuery, new { Login = login, Password = password });
         }
 
-        public async Task<Account> GetAccountAsync(long userId)
+        public async Task<Account_OLD> GetAccountAsync(long userId)
         {
             if (userId < 0)
             {
@@ -128,7 +128,7 @@
             }
         }
 
-        private async Task<Account> GetAccountBySqlParamsAsync<T>(string sql, T sqlParams)
+        private async Task<Account_OLD> GetAccountBySqlParamsAsync<T>(string sql, T sqlParams)
         {
             using (var connection = await this.connectionFactory.GetConnectionAsync())
             {
@@ -137,7 +137,7 @@
                     accounts.Count() == 0 ? null :
                     accounts.Count() > 1 ? throw new DbAccountRepositoryException("Multiple accounts were found by login and password") :
                     accounts.FirstOrDefault() ?? throw new DbAccountRepositoryException("Null account was returned");
-                return dbAccount != null ? new Account(dbAccount.UserId, dbAccount.Login) : null;
+                return dbAccount != null ? new Account_OLD(dbAccount.UserId, dbAccount.Login) : null;
             }
         }
 

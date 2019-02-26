@@ -27,7 +27,7 @@ namespace GroundsIce.WebApi
             string sqlConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=GroundsIce.DB;Integrated Security=True;Pooling=False";
             builder.Register(c => new SqlConnectionFactory(sqlConnectionString)).As<IConnectionFactory>().SingleInstance();
 
-            builder.RegisterType<DbAccountRepository>().As<IAccountRepository>().InstancePerRequest();
+            builder.RegisterType<DbAccountRepository_OLD>().As<IAccountRepository_OLD>().InstancePerRequest();
             builder.RegisterType<DbProfileRepository>().As<IProfileRepository>().InstancePerRequest();
 
             builder.Register(c => new LoginValidator(5, 20)).As<ILoginValidator>();
@@ -63,7 +63,7 @@ namespace GroundsIce.WebApi
 
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
-            this.ConfigureAuth(app, new DbAccountRepository(container.Resolve<IConnectionFactory>()));
+            this.ConfigureAuth(app, new DbAccountRepository_OLD(container.Resolve<IConnectionFactory>()));
         }
     }
 }

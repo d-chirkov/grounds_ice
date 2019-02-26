@@ -9,12 +9,12 @@
     using GroundsIce.WebApi.DTO.Common;
     using Moq;
     using NUnit.Framework;
-    using Account = Model.Entities.Account;
+    using Account_OLD = Model.Entities.Account_OLD;
 
     [TestFixture]
     public class AccountControllerTests
     {
-        private Mock<IAccountRepository> accountRepositoryMock;
+        private Mock<IAccountRepository_OLD> accountRepositoryMock;
         private long validUserId;
         private long notExistingUserId;
         private string validLogin;
@@ -36,25 +36,25 @@
             this.validNewLogin = "new_login";
             this.alreadyExistingLogin = "exists";
 
-            this.accountRepositoryMock = new Mock<IAccountRepository>();
+            this.accountRepositoryMock = new Mock<IAccountRepository_OLD>();
             this.accountRepositoryMock
                 .Setup(e => e.CreateAccountAsync(It.Is<string>(v => v != this.validLogin), It.Is<string>(v => v != this.validPassword)))
-                .ReturnsAsync((Account)null);
+                .ReturnsAsync((Account_OLD)null);
             this.accountRepositoryMock
                 .Setup(e => e.CreateAccountAsync(this.validLogin, this.validPassword))
-                .ReturnsAsync(new Account(this.validUserId, this.validLogin));
+                .ReturnsAsync(new Account_OLD(this.validUserId, this.validLogin));
             this.accountRepositoryMock
                 .Setup(e => e.GetAccountAsync(It.Is<long>(v => v != this.validUserId)))
-                .ReturnsAsync((Account)null);
+                .ReturnsAsync((Account_OLD)null);
             this.accountRepositoryMock
                 .Setup(e => e.GetAccountAsync(this.validUserId))
-                .ReturnsAsync(new Account(this.validUserId, this.validLogin));
+                .ReturnsAsync(new Account_OLD(this.validUserId, this.validLogin));
             this.accountRepositoryMock
                 .Setup(e => e.GetAccountAsync(It.Is<string>(v => v != this.validLogin), It.Is<string>(v => v != this.validPassword)))
-                .ReturnsAsync((Account)null);
+                .ReturnsAsync((Account_OLD)null);
             this.accountRepositoryMock
                 .Setup(e => e.GetAccountAsync(this.validLogin, this.validPassword))
-                .ReturnsAsync(new Account(this.validUserId, this.validLogin));
+                .ReturnsAsync(new Account_OLD(this.validUserId, this.validLogin));
             this.accountRepositoryMock
                 .Setup(e => e.ChangeLoginAsync(It.Is<long>(v => v != this.validUserId), It.IsAny<string>()))
                 .ThrowsAsync(new Exception());
@@ -236,7 +236,7 @@
         public async Task GetAccount_ReturnsSuccessWithValidAccount_When_RequestedAccountExistsInRepo()
         {
             this.SetUserIdToRequest(this.validUserId);
-            Value<Account> value = await this.accountController.GetAccount();
+            Value<Account_OLD> value = await this.accountController.GetAccount();
             Assert.AreEqual(value.Type, (int)AccountController.ValueType.Success);
             Assert.AreEqual(value.Payload.Login, this.validLogin);
             Assert.AreEqual(value.Payload.UserId, this.validUserId);

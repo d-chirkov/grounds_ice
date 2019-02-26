@@ -9,18 +9,18 @@
     using GroundsIce.Model.Abstractions.Validators;
     using GroundsIce.WebApi.Attributes;
     using GroundsIce.WebApi.DTO.Common;
-    using Account = Model.Entities.Account;
+    using Account_OLD = Model.Entities.Account_OLD;
 
     [AuthorizeApi]
     [RoutePrefix("api/account")]
     public class AccountController : ApiController
     {
-        private readonly IAccountRepository accountRepository;
+        private readonly IAccountRepository_OLD accountRepository;
         private readonly ILoginValidator loginValidator;
         private readonly IPasswordValidator passwordValidator;
 
         public AccountController(
-            IAccountRepository accountRepository,
+            IAccountRepository_OLD accountRepository,
             ILoginValidator loginValidator = null,
             IPasswordValidator passwordValidator = null)
         {
@@ -56,13 +56,13 @@
 
         [Route("get_account")]
         [HttpPost]
-        public async Task<Value<Account>> GetAccount()
+        public async Task<Value<Account_OLD>> GetAccount()
         {
             long userId = this.GetUserIdFromRequest();
-            Account account = await this.accountRepository.GetAccountAsync(userId);
+            Account_OLD account = await this.accountRepository.GetAccountAsync(userId);
             return account != null ?
-                new Value<Account>((int)ValueType.Success) { Payload = account } :
-                new Value<Account>((int)ValueType.AccountNotExists);
+                new Value<Account_OLD>((int)ValueType.Success) { Payload = account } :
+                new Value<Account_OLD>((int)ValueType.AccountNotExists);
         }
 
         [Route("change_login")]

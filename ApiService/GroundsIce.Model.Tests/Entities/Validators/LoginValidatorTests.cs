@@ -1,12 +1,9 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GroundsIce.Model.Entities.Validators.Tests
+﻿namespace GroundsIce.Model.Entities.Validators.Tests
 {
+    using System;
+    using System.Collections.Generic;
+    using NUnit.Framework;
+
     [TestFixture]
     public class LoginValidatorTests
     {

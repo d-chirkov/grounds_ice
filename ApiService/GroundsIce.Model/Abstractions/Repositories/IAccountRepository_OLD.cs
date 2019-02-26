@@ -4,23 +4,23 @@
     using System.Threading.Tasks;
     using GroundsIce.Model.Entities;
 
-    public interface IAccountRepository
+    public interface IAccountRepository_OLD
     {
         /// <summary>
-        /// Создаёт новый аккаунт с указанными учётными данными (логином и паролем)
+        /// Создать аккаунт в репозитории по логину и паролю
         /// </summary>
         /// <param name="login">Логин пользователя</param>
         /// <param name="password">Пароль пользователя</param>
-        /// <returns>Созданный аккаунт или null, если указанный логин уже используется</returns>
-        Task<Account_OLD> CreateAccountAsync(Login login, string password);
+        /// <returns>Созданный аккаунт или null, если логин уже используется</returns>
+        Task<Account_OLD> CreateAccountAsync(string login, string password);
 
         /// <summary>
-        /// Возвращает аккаунт пользователя по логину и парою
+        /// Получить аккаунт по логину и паролю
         /// </summary>
         /// <param name="login">Логин пользователя</param>
         /// <param name="password">Пароль пользователя</param>
-        /// <returns>Аккаунт, соответствующий логину и паролю или null, если нет такого аккаунта (или пароль не верен)</returns>
-        Task<Account_OLD> GetAccountAsync(Login login, string password);
+        /// <returns>Аккаунт, соответствующий логину и паролю или null, если нет такого аккаунта</returns>
+        Task<Account_OLD> GetAccountAsync(string login, string password);
 
         /// <summary>
         /// Получить аккаунт, соответствующий идентификатору пользователя userId
@@ -36,7 +36,7 @@
         /// <param name="newLogin">Новый логин</param>
         /// <returns>true - логин успешно изменён; false - логин уже используется и не может быть установлен</returns>
         /// <exception cref="Exception">Не удалось изменить логин по причинам, отличным от конфликта логинов</exception>
-        Task<bool> ChangeLoginAsync(long userId, Login newLogin);
+        Task<bool> ChangeLoginAsync(long userId, string newLogin);
 
         /// <summary>
         /// Изменить пароль аккаунта, соответствующего пользователю с идентификатором userId

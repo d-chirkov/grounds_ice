@@ -21,7 +21,7 @@
         private IConnectionFactory connectionFactory = new SqlConnectionFactory(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=GroundsIce.DB.Test;Integrated Security=True;Pooling=False");
 
         private DbProfileRepository subject;
-        private DbAccountRepository accountRepository;
+        private DbAccountRepository_OLD accountRepository;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -32,7 +32,7 @@
         [SetUp]
         public async Task SetUp()
         {
-            this.accountRepository = new DbAccountRepository(this.connectionFactory);
+            this.accountRepository = new DbAccountRepository_OLD(this.connectionFactory);
             this.subject = new DbProfileRepository(this.connectionFactory);
             using (var connection = await this.connectionFactory.GetConnectionAsync())
             {
@@ -61,7 +61,7 @@
         [Test]
         public async Task GetProfileAsync_ReturnNullProfile_When_PassingNotExistingUserId()
         {
-            Account account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
+            Account_OLD account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
             Profile profile = await this.subject.GetProfileAsync(account.UserId + 1);
             Assert.IsNull(profile);
         }
@@ -69,7 +69,7 @@
         [Test]
         public async Task GetProfileAsync_ReturnNotNullProfile_When_PassingExistingUserId()
         {
-            Account account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
+            Account_OLD account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
             Profile profile = await this.subject.GetProfileAsync(account.UserId);
             Assert.IsNotNull(profile);
             Assert.AreEqual(profile.Login, ValidLogin);
@@ -114,7 +114,7 @@
         [Test]
         public async Task SetProfileInfoAsync_ReturnTrue_When_PassingEmptyProfileInfo()
         {
-            Account account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
+            Account_OLD account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
             bool updated = await this.subject.SetProfileInfoAsync(account.UserId, new List<ProfileInfoEntry>());
             Assert.IsTrue(updated);
         }
@@ -122,7 +122,7 @@
         [Test]
         public async Task SetProfileInfoAsync_AffectGetProfileAsync_When_PassingEmptyProfileInfo()
         {
-            Account account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
+            Account_OLD account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
             await this.subject.SetProfileInfoAsync(account.UserId, new List<ProfileInfoEntry>());
             Profile profile = await this.subject.GetProfileAsync(account.UserId);
             Assert.AreEqual(profile.ProfileInfo.Count(), 0);
@@ -143,7 +143,7 @@
         [Test]
         public async Task SetProfileInfoAsync_AffectGetProfileAsync_When_PassingProfileInfo()
         {
-            Account account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
+            Account_OLD account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
             foreach (var typeName in Enum.GetNames(typeof(ProfileInfoType)))
             {
                 var type = (ProfileInfoType)Enum.Parse(typeof(ProfileInfoType), typeName);
@@ -165,7 +165,7 @@
         [Test]
         public async Task SetProfileInfoAsync_AffectGetProfileAsync_When_PassingFullProfileInfo()
         {
-            Account account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
+            Account_OLD account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
             var profileInfo = new List<ProfileInfoEntry>
             {
                 new ProfileInfoEntry { Type = ProfileInfoType.FirstName, Value = "a", IsPublic = false },
@@ -183,7 +183,7 @@
         [Test]
         public async Task SetProfileInfoAsync_NotAffectGetProfileAsync_When_PassingProfileInfoWithNullOrEmptyValue()
         {
-            Account account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
+            Account_OLD account = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
             await this.subject.SetProfileInfoAsync(account.UserId, new List<ProfileInfoEntry> { new ProfileInfoEntry { Value = null } });
             await this.subject.SetProfileInfoAsync(account.UserId, new List<ProfileInfoEntry> { new ProfileInfoEntry { Value = string.Empty } });
             Profile profile = await this.subject.GetProfileAsync(account.UserId);
@@ -193,8 +193,8 @@
         [Test]
         public async Task SetProfileInfoAsync_NotAffectGetProfileAsync_For_OtherUsers()
         {
-            Account account1 = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
-            Account account2 = await this.accountRepository.CreateAccountAsync(AnotherValidLogin, AnotherValidPassword);
+            Account_OLD account1 = await this.accountRepository.CreateAccountAsync(ValidLogin, ValidPassword);
+            Account_OLD account2 = await this.accountRepository.CreateAccountAsync(AnotherValidLogin, AnotherValidPassword);
             var profileInfo1 = new List<ProfileInfoEntry>
             {
                 new ProfileInfoEntry { Type = ProfileInfoType.FirstName, Value = "a", IsPublic = false },

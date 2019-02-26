@@ -12,9 +12,9 @@
     public class OAuthProvider : OAuthAuthorizationServerProvider
     {
         private readonly string publicClientId;
-        private readonly IAccountRepository accountRepository;
+        private readonly IAccountRepository_OLD accountRepository;
 
-        public OAuthProvider(string publicClientId, IAccountRepository accountRepository)
+        public OAuthProvider(string publicClientId, IAccountRepository_OLD accountRepository)
         {
             this.publicClientId = publicClientId ?? throw new ArgumentNullException("publicClientId");
             this.accountRepository = accountRepository ?? throw new ArgumentNullException("accountRepository");
@@ -32,7 +32,7 @@
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
             context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
-            Account account = await this.accountRepository.GetAccountAsync(context.UserName, context.Password);
+            Account_OLD account = await this.accountRepository.GetAccountAsync(context.UserName, context.Password);
             if (account == null)
             {
                 context.SetError("invalid_grant", "The user name or password is incorrect.");

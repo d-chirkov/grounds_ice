@@ -11,7 +11,7 @@
     {
         public static OAuthAuthorizationServerOptions OAuthOptions { get; private set; }
 
-        public void ConfigureAuth(IAppBuilder app, IAccountRepository accountRepository)
+        public void ConfigureAuth(IAppBuilder app, IAccountRepository_OLD accountRepository)
         {
             string publicClientId = "self";
             OAuthOptions = new OAuthAuthorizationServerOptions

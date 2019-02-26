@@ -17,7 +17,7 @@
         [Test]
         public void Ctor_ThrowArgumentOutOfRangeException_When_UserIdIsLessThenZero()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Account(-1, string.Empty));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Account(-1, new Login(string.Empty)));
             Assert.Throws<ArgumentOutOfRangeException>(() => new Account(-1, null));
         }
 
@@ -30,13 +30,13 @@
         [Test]
         public void Ctor_Create_When_LoginIsNotNullAndUserIdIsGreaterThenZero()
         {
-            Assert.DoesNotThrow(() => new Account(this.userId, "a"));
+            Assert.DoesNotThrow(() => new Account(this.userId, new Login("a")));
         }
 
         [Test]
         public void Ctor_SaveUserAndLoginAsProperties_When_LoginIsNotNullAndUserIdIsGreaterThenZero()
         {
-            string login = "a";
+            var login = new Login("a");
             var account = new Account(this.userId, login);
             Assert.AreEqual(this.userId, account.UserId);
             Assert.AreEqual(login, account.Login);
