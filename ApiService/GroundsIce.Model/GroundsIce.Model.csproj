@@ -92,6 +92,7 @@
     <Compile Include="Entities\Account.cs" />
     <Compile Include="Entities\BorrowOrder.cs" />
     <Compile Include="Entities\CreditType.cs" />
+    <Compile Include="Entities\Login.cs" />
     <Compile Include="Entities\Profile.cs" />
     <Compile Include="Entities\ProfileInfoEntry.cs" />
     <Compile Include="Entities\ProfileInfoType.cs" />
