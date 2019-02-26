@@ -48,28 +48,5 @@
             var login = new Login(value);
             Assert.AreEqual(login.Value, value);
         }
-
-        [Test]
-        public void ValueSetter_ChangeActualValue_When_CallSetter()
-        {
-            string value = "a";
-            var login = new Login(string.Empty);
-            login.Value = value;
-            Assert.AreEqual(login.Value, value);
-        }
-
-        [Test]
-        public void ValueSetter_ThrowArgumentNullException_When_CallSetterWithNullArg()
-        {
-            var login = new Login(string.Empty);
-            Assert.Throws<ArgumentNullException>(() => login.Value = null);
-        }
-
-        [Test]
-        public void ValueSetter_DoesNotThrow_When_CallSetterWithEmptyArg()
-        {
-            var login = new Login("a");
-            Assert.DoesNotThrow(() => login.Value = string.Empty);
-        }
     }
 }

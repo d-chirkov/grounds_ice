@@ -98,6 +98,7 @@
     <Compile Include="Entities\ProfileInfoType.cs" />
     <Compile Include="Entities\Surety.cs" />
     <Compile Include="Entities\SuretyType.cs" />
+    <Compile Include="Entities\Validators\LoginValidator.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Repositories\DbAccountRepository.cs" />
     <Compile Include="Repositories\DbProfileRepository.cs" />
