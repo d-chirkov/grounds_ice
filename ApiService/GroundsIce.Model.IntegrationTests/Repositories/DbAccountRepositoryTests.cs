@@ -1,4 +1,4 @@
-﻿namespace GroundsIce.Model.Repositories.Tests
+﻿namespace GroundsIce.Model.Repositories.IntegrationTests
 {
     using System;
     using System.Threading.Tasks;

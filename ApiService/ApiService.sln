@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.Model.Tests", "G
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.WebApi.Tests", "GroundsIce.WebApi.Tests\GroundsIce.WebApi.Tests.csproj", "{D487E752-16EF-4CAB-9B20-3F9FC578BA00}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundsIce.Model.IntegrationTests", "GroundsIce.Model.IntegrationTests\GroundsIce.Model.IntegrationTests.csproj", "{C60E1985-1998-48AA-A5A5-DB502B177CBE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D487E752-16EF-4CAB-9B20-3F9FC578BA00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D487E752-16EF-4CAB-9B20-3F9FC578BA00}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D487E752-16EF-4CAB-9B20-3F9FC578BA00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C60E1985-1998-48AA-A5A5-DB502B177CBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C60E1985-1998-48AA-A5A5-DB502B177CBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C60E1985-1998-48AA-A5A5-DB502B177CBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C60E1985-1998-48AA-A5A5-DB502B177CBE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
