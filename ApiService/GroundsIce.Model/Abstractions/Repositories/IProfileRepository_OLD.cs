@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using GroundsIce.Model.Entities;
 
-    public interface IProfileRepository
+    public interface IProfileRepository_OLD
     {
         Task<Profile_OLD> GetProfileAsync(long userId);
 

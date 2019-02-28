@@ -16,7 +16,7 @@
     public class BorrowOrderControllerTests
     {
         private Mock<IBorrowOrderRepository> mockBorrowOrderRepository;
-        private Mock<IBorrowOrderValidator> mockBorrowOrderValidator;
+        private Mock<IBorrowOrderValidator_OLD> mockBorrowOrderValidator;
         private long existUserId;
         private long notExistUserId;
         private long userIdThatHasNotBorrowOrders;
@@ -62,7 +62,7 @@
                 .ReturnsAsync(this.existBorrowOrders);
             this.mockBorrowOrderRepository.Setup(c => c.GetBorrowOrders(this.userIdThatHasNotBorrowOrders))
                 .ReturnsAsync(new List<BorrowOrder>());
-            this.mockBorrowOrderValidator = new Mock<IBorrowOrderValidator>();
+            this.mockBorrowOrderValidator = new Mock<IBorrowOrderValidator_OLD>();
             this.mockBorrowOrderValidator.Setup(c => c.ValidateAsync(this.validBorrowOrder)).ReturnsAsync(true);
             this.mockBorrowOrderValidator.Setup(c => c.ValidateAsync(this.invalidBorrowOrder)).ReturnsAsync(false);
             this.mockBorrowOrderValidator.Setup(c => c.ValidateAsync(null)).ThrowsAsync(new ArgumentNullException());

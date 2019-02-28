@@ -3,9 +3,9 @@
     using System;
     using FluentValidation;
 
-    public class LengthValidator : AbstractValidator<string>
+    public class LengthValidator_OLD : AbstractValidator<string>
     {
-        public LengthValidator(int minLength, int maxLength)
+        public LengthValidator_OLD(int minLength, int maxLength)
         {
             if (minLength <= 0)
             {

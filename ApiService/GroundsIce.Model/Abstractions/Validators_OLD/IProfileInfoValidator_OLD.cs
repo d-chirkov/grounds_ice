@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using GroundsIce.Model.Entities;
 
-    public interface IProfileInfoValidator
+    public interface IProfileInfoValidator_OLD
     {
         Task<bool> ValidateAsync(List<ProfileEntry> profileInfo);
     }

@@ -16,10 +16,10 @@
     [RoutePrefix("api/profile")]
     public class ProfileController : ApiController
     {
-        private readonly IProfileInfoValidator profileInfoValidator;
-        private readonly IProfileRepository profileRepository;
+        private readonly IProfileInfoValidator_OLD profileInfoValidator;
+        private readonly IProfileRepository_OLD profileRepository;
 
-        public ProfileController(IProfileInfoValidator profileInfoValidator, IProfileRepository profileRepository)
+        public ProfileController(IProfileInfoValidator_OLD profileInfoValidator, IProfileRepository_OLD profileRepository)
         {
             this.profileInfoValidator = profileInfoValidator ?? throw new ArgumentNullException("profileInfoValidator");
             this.profileRepository = profileRepository ?? throw new ArgumentNullException("profileRepository");

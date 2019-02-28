@@ -2,7 +2,7 @@
 {
     using System.Threading.Tasks;
 
-    public interface IStringValidator
+    public interface IStringValidator_OLD
     {
         Task<bool> ValidateAsync(string value);
     }

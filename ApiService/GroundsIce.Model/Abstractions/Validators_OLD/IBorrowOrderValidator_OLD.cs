@@ -3,7 +3,7 @@
     using System.Threading.Tasks;
     using GroundsIce.Model.Entities;
 
-    public interface IBorrowOrderValidator
+    public interface IBorrowOrderValidator_OLD
     {
         Task<bool> ValidateAsync(BorrowOrder borrowOrder);
     }

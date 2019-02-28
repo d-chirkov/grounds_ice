@@ -20,7 +20,7 @@
         private const string AnotherValidPassword = "passwordd";
         private IConnectionFactory connectionFactory = new SqlConnectionFactory(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=GroundsIce.DB.Test;Integrated Security=True;Pooling=False");
 
-        private DbProfileRepository subject;
+        private DbProfileRepository_OLD subject;
         private DbAccountRepository_OLD accountRepository;
 
         [OneTimeSetUp]
@@ -33,7 +33,7 @@
         public async Task SetUp()
         {
             this.accountRepository = new DbAccountRepository_OLD(this.connectionFactory);
-            this.subject = new DbProfileRepository(this.connectionFactory);
+            this.subject = new DbProfileRepository_OLD(this.connectionFactory);
             using (var connection = await this.connectionFactory.GetConnectionAsync())
             {
                 await connection.ExecuteAsync($"DELETE FROM {AccountsTableName}");
@@ -43,13 +43,13 @@
         [Test]
         public void Ctor_Throw_When_PassingNullConnectionFactory()
         {
-            Assert.Throws<ArgumentNullException>(() => new DbProfileRepository(null));
+            Assert.Throws<ArgumentNullException>(() => new DbProfileRepository_OLD(null));
         }
 
         [Test]
         public void Ctor_DoesNotThrow_When_PassingValidConnectionFactory()
         {
-            Assert.DoesNotThrow(() => new DbProfileRepository(this.connectionFactory));
+            Assert.DoesNotThrow(() => new DbProfileRepository_OLD(this.connectionFactory));
         }
 
         [Test]

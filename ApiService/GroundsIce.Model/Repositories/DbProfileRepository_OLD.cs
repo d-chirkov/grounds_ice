@@ -11,7 +11,7 @@
     using GroundsIce.Model.Abstractions.Repositories;
     using GroundsIce.Model.Entities;
 
-    public class DbProfileRepository : IProfileRepository
+    public class DbProfileRepository_OLD : IProfileRepository_OLD
     {
         private const string ProfileInfoEntriesTableName = "ProfileInfoEntries";
 
@@ -34,7 +34,7 @@
 
         private readonly IConnectionFactory connectionFactory;
 
-        public DbProfileRepository(IConnectionFactory connectionFactory)
+        public DbProfileRepository_OLD(IConnectionFactory connectionFactory)
         {
             this.connectionFactory = connectionFactory ?? throw new ArgumentNullException("connectionFactory");
         }

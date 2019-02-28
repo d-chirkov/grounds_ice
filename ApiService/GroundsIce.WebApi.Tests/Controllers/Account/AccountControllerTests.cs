@@ -22,8 +22,8 @@
         private string validNewLogin;
         private string alreadyExistingLogin;
         private AccountController accountController;
-        private Mock<ILoginValidator> loginValidatorMock;
-        private Mock<IPasswordValidator> passwordValidatorMock;
+        private Mock<ILoginValidator_OLD> loginValidatorMock;
+        private Mock<IPasswordValidator_OLD> passwordValidatorMock;
         private string invalidString;
 
         [SetUp]
@@ -75,10 +75,10 @@
                 .ReturnsAsync(true);
 
             this.invalidString = "invalid";
-            this.loginValidatorMock = new Mock<ILoginValidator>();
+            this.loginValidatorMock = new Mock<ILoginValidator_OLD>();
             this.loginValidatorMock.Setup(e => e.ValidateAsync(this.invalidString)).ReturnsAsync(false);
             this.loginValidatorMock.Setup(e => e.ValidateAsync(It.Is<string>(v => v != this.invalidString))).ReturnsAsync(true);
-            this.passwordValidatorMock = new Mock<IPasswordValidator>();
+            this.passwordValidatorMock = new Mock<IPasswordValidator_OLD>();
             this.passwordValidatorMock.Setup(e => e.ValidateAsync(this.invalidString)).ReturnsAsync(false);
             this.passwordValidatorMock.Setup(e => e.ValidateAsync(It.Is<string>(v => v != this.invalidString))).ReturnsAsync(true);
 

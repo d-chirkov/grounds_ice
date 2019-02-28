@@ -28,14 +28,14 @@ namespace GroundsIce.WebApi
             builder.Register(c => new SqlConnectionFactory(sqlConnectionString)).As<IConnectionFactory>().SingleInstance();
 
             builder.RegisterType<DbAccountRepository_OLD>().As<IAccountRepository_OLD>().InstancePerRequest();
-            builder.RegisterType<DbProfileRepository>().As<IProfileRepository>().InstancePerRequest();
+            builder.RegisterType<DbProfileRepository_OLD>().As<IProfileRepository_OLD>().InstancePerRequest();
 
-            builder.Register(c => new LoginValidator(5, 20)).As<ILoginValidator>();
-            builder.Register(c => new PasswordValidator(8, 30)).As<IPasswordValidator>();
+            builder.Register(c => new LoginValidator_OLD(5, 20)).As<ILoginValidator_OLD>();
+            builder.Register(c => new PasswordValidator_OLD(8, 30)).As<IPasswordValidator_OLD>();
 
             builder.Register(c =>
             {
-                return new ProfileInfoValidator()
+                return new ProfileInfoValidator_OLD()
                 {
                     TypesMaxLengths = new Dictionary<ProfileEntryType, int>()
                     {
@@ -47,7 +47,7 @@ namespace GroundsIce.WebApi
                         { ProfileEntryType.Description, 300 },
                     }
                 };
-            }).As<IProfileInfoValidator>().SingleInstance();
+            }).As<IProfileInfoValidator_OLD>().SingleInstance();
 
             // TODO: add whitespace checks for login and profile info
             builder.RegisterType<AccountController>().InstancePerRequest();

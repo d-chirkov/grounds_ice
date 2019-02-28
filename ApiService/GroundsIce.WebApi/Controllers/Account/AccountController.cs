@@ -16,13 +16,13 @@
     public class AccountController : ApiController
     {
         private readonly IAccountRepository_OLD accountRepository;
-        private readonly ILoginValidator loginValidator;
-        private readonly IPasswordValidator passwordValidator;
+        private readonly ILoginValidator_OLD loginValidator;
+        private readonly IPasswordValidator_OLD passwordValidator;
 
         public AccountController(
             IAccountRepository_OLD accountRepository,
-            ILoginValidator loginValidator = null,
-            IPasswordValidator passwordValidator = null)
+            ILoginValidator_OLD loginValidator = null,
+            IPasswordValidator_OLD passwordValidator = null)
         {
             this.accountRepository = accountRepository ?? throw new ArgumentNullException("accountRepository");
             this.loginValidator = loginValidator;

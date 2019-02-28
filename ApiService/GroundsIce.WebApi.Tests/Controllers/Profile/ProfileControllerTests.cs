@@ -16,8 +16,8 @@
     [TestFixture]
     public class ProfileControllerTests
     {
-        private Mock<IProfileInfoValidator> mockProfileInfoValidator;
-        private Mock<IProfileRepository> mockProfileRepository;
+        private Mock<IProfileInfoValidator_OLD> mockProfileInfoValidator;
+        private Mock<IProfileRepository_OLD> mockProfileRepository;
         private List<ProfileEntry> validProfileInfo;
         private List<ProfileEntry> invalidProfileInfo;
         private long validUserId;
@@ -41,11 +41,11 @@
                 ProfileInfo = new[] { new ProfileEntry() }.ToList()
             };
 
-            this.mockProfileInfoValidator = new Mock<IProfileInfoValidator>();
+            this.mockProfileInfoValidator = new Mock<IProfileInfoValidator_OLD>();
             this.mockProfileInfoValidator.Setup(c => c.ValidateAsync(It.Is<List<ProfileEntry>>(v => v != this.validProfileInfo))).ReturnsAsync(false);
             this.mockProfileInfoValidator.Setup(c => c.ValidateAsync(this.validProfileInfo)).ReturnsAsync(true);
 
-            this.mockProfileRepository = new Mock<IProfileRepository>();
+            this.mockProfileRepository = new Mock<IProfileRepository_OLD>();
             this.mockProfileRepository.Setup(c => c.GetProfileAsync(this.validUserId)).ReturnsAsync(this.validProfile);
             this.mockProfileRepository.Setup(c => c.GetProfileAsync(this.invalidUserId)).ReturnsAsync((Profile_OLD)null);
             this.mockProfileRepository.Setup(c => c.SetProfileInfoAsync(this.validUserId, this.validProfileInfo)).ReturnsAsync(true);

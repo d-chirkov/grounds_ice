@@ -7,9 +7,9 @@
     using GroundsIce.Model.Abstractions.Validators;
     using GroundsIce.Model.Entities;
 
-    public class ProfileInfoValidator : AbstractValidator<List<ProfileEntry>>, IProfileInfoValidator
+    public class ProfileInfoValidator_OLD : AbstractValidator<List<ProfileEntry>>, IProfileInfoValidator_OLD
     {
-        public ProfileInfoValidator()
+        public ProfileInfoValidator_OLD()
         {
             this.RuleFor(profileInfo => profileInfo)
                 .Must(profileInfo => profileInfo.Count == profileInfo.GroupBy(v => v.Type).Select(group => group.First()).Count());
@@ -23,7 +23,7 @@
 
         public IDictionary<ProfileEntryType, int> TypesMaxLengths { get; set; }
 
-        async Task<bool> IProfileInfoValidator.ValidateAsync(List<ProfileEntry> profileInfo)
+        async Task<bool> IProfileInfoValidator_OLD.ValidateAsync(List<ProfileEntry> profileInfo)
         {
             return (await this.ValidateAsync(profileInfo)).IsValid;
         }

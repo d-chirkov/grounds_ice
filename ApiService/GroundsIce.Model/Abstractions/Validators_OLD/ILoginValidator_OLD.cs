@@ -1,6 +1,6 @@
 ﻿namespace GroundsIce.Model.Abstractions.Validators
 {
-    public interface ILoginValidator : IStringValidator
+    public interface ILoginValidator_OLD : IStringValidator_OLD
     {
     }
 }

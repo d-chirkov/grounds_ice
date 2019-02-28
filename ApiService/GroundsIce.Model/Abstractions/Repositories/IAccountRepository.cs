@@ -12,7 +12,7 @@
         /// <param name="login">Логин пользователя</param>
         /// <param name="password">Пароль пользователя</param>
         /// <returns>Созданный аккаунт или null, если указанный логин уже используется</returns>
-        Task<Account_OLD> CreateAccountAsync(Login login, string password);
+        Task<Account_OLD> CreateAccountAsync(Login login, Password password);
 
         /// <summary>
         /// Возвращает аккаунт пользователя по логину и парою
@@ -20,7 +20,7 @@
         /// <param name="login">Логин пользователя</param>
         /// <param name="password">Пароль пользователя</param>
         /// <returns>Аккаунт, соответствующий логину и паролю или null, если нет такого аккаунта (или пароль не верен)</returns>
-        Task<Account_OLD> GetAccountAsync(Login login, string password);
+        Task<Account_OLD> GetAccountAsync(Login login, Password password);
 
         /// <summary>
         /// Получить аккаунт, соответствующий идентификатору пользователя userId
@@ -45,6 +45,6 @@
         /// <param name="oldPassword">Текущий действительный пароль</param>
         /// <param name="newPassword">Новый пароль</param>
         /// <returns>true - пароль успешно изменён; false - старый пароль неверен или пользователя с таким аккаунтом нет</returns>
-        Task<bool> ChangePasswordAsync(long userId, string oldPassword, string newPassword);
+        Task<bool> ChangePasswordAsync(long userId, Password oldPassword, Password newPassword);
     }
 }

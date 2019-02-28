@@ -15,9 +15,9 @@
     public class BorrowOrderController : ApiController
     {
         private readonly IBorrowOrderRepository borrowOrderRepository;
-        private readonly IBorrowOrderValidator borrowOrderValidator;
+        private readonly IBorrowOrderValidator_OLD borrowOrderValidator;
 
-        public BorrowOrderController(IBorrowOrderRepository borrowOrderRepository, IBorrowOrderValidator borrowOrderValidator)
+        public BorrowOrderController(IBorrowOrderRepository borrowOrderRepository, IBorrowOrderValidator_OLD borrowOrderValidator)
         {
             this.borrowOrderRepository = borrowOrderRepository ?? throw new ArgumentNullException("borrowOrderRepository");
             this.borrowOrderValidator = borrowOrderValidator ?? throw new ArgumentNullException("borrowOrderValidator");
