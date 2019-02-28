@@ -7,20 +7,20 @@
     [TestFixture]
     public class LoginValidatorTests
     {
-        public List<LoginValueValidation> Validations { get; } = new List<LoginValueValidation>
+        public ValidationsCollection<Login> Validations { get; } = new ValidationsCollection<Login>
         {
-            new LoginValueValidation { Login = new Login("a"), Validator = new LoginValidator(1, 2),  Result = true },
-            new LoginValueValidation { Login = new Login("ab"), Validator = new LoginValidator(1, 2),  Result = true },
-            new LoginValueValidation { Login = new Login("ab"), Validator = new LoginValidator(2, 4),  Result = true },
-            new LoginValueValidation { Login = new Login("abcd"), Validator = new LoginValidator(2, 4),  Result = true },
-            new LoginValueValidation { Login = new Login("abc"), Validator = new LoginValidator(2, 4),  Result = true },
-            new LoginValueValidation { Login = new Login("a"), Validator = new LoginValidator(2, 4),  Result = false },
-            new LoginValueValidation { Login = new Login("a"), Validator = new LoginValidator(2, 3),  Result = false },
-            new LoginValueValidation { Login = new Login("abc"), Validator = new LoginValidator(1, 2),  Result = false },
-            new LoginValueValidation { Login = new Login("abcde"), Validator = new LoginValidator(2, 4),  Result = false },
-            new LoginValueValidation { Login = new Login("abcdef"), Validator = new LoginValidator(2, 4),  Result = false },
-            new LoginValueValidation { Login = new Login(string.Empty), Validator = new LoginValidator(1, 2),  Result = false },
-            new LoginValueValidation { Login = new Login(string.Empty), Validator = new LoginValidator(2, 3),  Result = false },
+            new Validation<Login> { Object = new Login("a"), Validator = new LoginValidator(1, 2),  Result = true },
+            new Validation<Login> { Object = new Login("ab"), Validator = new LoginValidator(1, 2),  Result = true },
+            new Validation<Login> { Object = new Login("ab"), Validator = new LoginValidator(2, 4),  Result = true },
+            new Validation<Login> { Object = new Login("abcd"), Validator = new LoginValidator(2, 4),  Result = true },
+            new Validation<Login> { Object = new Login("abc"), Validator = new LoginValidator(2, 4),  Result = true },
+            new Validation<Login> { Object = new Login("a"), Validator = new LoginValidator(2, 4),  Result = false },
+            new Validation<Login> { Object = new Login("a"), Validator = new LoginValidator(2, 3),  Result = false },
+            new Validation<Login> { Object = new Login("abc"), Validator = new LoginValidator(1, 2),  Result = false },
+            new Validation<Login> { Object = new Login("abcde"), Validator = new LoginValidator(2, 4),  Result = false },
+            new Validation<Login> { Object = new Login("abcdef"), Validator = new LoginValidator(2, 4),  Result = false },
+            new Validation<Login> { Object = new Login(string.Empty), Validator = new LoginValidator(1, 2),  Result = false },
+            new Validation<Login> { Object = new Login(string.Empty), Validator = new LoginValidator(2, 3),  Result = false },
         };
 
         [Test]
@@ -56,22 +56,7 @@
         [Test]
         public void Validate_ReturnExpextedValue_InAllCases()
         {
-            for (int i = 0; i < this.Validations.Count; ++i)
-            {
-                var validation = this.Validations[i];
-                Assert.AreEqual(validation.Result, validation.Validator.Validate(validation.Login).IsValid, i.ToString());
-            }
-        }
-
-        public class LoginValueValidation
-        {
-            public Login Login { get; set; }
-
-            public LoginValidator Validator { get; set; }
-
-            public bool Result { get; set; }
-
-            public string FailedPassingDescription { get; set; }
+            this.Validations.AssertAll();
         }
     }
 }

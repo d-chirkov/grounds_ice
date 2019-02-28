@@ -6,6 +6,6 @@
 
     public interface IProfileInfoValidator
     {
-        Task<bool> ValidateAsync(List<ProfileInfoEntry> profileInfo);
+        Task<bool> ValidateAsync(List<ProfileEntry> profileInfo);
     }
 }

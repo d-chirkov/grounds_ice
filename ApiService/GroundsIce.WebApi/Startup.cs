@@ -37,14 +37,14 @@ namespace GroundsIce.WebApi
             {
                 return new ProfileInfoValidator()
                 {
-                    TypesMaxLengths = new Dictionary<ProfileInfoType, int>()
+                    TypesMaxLengths = new Dictionary<ProfileEntryType, int>()
                     {
-                        { ProfileInfoType.FirstName, 30 },
-                        { ProfileInfoType.LastName, 30 },
-                        { ProfileInfoType.MiddleName, 30 },
-                        { ProfileInfoType.City, 35 },
-                        { ProfileInfoType.Region, 35 },
-                        { ProfileInfoType.Description, 300 },
+                        { ProfileEntryType.FirstName, 30 },
+                        { ProfileEntryType.LastName, 30 },
+                        { ProfileEntryType.MiddleName, 30 },
+                        { ProfileEntryType.City, 35 },
+                        { ProfileEntryType.Region, 35 },
+                        { ProfileEntryType.Description, 300 },
                     }
                 };
             }).As<IProfileInfoValidator>().SingleInstance();

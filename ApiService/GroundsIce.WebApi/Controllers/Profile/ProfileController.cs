@@ -10,7 +10,7 @@
     using GroundsIce.Model.Entities;
     using GroundsIce.WebApi.Attributes;
     using GroundsIce.WebApi.DTO.Common;
-    using Profile = Model.Entities.Profile;
+    using Profile_OLD = Model.Entities.Profile_OLD;
 
     [AuthorizeApi]
     [RoutePrefix("api/profile")]
@@ -35,7 +35,7 @@
         [Route("get")]
         [AllowAnonymous]
         [HttpPost]
-        public async Task<Value<Profile>> Get(DTO.ProfileRequest dto)
+        public async Task<Value<Profile_OLD>> Get(DTO.ProfileRequest dto)
         {
             if (dto == null)
             {
@@ -48,10 +48,10 @@
                 throw new ArgumentOutOfRangeException("requestedUserId");
             }
 
-            Profile profile = await this.profileRepository.GetProfileAsync(requestedUserId);
+            Profile_OLD profile = await this.profileRepository.GetProfileAsync(requestedUserId);
             if (profile == null)
             {
-                return new Value<Profile>((int)ValueType.ProfileNotExists);
+                return new Value<Profile_OLD>((int)ValueType.ProfileNotExists);
             }
 
             long? ownUserId = this.GetUserIdFromRequest();
@@ -60,7 +60,7 @@
                 RemovePrivateFieldsFrom(profile);
             }
 
-            return new Value<Profile>((int)ValueType.Success) { Payload = profile };
+            return new Value<Profile_OLD>((int)ValueType.Success) { Payload = profile };
         }
 
         [Route("set_profile_info")]
@@ -85,7 +85,7 @@
                 new Value((int)ValueType.BadData);
         }
 
-        private static void RemovePrivateFieldsFrom(Profile profile)
+        private static void RemovePrivateFieldsFrom(Profile_OLD profile)
         {
             profile.ProfileInfo = profile.ProfileInfo.Where(v => v.IsPublic).ToList();
         }

@@ -19,17 +19,17 @@
 
         private const string AccountsTableName = "Accounts";
 
-        private static readonly Dictionary<string, ProfileInfoType> FromDbProfileInfoTypesMapping = new Dictionary<string, ProfileInfoType>()
+        private static readonly Dictionary<string, ProfileEntryType> FromDbProfileInfoTypesMapping = new Dictionary<string, ProfileEntryType>()
         {
-            { "firstname", ProfileInfoType.FirstName },
-            { "lastname", ProfileInfoType.LastName },
-            { "middlename", ProfileInfoType.MiddleName },
-            { "description", ProfileInfoType.Description },
-            { "city", ProfileInfoType.City },
-            { "region", ProfileInfoType.Region },
+            { "firstname", ProfileEntryType.FirstName },
+            { "lastname", ProfileEntryType.LastName },
+            { "middlename", ProfileEntryType.MiddleName },
+            { "description", ProfileEntryType.Description },
+            { "city", ProfileEntryType.City },
+            { "region", ProfileEntryType.Region },
         };
 
-        private static readonly Dictionary<ProfileInfoType, string> ToDbProfileInfoTypesMapping =
+        private static readonly Dictionary<ProfileEntryType, string> ToDbProfileInfoTypesMapping =
             FromDbProfileInfoTypesMapping.ToDictionary(x => x.Value, x => x.Key);
 
         private readonly IConnectionFactory connectionFactory;
@@ -39,7 +39,7 @@
             this.connectionFactory = connectionFactory ?? throw new ArgumentNullException("connectionFactory");
         }
 
-        public async Task<Profile> GetProfileAsync(long userId)
+        public async Task<Profile_OLD> GetProfileAsync(long userId)
         {
             if (userId < 0)
             {
@@ -64,13 +64,13 @@
                     $"WHERE p.UserId=@UserId AND t.Id=p.TypeId";
                 var dbProfileInfoEntries = await connection.QueryAsync<DbProfileInfoEntry>(sqlQuery, new { UserId = userId });
                 var profileInfo = from dbEntry in dbProfileInfoEntries
-                                  select new ProfileInfoEntry
+                                  select new ProfileEntry
                                   {
                                       Type = FromDbProfileInfoTypesMapping[dbEntry.Type],
                                       Value = dbEntry.Value,
                                       IsPublic = dbEntry.IsPublic
                                   };
-                return new Profile
+                return new Profile_OLD
                 {
                     Login = login,
                     Avatar = null,
@@ -79,7 +79,7 @@
             }
         }
 
-        public async Task<bool> SetProfileInfoAsync(long userId, List<ProfileInfoEntry> profileInfo)
+        public async Task<bool> SetProfileInfoAsync(long userId, List<ProfileEntry> profileInfo)
         {
             if (userId < 0)
             {

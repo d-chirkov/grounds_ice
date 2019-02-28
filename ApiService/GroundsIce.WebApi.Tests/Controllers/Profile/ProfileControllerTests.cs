@@ -11,18 +11,18 @@
     using GroundsIce.WebApi.DTO.Common;
     using Moq;
     using NUnit.Framework;
-    using Profile = Model.Entities.Profile;
+    using Profile_OLD = Model.Entities.Profile_OLD;
 
     [TestFixture]
     public class ProfileControllerTests
     {
         private Mock<IProfileInfoValidator> mockProfileInfoValidator;
         private Mock<IProfileRepository> mockProfileRepository;
-        private List<ProfileInfoEntry> validProfileInfo;
-        private List<ProfileInfoEntry> invalidProfileInfo;
+        private List<ProfileEntry> validProfileInfo;
+        private List<ProfileEntry> invalidProfileInfo;
         private long validUserId;
         private long invalidUserId;
-        private Profile validProfile;
+        private Profile_OLD validProfile;
         private ProfileController subject;
         private long ownUserId;
 
@@ -33,21 +33,21 @@
             this.validUserId = 2;
             this.invalidUserId = 3;
 
-            this.validProfileInfo = new[] { new ProfileInfoEntry() }.ToList();
-            this.invalidProfileInfo = new[] { new ProfileInfoEntry() }.ToList();
+            this.validProfileInfo = new[] { new ProfileEntry() }.ToList();
+            this.invalidProfileInfo = new[] { new ProfileEntry() }.ToList();
 
-            this.validProfile = new Profile
+            this.validProfile = new Profile_OLD
             {
-                ProfileInfo = new[] { new ProfileInfoEntry() }.ToList()
+                ProfileInfo = new[] { new ProfileEntry() }.ToList()
             };
 
             this.mockProfileInfoValidator = new Mock<IProfileInfoValidator>();
-            this.mockProfileInfoValidator.Setup(c => c.ValidateAsync(It.Is<List<ProfileInfoEntry>>(v => v != this.validProfileInfo))).ReturnsAsync(false);
+            this.mockProfileInfoValidator.Setup(c => c.ValidateAsync(It.Is<List<ProfileEntry>>(v => v != this.validProfileInfo))).ReturnsAsync(false);
             this.mockProfileInfoValidator.Setup(c => c.ValidateAsync(this.validProfileInfo)).ReturnsAsync(true);
 
             this.mockProfileRepository = new Mock<IProfileRepository>();
             this.mockProfileRepository.Setup(c => c.GetProfileAsync(this.validUserId)).ReturnsAsync(this.validProfile);
-            this.mockProfileRepository.Setup(c => c.GetProfileAsync(this.invalidUserId)).ReturnsAsync((Profile)null);
+            this.mockProfileRepository.Setup(c => c.GetProfileAsync(this.invalidUserId)).ReturnsAsync((Profile_OLD)null);
             this.mockProfileRepository.Setup(c => c.SetProfileInfoAsync(this.validUserId, this.validProfileInfo)).ReturnsAsync(true);
             this.mockProfileRepository.Setup(c => c.SetProfileInfoAsync(this.invalidUserId, this.validProfileInfo)).ReturnsAsync(false);
 
@@ -77,7 +77,7 @@
         [Test]
         public async Task Get_ReturnSuccessWithProfile_When_PassingValidUserId()
         {
-            Value<Profile> result = await this.subject.Get(new DTO.ProfileRequest { UserId = this.validUserId.ToString() });
+            Value<Profile_OLD> result = await this.subject.Get(new DTO.ProfileRequest { UserId = this.validUserId.ToString() });
             Assert.AreEqual(result.Type, (int)ProfileController.ValueType.Success);
             Assert.AreEqual(result.Payload, this.validProfile);
             this.mockProfileRepository.Verify(c => c.GetProfileAsync(this.validUserId));
@@ -86,7 +86,7 @@
         [Test]
         public async Task Get_ReturnProfileNotExists_When_PassingInvalidUserId()
         {
-            Value<Profile> result = await this.subject.Get(new DTO.ProfileRequest { UserId = this.invalidUserId.ToString() });
+            Value<Profile_OLD> result = await this.subject.Get(new DTO.ProfileRequest { UserId = this.invalidUserId.ToString() });
             Assert.AreEqual(result.Type, (int)ProfileController.ValueType.ProfileNotExists);
             this.mockProfileRepository.Verify(c => c.GetProfileAsync(this.invalidUserId));
         }
@@ -108,13 +108,13 @@
         public async Task Get_CutDownNotPublicProfileEntriesFromResult_When_PassingNotOwnUserId()
         {
             this.SetUserIdToRequest(this.ownUserId);
-            var publicProfileInfo = new ProfileInfoEntry() { Type = ProfileInfoType.MiddleName, Value = "a", IsPublic = true };
+            var publicProfileInfo = new ProfileEntry() { Type = ProfileEntryType.MiddleName, Value = "a", IsPublic = true };
             this.validProfile.ProfileInfo = new[]
             {
-                new ProfileInfoEntry() { Type = ProfileInfoType.FirstName, Value = "a", IsPublic = false },
+                new ProfileEntry() { Type = ProfileEntryType.FirstName, Value = "a", IsPublic = false },
                 publicProfileInfo
             }.ToList();
-            Value<Profile> result = await this.subject.Get(new DTO.ProfileRequest { UserId = this.validUserId.ToString() });
+            Value<Profile_OLD> result = await this.subject.Get(new DTO.ProfileRequest { UserId = this.validUserId.ToString() });
             Assert.AreEqual(result.Payload.ProfileInfo.Count, 1);
             Assert.AreEqual(result.Payload.ProfileInfo.First(), publicProfileInfo);
         }
@@ -122,13 +122,13 @@
         [Test]
         public async Task Get_CutDownNotPublicProfileEntriesFromResult_When_AnonymousCall()
         {
-            var publicProfileInfo = new ProfileInfoEntry() { Type = ProfileInfoType.MiddleName, Value = "a", IsPublic = true };
+            var publicProfileInfo = new ProfileEntry() { Type = ProfileEntryType.MiddleName, Value = "a", IsPublic = true };
             this.validProfile.ProfileInfo = new[]
             {
-                new ProfileInfoEntry() { Type = ProfileInfoType.FirstName, Value = "a", IsPublic = false },
+                new ProfileEntry() { Type = ProfileEntryType.FirstName, Value = "a", IsPublic = false },
                 publicProfileInfo
             }.ToList();
-            Value<Profile> result = await this.subject.Get(new DTO.ProfileRequest { UserId = this.validUserId.ToString() });
+            Value<Profile_OLD> result = await this.subject.Get(new DTO.ProfileRequest { UserId = this.validUserId.ToString() });
             Assert.AreEqual(result.Payload.ProfileInfo.Count, 1);
             Assert.AreEqual(result.Payload.ProfileInfo.First(), publicProfileInfo);
         }
@@ -137,14 +137,14 @@
         public async Task Get_DoesNotCutDownNotPublicProfileEntriesFromResult_When_PassingOwnUserId()
         {
             this.SetUserIdToRequest(this.validUserId);
-            var privateProfileInfo = new ProfileInfoEntry() { Type = ProfileInfoType.FirstName, Value = "a", IsPublic = false };
-            var publicProfileInfo = new ProfileInfoEntry() { Type = ProfileInfoType.MiddleName, Value = "b", IsPublic = true };
+            var privateProfileInfo = new ProfileEntry() { Type = ProfileEntryType.FirstName, Value = "a", IsPublic = false };
+            var publicProfileInfo = new ProfileEntry() { Type = ProfileEntryType.MiddleName, Value = "b", IsPublic = true };
             this.validProfile.ProfileInfo = new[]
             {
                 privateProfileInfo,
                 publicProfileInfo
             }.ToList();
-            Value<Profile> result = await this.subject.Get(new DTO.ProfileRequest { UserId = this.validUserId.ToString() });
+            Value<Profile_OLD> result = await this.subject.Get(new DTO.ProfileRequest { UserId = this.validUserId.ToString() });
             Assert.AreEqual(result.Payload.ProfileInfo.Count, 2);
             Assert.AreEqual(result.Payload.ProfileInfo.First(), privateProfileInfo);
             Assert.AreEqual(result.Payload.ProfileInfo.Last(), publicProfileInfo);

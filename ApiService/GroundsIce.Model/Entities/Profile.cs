@@ -1,13 +1,10 @@
 ﻿namespace GroundsIce.Model.Entities
 {
-    using System.Collections.Generic;
-
+    // TODO: Надо добавить поле для аватарки (поле типа Avatar, который содержит картинку)
     public class Profile
     {
-        public string Login { get; set; }
+        public Login Login { get; set; }
 
-        public string Avatar { get; set; }
-
-        public List<ProfileInfoEntry> ProfileInfo { get; set; }
+        public ProfileEntriesCollection ProfileEntriesCollection { get; set; }
     }
 }

@@ -6,8 +6,8 @@
 
     public interface IProfileRepository
     {
-        Task<Profile> GetProfileAsync(long userId);
+        Task<Profile_OLD> GetProfileAsync(long userId);
 
-        Task<bool> SetProfileInfoAsync(long userId, List<ProfileInfoEntry> profileInfo);
+        Task<bool> SetProfileInfoAsync(long userId, List<ProfileEntry> profileInfo);
     }
 }

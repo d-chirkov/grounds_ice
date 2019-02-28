@@ -5,6 +5,6 @@
 
     public class ProfileInfoModel
     {
-        public List<ProfileInfoEntry> ProfileInfo { get; set; }
+        public List<ProfileEntry> ProfileInfo { get; set; }
     }
 }

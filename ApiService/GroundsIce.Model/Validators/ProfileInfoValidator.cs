@@ -7,7 +7,7 @@
     using GroundsIce.Model.Abstractions.Validators;
     using GroundsIce.Model.Entities;
 
-    public class ProfileInfoValidator : AbstractValidator<List<ProfileInfoEntry>>, IProfileInfoValidator
+    public class ProfileInfoValidator : AbstractValidator<List<ProfileEntry>>, IProfileInfoValidator
     {
         public ProfileInfoValidator()
         {
@@ -15,15 +15,15 @@
                 .Must(profileInfo => profileInfo.Count == profileInfo.GroupBy(v => v.Type).Select(group => group.First()).Count());
             this.RuleForEach(profileInfo => profileInfo.Select(e => e.Value))
                 .NotEmpty()
-                .OverridePropertyName(nameof(ProfileInfoEntry.Value));
+                .OverridePropertyName(nameof(ProfileEntry.Value));
             this.RuleForEach(profileInfo => profileInfo)
                 .Must(e => !this.TypesMaxLengths.ContainsKey(e.Type) || this.TypesMaxLengths[e.Type] >= e.Value.Length)
                     .When(e => this.TypesMaxLengths != null);
         }
 
-        public IDictionary<ProfileInfoType, int> TypesMaxLengths { get; set; }
+        public IDictionary<ProfileEntryType, int> TypesMaxLengths { get; set; }
 
-        async Task<bool> IProfileInfoValidator.ValidateAsync(List<ProfileInfoEntry> profileInfo)
+        async Task<bool> IProfileInfoValidator.ValidateAsync(List<ProfileEntry> profileInfo)
         {
             return (await this.ValidateAsync(profileInfo)).IsValid;
         }
