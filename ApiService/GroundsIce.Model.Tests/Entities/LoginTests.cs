@@ -26,6 +26,13 @@
         }
 
         [Test]
+        public void Equals_ReturnFalse_When_ComparingWithNull()
+        {
+            var login = new Login("a");
+            Assert.AreNotEqual(login, null);
+        }
+
+        [Test]
         public void Equals_ReturnFalse_When_LoginsHasDifferentValues()
         {
             var login1 = new Login("a");

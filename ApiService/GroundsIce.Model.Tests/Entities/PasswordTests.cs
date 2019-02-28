@@ -26,6 +26,13 @@
         }
 
         [Test]
+        public void Equals_ReturnFalse_When_ComparingWithNull()
+        {
+            var password = new Password("a");
+            Assert.AreNotEqual(password, null);
+        }
+
+        [Test]
         public void Equals_ReturnFalse_When_PasswordsHasDifferentValues()
         {
             var password1 = new Password("a");

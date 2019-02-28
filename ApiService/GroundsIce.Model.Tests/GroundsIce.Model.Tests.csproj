@@ -84,6 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\AccountTests.cs" />
+    <Compile Include="Entities\ProfileEntryTests.cs" />
     <Compile Include="Entities\PasswordTests.cs" />
     <Compile Include="Entities\LoginTests.cs" />
     <Compile Include="Entities\Validators\LoginValidatorTests.cs" />

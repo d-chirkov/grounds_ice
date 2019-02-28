@@ -87,11 +87,12 @@
     <Compile Include="Abstractions\Repositories\IAccountRepository_OLD.cs" />
     <Compile Include="Abstractions\Repositories\IBorrowOrderRepository.cs" />
     <Compile Include="Abstractions\Repositories\IProfileRepository.cs" />
-    <Compile Include="Abstractions\Validators\IBorrowOrderValidator.cs" />
-    <Compile Include="Abstractions\Validators\ILoginValidator.cs" />
-    <Compile Include="Abstractions\Validators\IPasswordValidator.cs" />
-    <Compile Include="Abstractions\Validators\IProfileInfoValidator.cs" />
-    <Compile Include="Abstractions\Validators\IStringValidator.cs" />
+    <Compile Include="Abstractions\Repositories\IProfileRepository_OLD.cs" />
+    <Compile Include="Abstractions\Validators_OLD\IBorrowOrderValidator_OLD.cs" />
+    <Compile Include="Abstractions\Validators_OLD\ILoginValidator_OLD.cs" />
+    <Compile Include="Abstractions\Validators_OLD\IPasswordValidator_OLD.cs" />
+    <Compile Include="Abstractions\Validators_OLD\IProfileInfoValidator_OLD.cs" />
+    <Compile Include="Abstractions\Validators_OLD\IStringValidator_OLD.cs" />
     <Compile Include="ConnectionFactories\SqlConnectionFactory.cs" />
     <Compile Include="Entities\Account.cs" />
     <Compile Include="Entities\Account_OLD.cs" />
@@ -111,12 +112,12 @@
     <Compile Include="Entities\Validators\ProfileEntriesCollectionValidator.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Repositories\DbAccountRepository_OLD.cs" />
-    <Compile Include="Repositories\DbProfileRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Validators\LengthValidator.cs" />
-    <Compile Include="Validators\LoginValidator.cs" />
-    <Compile Include="Validators\PasswordValidator.cs" />
-    <Compile Include="Validators\ProfileInfoValidator.cs" />
+    <Compile Include="Repositories\DbProfileRepository_OLD.cs" />
+    <Compile Include="Validators_OLD\LengthValidator_OLD.cs" />
+    <Compile Include="Validators_OLD\LoginValidator_OLD.cs" />
+    <Compile Include="Validators_OLD\PasswordValidator_OLD.cs" />
+    <Compile Include="Validators_OLD\ProfileInfoValidator_OLD.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
