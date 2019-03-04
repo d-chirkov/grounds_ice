@@ -7,20 +7,20 @@
     using GroundsIce.Model.ConnectionFactories;
     using GroundsIce.Model.Entities;
     using NUnit.Framework;
-    using static GroundsIce.Model.Repositories.DbAccountRepository_OLD;
+    using static GroundsIce.Model.Repositories.DbAccountRepository;
 
     [TestFixture]
     public class DbAccountRepositoryTests
     {
         private const string AccountsTableName = "Accounts";
         private const string ProfileInfoTableName = "ProfileInfo";
-        private const string ValidLogin = "login";
-        private const string ValidPassword = "password";
-        private const string AnotherValidLogin = "loginn";
-        private const string AnotherValidPassword = "passwordd";
+        private readonly Login validLogin = new Login("login");
+        private readonly Password validPassword = new Password("password");
+        private readonly Login anotherValidLogin = new Login("loginn");
+        private readonly Password anotherValidPassword = new Password("passwordd");
         private IConnectionFactory connectionFactory = new SqlConnectionFactory(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=GroundsIce.DB.Test;Integrated Security=True;Pooling=False");
 
-        private DbAccountRepository_OLD repository;
+        private DbAccountRepository repository;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -31,7 +31,7 @@
         [SetUp]
         public async Task SetUp()
         {
-            this.repository = new DbAccountRepository_OLD(this.connectionFactory);
+            this.repository = new DbAccountRepository(this.connectionFactory);
             using (var connection = await this.connectionFactory.GetConnectionAsync())
             {
                 await connection.ExecuteAsync($"DELETE FROM {AccountsTableName}");
@@ -41,78 +41,78 @@
         [Test]
         public void Ctor_ThrowArgumentNullException_When_ConnectionFactoryIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new DbAccountRepository_OLD(null));
+            Assert.Throws<ArgumentNullException>(() => new DbAccountRepository(null));
         }
 
         [Test]
         public void Ctor_DoesNotThrow_When_PassingValidConnectionFactory()
         {
-            Assert.DoesNotThrow(() => new DbAccountRepository_OLD(this.connectionFactory));
+            Assert.DoesNotThrow(() => new DbAccountRepository(this.connectionFactory));
         }
 
         [Test]
         public void CreateAccountAsync_ThrowArgumentNullException_WhenLoginOrPasswordIsNull()
         {
             Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.CreateAccountAsync(null, null));
-            Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.CreateAccountAsync(ValidLogin, null));
-            Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.CreateAccountAsync(null, ValidPassword));
+            Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.CreateAccountAsync(this.validLogin, null));
+            Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.CreateAccountAsync(null, this.validPassword));
         }
 
         [Test]
         public async Task CreateAccountAsync_ReturnCreatedAccount_When_PassingNotNullLoginAndPassword()
         {
-            Account_OLD account = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
+            Account account = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
             Assert.NotNull(account);
-            Assert.AreEqual(ValidLogin, account.Login);
+            Assert.AreEqual(this.validLogin, account.Login);
         }
 
-        public async Task CreateAccountAsync_ReturnNull_When_PassingSecondTime(string login, string password)
+        public async Task CreateAccountAsync_ReturnNull_When_PassingSecondTime(Login login, Password password)
         {
-            Account_OLD firstAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
-            Account_OLD secondAccount = await this.repository.CreateAccountAsync(login, password);
+            Account firstAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
+            Account secondAccount = await this.repository.CreateAccountAsync(login, password);
             Assert.IsNull(secondAccount);
         }
 
         [Test]
         public async Task CreateAccountAsync_ReturnNull_When_PassingSameLoginAndPasswordSecondTime()
         {
-            await this.CreateAccountAsync_ReturnNull_When_PassingSecondTime(ValidLogin, ValidPassword);
+            await this.CreateAccountAsync_ReturnNull_When_PassingSecondTime(this.validLogin, this.validPassword);
         }
 
         [Test]
         public async Task CreateAccountAsync_ReturnNull_When_PassingSameLoginAndAnotherPasswordSecondTime()
         {
-            await this.CreateAccountAsync_ReturnNull_When_PassingSecondTime(ValidLogin, AnotherValidPassword);
+            await this.CreateAccountAsync_ReturnNull_When_PassingSecondTime(this.validLogin, this.anotherValidPassword);
         }
 
-        public async Task CreateAccountAsync_ReturnCreatedAccount_When_PassingSecondTime(string login, string password)
+        public async Task CreateAccountAsync_ReturnCreatedAccount_When_PassingSecondTime(Login login, Password password)
         {
-            Account_OLD firstAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
-            Account_OLD secondAccount = await this.repository.CreateAccountAsync(login, password);
+            Account firstAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
+            Account secondAccount = await this.repository.CreateAccountAsync(login, password);
             Assert.NotNull(firstAccount);
             Assert.NotNull(secondAccount);
-            Assert.AreEqual(ValidLogin, firstAccount.Login);
-            Assert.AreEqual(AnotherValidLogin, secondAccount.Login);
+            Assert.AreEqual(this.validLogin, firstAccount.Login);
+            Assert.AreEqual(this.anotherValidLogin, secondAccount.Login);
         }
 
         [Test]
         public async Task CreateAccountAsync_ReturnCreatedAccount_When_PassingAnotherLoginAndSamePasswordSecondTime()
         {
-            await this.CreateAccountAsync_ReturnCreatedAccount_When_PassingSecondTime(AnotherValidLogin, ValidPassword);
+            await this.CreateAccountAsync_ReturnCreatedAccount_When_PassingSecondTime(this.anotherValidLogin, this.validPassword);
         }
 
         [Test]
         public async Task CreateAccountAsync_ReturnCreatedAccount_When_PassingAnotherLoginAndPasswordSecondTime()
         {
-            await this.CreateAccountAsync_ReturnCreatedAccount_When_PassingSecondTime(AnotherValidLogin, AnotherValidPassword);
+            await this.CreateAccountAsync_ReturnCreatedAccount_When_PassingSecondTime(this.anotherValidLogin, this.anotherValidPassword);
         }
 
         [Test]
         public void GetAccountAsync_ThrowArgumentNullException_WhenPassingNullLoginOrPassword()
         {
             Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.GetAccountAsync(null, null));
-            Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.GetAccountAsync(ValidLogin, null));
-            Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.GetAccountAsync(null, ValidPassword));
+            Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.GetAccountAsync(this.validLogin, null));
+            Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.GetAccountAsync(null, this.validPassword));
         }
 
         [Test]
@@ -124,10 +124,10 @@
         [Test]
         public async Task GetAccountAsync_ReturnValidAccountByLoginAndPassword_When_CalledAfterValidCreateAccountAsyncCalling()
         {
-            Account_OLD createdAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
-            Account_OLD anotherCreatedAccount = await this.repository.CreateAccountAsync(AnotherValidLogin, AnotherValidPassword);
-            Account_OLD requestedAccount = await this.repository.GetAccountAsync(ValidLogin, ValidPassword);
-            Account_OLD anotherRequestedAccount = await this.repository.GetAccountAsync(AnotherValidLogin, AnotherValidPassword);
+            Account createdAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
+            Account anotherCreatedAccount = await this.repository.CreateAccountAsync(this.anotherValidLogin, this.anotherValidPassword);
+            Account requestedAccount = await this.repository.GetAccountAsync(this.validLogin, this.validPassword);
+            Account anotherRequestedAccount = await this.repository.GetAccountAsync(this.anotherValidLogin, this.anotherValidPassword);
             Assert.AreEqual(createdAccount.UserId, requestedAccount.UserId);
             Assert.AreEqual(createdAccount.Login, requestedAccount.Login);
             Assert.AreEqual(anotherCreatedAccount.UserId, anotherRequestedAccount.UserId);
@@ -137,10 +137,10 @@
         [Test]
         public async Task GetAccountAsync_ReturnValidAccountById_When_CalledAfterValidCreateAccountAsyncCalling()
         {
-            Account_OLD createdAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
-            Account_OLD anotherCreatedAccount = await this.repository.CreateAccountAsync(AnotherValidLogin, AnotherValidPassword);
-            Account_OLD requestedAccount = await this.repository.GetAccountAsync(createdAccount.UserId);
-            Account_OLD anotherRequestedAccount = await this.repository.GetAccountAsync(anotherCreatedAccount.UserId);
+            Account createdAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
+            Account anotherCreatedAccount = await this.repository.CreateAccountAsync(this.anotherValidLogin, this.anotherValidPassword);
+            Account requestedAccount = await this.repository.GetAccountAsync(createdAccount.UserId);
+            Account anotherRequestedAccount = await this.repository.GetAccountAsync(anotherCreatedAccount.UserId);
             Assert.AreEqual(createdAccount.UserId, requestedAccount.UserId);
             Assert.AreEqual(createdAccount.Login, requestedAccount.Login);
             Assert.AreEqual(anotherCreatedAccount.UserId, anotherRequestedAccount.UserId);
@@ -150,60 +150,60 @@
         [Test]
         public async Task GetAccountAsync_ReturnNull_When_PassingNotExistingLogin_And_RepoIsEmpty()
         {
-            Account_OLD sameAccount = await this.repository.GetAccountAsync(ValidLogin, ValidPassword);
+            Account sameAccount = await this.repository.GetAccountAsync(this.validLogin, this.validPassword);
             Assert.IsNull(sameAccount);
         }
 
-        public async Task GetAccountAsync_ReturnNull_When_PassingArgs(string login, string password)
+        public async Task GetAccountAsync_ReturnNull_When_PassingArgs(Login login, Password password)
         {
-            Account_OLD createdAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
-            Account_OLD sameAccount = await this.repository.GetAccountAsync(login, password);
+            Account createdAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
+            Account sameAccount = await this.repository.GetAccountAsync(login, password);
             Assert.IsNull(sameAccount);
         }
 
         [Test]
         public async Task GetAccountAsync_ReturnNull_When_PassingNotExistingLogin_And_RepoIsNotEmpty()
         {
-            await this.GetAccountAsync_ReturnNull_When_PassingArgs(AnotherValidLogin, ValidPassword);
+            await this.GetAccountAsync_ReturnNull_When_PassingArgs(this.anotherValidLogin, this.validPassword);
         }
 
         [Test]
         public async Task GetAccountAsync_ReturnNull_When_PassingPasswordNotSuitableForLogin_And_RepoIsNotEmpty()
         {
-            await this.GetAccountAsync_ReturnNull_When_PassingArgs(ValidLogin, AnotherValidPassword);
+            await this.GetAccountAsync_ReturnNull_When_PassingArgs(this.validLogin, this.anotherValidPassword);
         }
 
         [Test]
         public async Task GetAccountAsync_ReturnNull_When_PassingNotExistingLoginAndPassword_And_RepoIsNotEmpty()
         {
-            await this.GetAccountAsync_ReturnNull_When_PassingArgs(AnotherValidPassword, AnotherValidPassword);
+            await this.GetAccountAsync_ReturnNull_When_PassingArgs(this.anotherValidLogin, this.anotherValidPassword);
         }
 
         [Test]
         public async Task GetAccountAsync_ReturnNull_When_PassingNotExistingUserId_And_RepoIsNotEmpty()
         {
-            Account_OLD createdAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
-            Account_OLD sameAccount = await this.repository.GetAccountAsync(createdAccount.UserId + 1);
+            Account createdAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
+            Account sameAccount = await this.repository.GetAccountAsync(createdAccount.UserId + 1);
             Assert.IsNull(sameAccount);
         }
 
         [Test]
         public async Task GetAccountAsync_ReturnNull_When_PassingNotExistingUserId_And_RepoIsEmpty()
         {
-            Account_OLD sameAccount = await this.repository.GetAccountAsync(1);
+            Account sameAccount = await this.repository.GetAccountAsync(1);
             Assert.IsNull(sameAccount);
         }
 
         [Test]
         public void ChangeLoginAsync_ThrowArgumentOutOfRangeException_When_PassingUserIdIsLessThenZero()
         {
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => this.repository.ChangeLoginAsync(-1, ValidLogin));
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => this.repository.ChangeLoginAsync(-1, this.validLogin));
         }
 
         [Test]
         public void ChangePasswordAsync_ThrowArgumentOutOfRangeException_When_PassingUserIdIsLessThenZero()
         {
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => this.repository.ChangePasswordAsync(-1, ValidPassword, AnotherValidPassword));
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => this.repository.ChangePasswordAsync(-1, this.validPassword, this.anotherValidPassword));
         }
 
         [Test]
@@ -215,18 +215,18 @@
         [Test]
         public void ChangePasswordAsync_ThrowArgumentNullException_When_PassingNullOldOrNewPassword()
         {
-            Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.ChangePasswordAsync(1, ValidPassword, null));
-            Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.ChangePasswordAsync(1, null, ValidPassword));
+            Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.ChangePasswordAsync(1, this.validPassword, null));
+            Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.ChangePasswordAsync(1, null, this.validPassword));
             Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.ChangePasswordAsync(1, null, null));
         }
 
         [Test]
         public async Task ChangeLoginAsync_ThrowDbAccountRepositoryException_When_PassingNotExistingUserId_And_RepoIsNotEmpty()
         {
-            Account_OLD createdAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
+            Account createdAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
             Assert.ThrowsAsync<DbAccountRepositoryException>(
-                () => this.repository.ChangeLoginAsync(createdAccount.UserId + 1, AnotherValidLogin));
-            Account_OLD sameAccount = await this.repository.GetAccountAsync(ValidLogin, ValidPassword);
+                () => this.repository.ChangeLoginAsync(createdAccount.UserId + 1, this.anotherValidLogin));
+            Account sameAccount = await this.repository.GetAccountAsync(this.validLogin, this.validPassword);
             Assert.NotNull(sameAccount);
             Assert.AreEqual(createdAccount.UserId, sameAccount.UserId);
         }
@@ -234,10 +234,10 @@
         [Test]
         public async Task ChangePasswordAsync_ReturnFalse_When_PassingNotExistingUserId_And_RepoIsNotEmpty()
         {
-            Account_OLD createdAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
-            bool changed = await this.repository.ChangePasswordAsync(createdAccount.UserId + 1, ValidPassword, AnotherValidPassword);
+            Account createdAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
+            bool changed = await this.repository.ChangePasswordAsync(createdAccount.UserId + 1, this.validPassword, this.anotherValidPassword);
             Assert.IsFalse(changed);
-            Account_OLD sameAccount = await this.repository.GetAccountAsync(ValidLogin, ValidPassword);
+            Account sameAccount = await this.repository.GetAccountAsync(this.validLogin, this.validPassword);
             Assert.NotNull(sameAccount);
             Assert.AreEqual(createdAccount.UserId, sameAccount.UserId);
         }
@@ -245,57 +245,58 @@
         [Test]
         public async Task ChangePasswordAsync_ReturnFalse_When_PassingNotExistingUserId_And_RepoIsEmpty()
         {
-            bool changed = await this.repository.ChangePasswordAsync(1, ValidPassword, AnotherValidPassword);
+            bool changed = await this.repository.ChangePasswordAsync(1, this.validPassword, this.anotherValidPassword);
             Assert.IsFalse(changed);
         }
 
         [Test]
         public async Task ChangeLoginAsync_ReturnTrue_When_PassingValidUserIdAndLogin()
         {
-            Account_OLD createdAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
-            bool changed = await this.repository.ChangeLoginAsync(createdAccount.UserId, AnotherValidLogin);
+            Account createdAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
+            bool changed = await this.repository.ChangeLoginAsync(createdAccount.UserId, this.anotherValidLogin);
             Assert.IsTrue(changed);
         }
 
         [Test]
         public async Task ChangePasswordAsync_ReturnTrue_When_PassingValidUserIdAndLogin()
         {
-            Account_OLD createdAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
-            bool changed = await this.repository.ChangePasswordAsync(createdAccount.UserId, ValidPassword, AnotherValidPassword);
+            Account createdAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
+            bool changed = await this.repository.ChangePasswordAsync(createdAccount.UserId, this.validPassword, this.anotherValidPassword);
             Assert.IsTrue(changed);
         }
 
         [Test]
         public async Task ChangeLoginAsync_PerformChangingForGetAccountAsyncResult_When_PassingValidUserIdAndLogin()
         {
-            Account_OLD createdAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
-            bool changed = await this.repository.ChangeLoginAsync(createdAccount.UserId, AnotherValidLogin);
-            Account_OLD changedAccount = await this.repository.GetAccountAsync(createdAccount.UserId);
-            Assert.AreEqual(changedAccount.Login, AnotherValidLogin);
-            Account_OLD sameChangedAccount = await this.repository.GetAccountAsync(AnotherValidLogin, ValidPassword);
+            Account createdAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
+            bool changed = await this.repository.ChangeLoginAsync(createdAccount.UserId, this.anotherValidLogin);
+            Account changedAccount = await this.repository.GetAccountAsync(createdAccount.UserId);
+            Assert.AreEqual(changedAccount.Login, this.anotherValidLogin);
+            Account sameChangedAccount = await this.repository.GetAccountAsync(this.anotherValidLogin, this.validPassword);
             Assert.AreEqual(sameChangedAccount.UserId, createdAccount.UserId);
-            Account_OLD notValidAccount = await this.repository.GetAccountAsync(ValidLogin, ValidPassword);
+            Account notValidAccount = await this.repository.GetAccountAsync(this.validLogin, this.validPassword);
             Assert.IsNull(notValidAccount);
         }
 
         [Test]
         public async Task ChangePasswordAsync_PerformChangingForGetAccountAsyncResult_When_PassingValidUserIdAndLogin()
         {
-            Account_OLD createdAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
-            bool changed = await this.repository.ChangePasswordAsync(createdAccount.UserId, ValidPassword, AnotherValidPassword);
-            Account_OLD changedAccount = await this.repository.GetAccountAsync(ValidLogin, AnotherValidPassword);
+            Account createdAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
+            bool changed = await this.repository.ChangePasswordAsync(createdAccount.UserId, this.validPassword, this.anotherValidPassword);
+            Account changedAccount = await this.repository.GetAccountAsync(this.validLogin, this.anotherValidPassword);
             Assert.AreEqual(changedAccount.UserId, createdAccount.UserId);
-            Account_OLD notValidAccount = await this.repository.GetAccountAsync(ValidLogin, ValidPassword);
+            Account notValidAccount = await this.repository.GetAccountAsync(this.validLogin, this.validPassword);
             Assert.IsNull(notValidAccount);
         }
 
         [Test]
         public async Task ChangePasswordAsync_ReturnFalse_When_PassingNotValidOldPassword()
         {
-            Account_OLD createdAccount = await this.repository.CreateAccountAsync(ValidLogin, ValidPassword);
-            bool changed = await this.repository.ChangePasswordAsync(createdAccount.UserId, ValidPassword + "a", AnotherValidPassword);
+            Account createdAccount = await this.repository.CreateAccountAsync(this.validLogin, this.validPassword);
+            bool changed = await this.repository.ChangePasswordAsync(
+                createdAccount.UserId, new Password(this.validPassword.Value + "a"), this.anotherValidPassword);
             Assert.IsFalse(changed);
-            Account_OLD sameAccount = await this.repository.GetAccountAsync(ValidLogin, ValidPassword);
+            Account sameAccount = await this.repository.GetAccountAsync(this.validLogin, this.validPassword);
             Assert.NotNull(sameAccount);
             Assert.AreEqual(createdAccount.UserId, sameAccount.UserId);
         }

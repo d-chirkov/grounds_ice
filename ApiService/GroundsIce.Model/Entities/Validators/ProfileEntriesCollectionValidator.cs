@@ -26,7 +26,7 @@
 
         private bool IsCollectionContainsRepeatingEntryTypes(ProfileEntriesCollection collection)
         {
-            return collection.Count != collection.GroupBy(v => v.Type).Select(group => group.First()).Count();
+            return collection.Count() != collection.GroupBy(v => v.Type).Select(group => group.First()).Count();
         }
     }
 }
